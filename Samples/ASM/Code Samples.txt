@@ -1,0 +1,223 @@
+﻿DDxn PORTxn
+0    0       input     hi-z
+0    1       input     pull-up
+1    0       output    low
+1    1       output    high
+
+
+
+The out-of-date code samples:
+
+; The Timer Program
+; needed to check all the names
+; disable the brown out detector with the fuse bits
+
+.device  ATmega8
+.include "m8def.inc"
+
+.macro Load
+ldi R16, @1
+out @0, R16
+.endm
+
+.macro InitStack
+Load SPL, Low(RAMEND)
+Load SPH, High(RAMEND)
+.endm
+
+.macro InitUART
+Load UBRRL, 2
+Load UBRRH, 0
+Load UCSRA, 0
+Load UCSRB, 1<<TXEN | 1<<TXCIE
+Load UCSRC, 1<<URSEL | 1<<UCSZ0 | 1<<UCSZ1
+.endm
+
+.macro InitTimer
+Load OCR1AH, High(1500)
+Load OCR1AL, Low(1500)
+Load TCNT1H, 0
+Load TCNT1L, 0
+Load TCCR1B, 0b00001010 ; enable the timer 1 with prescaler 8
+Load TIMSK, 1<<OCIE1A
+.endm
+
+.macro DisableUnused
+Load ACSR, 1<<ACD
+Load TIFR, 0xFF
+Load GIFR, 0xFF
+.endm
+
+.macro Run
+sei
+Main: rjmp Main
+.endm
+
+.macro TransmitByte
+Load UDR, 0b00000001
+.endm
+
+.org 0
+rjmp Reset
+
+.org 0x006
+rjmp TimerCompareMatch
+
+Reset:
+InitStack
+InitUART
+InitTimer
+DisableUnused
+Run
+
+TimerCompareMatch:
+TransmitByte
+reti
+
+
+
+.device  ATmega8
+.include "m8def.inc"
+
+;==========
+
+.macro Load
+ldi R16, @1
+out @0, R16
+.endm
+
+.macro StartTransmission
+in R16, @0
+out UDR, R16
+.endm
+
+.macro InitStack
+Load SPL, Low(RAMEND)
+Load SPH, High(RAMEND)
+.endm
+
+.macro InitUART
+Load UBRRL, 2
+Load UBRRH, 0
+Load UCSRA, 0
+Load UCSRB, 1<<RXEN | 1<<TXEN | 1<<RXCIE | 1<<TXCIE
+Load UCSRC, 1<<URSEL | 1<<UCSZ0 | 1<<UCSZ1
+.endm
+
+.macro InitADC
+Load ADCSRA, 0b00001110
+.endm
+
+.macro InitSleepMode
+Load MCUCR, 1<<SE
+.endm
+
+.macro DisableUnused
+Load ACSR, 1<<ACD
+Load TIFR, 0xFF
+LOAD GIFR, 0xFF
+.endm
+
+.macro Run
+sei
+Main: sleep
+rjmp  Main
+.endm
+
+.macro Switch
+in R16, @0
+.endm
+
+.macro Case
+cpi R16, @0
+breq @1
+.endm
+
+.macro DisableADC
+cbi ADCSRA, ADEN
+cbi MCUCR, SM0
+.endm
+
+.macro EnableADC
+sbi ADCSRA, ADEN
+sbi MCUCR, SM0
+.endm
+
+.macro SetFirstChannel
+Load ADMUX, 0b00100000
+.endm
+
+.macro SetCalibration
+Load ADMUX, 0b00101111
+.endm
+
+.macro EnableSleepMode
+sbi MCUCR, SE
+.endm
+
+.macro DisableSleepMode
+cbi MCUCR, SE
+.endm
+
+;==========
+
+.org 0
+rjmp Reset
+
+.org 0x00B
+rjmp UARTReceivingIsCompleted
+
+.org 0x00D
+rjmp UARTTransmissionIsCompleted
+
+.org 0x00E
+rjmp ADCConversionIsCompleted
+
+;==========
+
+Reset:
+
+InitStack
+InitUART
+InitADC
+InitSleepMode
+DisableUnused
+Run
+
+;==========
+
+UARTReceivingIsCompleted:
+Switch UDR
+Case 0, StopCommand
+Case 1, StartCommand
+Case 2, CalibrationCommand
+reti
+
+  StopCommand:
+  DisableADC
+  reti
+
+  StartCommand:
+  SetFirstChannel
+  EnableADC
+  reti
+
+  CalibrationCommand:
+  SetCalibration
+  EnableADC
+  reti
+
+;==========
+
+ADCConversionIsCompleted:
+DisableSleepMode
+StartTransmission ADCH
+reti
+
+;==========
+
+UARTTransmissionIsCompleted:
+EnableSleepMode
+reti
+
+;==========

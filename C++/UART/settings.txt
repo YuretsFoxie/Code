@@ -1,0 +1,2 @@
+isConsole=0
+libraries=0

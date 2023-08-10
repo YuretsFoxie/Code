@@ -1,0 +1,154 @@
+﻿// Some decorators may use the caching for the optimization purpose
+
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+
+
+class RangeInterface
+{
+	public:
+	virtual ~RangeInterface() {}
+	virtual vector<int> numbers() const = 0;
+};
+
+typedef const RangeInterface* const R;
+
+
+
+class Range: public RangeInterface
+{
+	public:
+	Range(int newFirst, int newLast): first(newFirst), last(newLast) {}
+	~Range() {}
+	
+	vector<int> numbers() const
+	{
+		vector<int> result;
+		
+		for(int i = first; i <= last; i++)
+			result.push_back(i);
+		
+		return result;
+	}
+	
+	private:
+	const int first;
+	const int last;
+};
+
+
+
+class OddOnly: public RangeInterface
+{
+	public:
+	OddOnly(R range): decorated(range) {}
+   	~OddOnly() { delete decorated; }
+	
+	vector<int> numbers() const
+	{
+		vector<int> numbers = decorated->numbers();
+		vector<int> result;
+		
+		for(int i = 0; i < numbers.size(); i++)
+			if(numbers[i] % 2)
+				result.push_back(numbers[i]);
+		
+		return result;
+	}
+	
+	private:	
+	R decorated;
+};
+
+
+
+class Squared: public RangeInterface
+{
+	public:
+	Squared(R range): decorated(range) {}
+	~Squared() { delete decorated; }
+	
+	vector<int> numbers() const
+	{
+		vector<int> numbers = decorated->numbers();
+		vector<int> result;
+		
+		for(int i = 0; i < numbers.size(); i++)
+			result.push_back(numbers[i] * numbers[i]);
+		
+		return result;
+	}
+	
+	private:
+	R decorated;
+};
+
+
+
+class Incremented: public RangeInterface
+{
+	public:
+	Incremented(R range, int newIncrement): decorated(range), increment(newIncrement) {}
+	~Incremented() { delete decorated; }
+	
+	vector<int> numbers() const
+	{
+		vector<int> numbers = decorated->numbers();
+		vector<int> result;
+		
+		for(int i = 0; i < numbers.size(); i++)
+			result.push_back(numbers[i] + increment);
+		
+		return result;
+	}
+	
+	private:
+	R decorated;
+	const int increment;
+};
+
+
+
+class Logged: public RangeInterface
+{
+	public:
+	Logged(R range): decorated(range) {}
+	~Logged() { delete decorated; }
+	
+	vector<int> numbers() const
+	{
+		vector<int> numbers = decorated->numbers();
+		
+		for(int i = 0; i < numbers.size(); i++)
+			cout << numbers[i] << " ";
+		cout << endl;
+		
+		return numbers;
+	}
+	
+	private:
+	R decorated;
+};
+
+
+
+int main()
+{
+	R range = new Logged(
+		new Incremented(
+			new Squared(
+				new OddOnly(
+					new Range(5, 15)
+				)
+			),
+			100
+		)
+	);
+	
+	range->numbers();
+	delete range;
+	return 0;
+}

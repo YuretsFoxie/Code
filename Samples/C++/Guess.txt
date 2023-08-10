@@ -1,0 +1,154 @@
+﻿#include <iostream>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+class IntegerInterface
+{
+	public:
+	virtual ~IntegerInterface() {}
+	virtual int value() const = 0;
+};
+
+typedef const IntegerInterface* const I;
+
+
+
+class Guess: public IntegerInterface
+{
+	public:
+	int value() const
+	{
+		cout << "Guess a number in 0...10 range:" << endl;
+		
+		int number;
+		cin >> number;
+		return number;
+	}
+};
+
+
+
+class Secret: public IntegerInterface
+{
+	public:
+     Secret()
+     {
+          srand(time(0));
+		number = rand() % 10 + 1;
+     }
+		
+	int value() const
+	{
+		return number;
+	}
+
+     private:
+     int number;
+};
+
+
+
+class Diff: public IntegerInterface
+{
+	public:
+	Diff(I newFirst, I newSecond): first(newFirst), second(newSecond) {}
+    ~Diff() { delete first; delete second; }
+	
+	int value() const
+	{
+		return first->value() - second->value();
+	}
+	
+	private:
+	I first;
+	I second;
+};
+
+
+
+class VerboseDiff: public IntegerInterface
+{
+	public:
+	VerboseDiff(I number): decorated(number) {}
+    ~VerboseDiff() { delete decorated; }
+	
+	int value() const
+	{
+		int value = decorated->value();
+		cout << (value == 0 ? "Bingo!" : value < 0 ? "Too small" : "Too big") << endl;		
+		return value;
+	}
+	
+	private:
+	I decorated;
+};
+
+
+
+class Attempts: public IntegerInterface
+{
+	public:
+	Attempts(I number, int newAttempts): decorated(number), attempts(newAttempts) {}
+    ~Attempts() { delete decorated; }
+	
+    	int value() const
+	{
+		for(int i = 0; i < attempts; i++)
+			if(decorated->value() == 0)
+				return 0;
+		
+		return 1;
+	}
+	
+    	private:
+    	I decorated;
+    	const int attempts;
+};
+
+
+
+class Farewell
+{
+    	public:
+    	Farewell(I newAttempts, I newSecret): attempts(newAttempts), secret(newSecret) {}
+    ~Farewell() { delete attempts; }
+	
+    	Farewell* say()
+    	{
+		if(attempts->value())
+			cout << "You lost. It was " << secret->value() << endl;
+		
+        	cout << "Thanks for playing!" << endl;
+		return this;
+    	}
+	
+	private:
+	I attempts;
+	I secret;
+};
+
+
+
+int main()
+{
+    I secret = new Secret();
+    
+    delete(
+        new Farewell(
+            new Attempts(
+                new VerboseDiff(
+                    new Diff(
+                        new Guess(),
+                        secret
+                    )
+                ),
+                3
+            ),
+            secret
+        )
+    )->say();
+    
+    return 0;
+}
