@@ -1,0 +1,71 @@
+===== Log started at 2023-12-21, 22:35:09. =====
+
+22:35:09  Main window is created.
+22:35:09  Creating a dummy window to use WGL_ARB_pixel_format extension.
+22:35:09  WGL_ARB_pixel_format and WGL_ARB_multisample are supported.
+22:35:09  Use wglChoosePixelFormatARB() to find a pixel format with MSAA.
+22:35:09  MSAA mode: 8x
+22:35:09  Pixel Format: 35
+22:35:09  A dummy window is destroyed.
+22:35:09  Created a rendering thread for OpenGL.
+22:35:09  Changed OpenGL rendering window size: 1024x1024.
+22:35:09  OpenGL rendering window is created.
+22:35:09  Loading a default OBJ: cube_tris.obj ...
+22:35:09  Initialized OpenGL states.
+22:35:09  [WARNING] GL_ARB_texture_filter_anisotropic is not supported.
+22:35:09  Use GL_ARB_shader_objects extension.
+22:35:09  Use GL_ARB_vertex_buffer_object extension.
+22:35:09  Use GL_ARB_framebuffer_object extension.
+22:35:09  
+===== FBO STATUS =====
+Max Number of Color Buffer Attachment Points: 8
+Max Number of Samples for MSAA: 8
+Color Attachment 0: GL_RENDERBUFFER, 1024x1024, GL_RGB8, MSAA(8)
+Depth Attachment: GL_RENDERBUFFER, 1024x1024, GL_DEPTH_COMPONENT24, MSAA(8)
+
+22:35:09  Loading default texture: C:\Users\User\Downloads\ObjViewer\ObjViewer\bin\/data/grid512.png
+22:35:09  Form dialog is created.
+22:35:09  Entering OpenGL rendering loop...
+22:35:09  Installed low-level mouse hook in ControllerTab1 class.
+22:35:09  Changed OpenGL rendering window size: 658x658.
+22:35:09   OBJ File Name: cube_tris.obj
+22:35:09   MTL File Name: cube_tris.mtl
+22:35:09   TEX File Name: numgrid256.tga
+22:35:09  Triangle Count: 12
+22:35:09     Index Count: 36
+22:35:09    Vertex Count: 24
+22:35:09    Normal Count: 24
+22:35:09  TexCoord Count: 24
+22:35:09     Group Count: 1
+22:35:09  Material Count: 1
+22:35:09  Success to open cube_tris.obj
+22:35:09  Elapsed Time: 11.684600 ms.
+
+22:35:47  Loading OBJ: C:\Users\User\Downloads\ObjViewer\ObjViewer\bin\data\torus_hard.obj...
+22:35:47   OBJ File Name: torus_hard.obj
+22:35:47   MTL File Name: torus_hard.mtl
+22:35:47   TEX File Name: 
+22:35:47  Triangle Count: 800
+22:35:47     Index Count: 2400
+22:35:47    Vertex Count: 1600
+22:35:47    Normal Count: 1600
+22:35:47  TexCoord Count: 1600
+22:35:47     Group Count: 1
+22:35:47  Material Count: 1
+22:35:47  Success to open C:\Users\User\Downloads\ObjViewer\ObjViewer\bin\data\torus_hard.obj
+22:35:47  Elapsed Time: 6.543500 ms.
+
+22:36:54  Closing the application...
+22:36:54  Main windows is destroyed.
+22:36:54  Closed OpenGL context.
+22:36:54  Exit OpenGL rendering thread.
+22:36:54  OpenGL window is destroyed.
+22:36:54  Form dialog is destroyed.
+22:36:54  ControllerTab3 is destroyed.
+22:36:54  ControllerTab2 is destroyed.
+22:36:54  Uninstalled low-level mouse hook.
+22:36:54  Form dialog is destroyed.
+22:36:54  Application is terminated.
+
+
+===== END OF LOG =====

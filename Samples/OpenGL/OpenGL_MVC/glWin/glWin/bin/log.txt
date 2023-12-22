@@ -1,0 +1,26 @@
+===== Log started at 2023-12-21, 22:32:38. =====
+
+22:32:38  Main window is created.
+22:32:38  Created a rendering thread for OpenGL.
+22:32:38  OpenGL window is resized: 300x300.
+22:32:38  OpenGL window is created.
+22:32:38  Initialized OpenGL states.
+22:32:38  Loaded a bitmap: 1024 x 512, 32 bits
+22:32:38  Created OpenGL texture object.
+22:32:38  Initialized OpenGL viewport and projection matrix.
+22:32:38  Entering OpenGL rendering thread...
+22:32:38  OpenGL form dialog is created.
+22:32:38  Status bar window is created.
+22:32:38  OpenGL window is resized: 443x443.
+22:32:40  OpenGL window is resized: 1024x475.
+22:32:45  
+22:32:45  Closing the application...
+22:32:45  Closed OpenGL context.
+22:32:45  Exit OpenGL rendering thread.
+22:32:45  OpenGL window is closed.
+22:32:45  Form dialog is closed.
+22:32:45  Main window is destroyed.
+22:32:45  Application terminated.
+
+
+===== END OF LOG =====
