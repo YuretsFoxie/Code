@@ -5,6 +5,7 @@
 
 using namespace std;
 
+/*
 HINSTANCE hInstance;
 HANDLE drawingThreadHandle;
 MSG msg;
@@ -239,3 +240,162 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
     return run(hInstance);
 }
+*/
+
+
+
+//====================
+
+LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+//====================
+
+class Model
+{
+public:
+	string getMessage();
+	
+private:
+	int count = 1;
+};
+
+string Model::getMessage()
+{
+	return "message " + to_string(count++);
+}
+
+//====================
+
+class View
+{
+public:
+	void createWindows(HINSTANCE instance);
+	
+	const int quitButtonID = 100;
+	const int printButtonID = 101;
+	
+private:
+	void createMainWindow();
+	void addControls();
+	
+	HINSTANCE hInstance;
+	HWND hWindow;
+};
+
+void View::createWindows(HINSTANCE instance)
+{
+	hInstance = instance;
+	createMainWindow();
+	addControls();
+	::SetFocus(hWindow);
+}
+
+void View::createMainWindow()
+{
+	hWindow = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, 
+							   "MainWindowClass",
+							   "MVC Sample",
+							   WS_MINIMIZEBOX | WS_VISIBLE,
+							   100, 100, 100, 120,
+							   NULL, NULL, hInstance, NULL);
+}
+
+void View::addControls()
+{
+	::CreateWindow("button", "Print", WS_CHILD | WS_VISIBLE, 20, 10, 70, 30, hWindow, (HMENU)printButtonID, hInstance, NULL);
+	::CreateWindow("button", "Quit", WS_CHILD | WS_VISIBLE, 20, 50, 70, 30, hWindow, (HMENU)quitButtonID, hInstance, NULL);
+}
+
+//====================
+
+class Controller
+{
+public:
+	WPARAM run(HINSTANCE hInstance);
+	void onClick(WPARAM wParam);
+	
+private:
+	void onStart(HINSTANCE instance);
+	void registerWindowClass();
+	void runMainLoop();
+	void onStop();
+	
+	Model model = Model();
+	View view = View();
+	
+	HINSTANCE hInstance;
+	MSG msg;
+};
+
+WPARAM Controller::run(HINSTANCE hInstance)
+{
+	onStart(hInstance);
+	registerWindowClass();
+	view.createWindows(hInstance);
+	
+	runMainLoop();
+	onStop();
+	
+	return msg.wParam;
+}
+
+void Controller::onClick(WPARAM wParam)
+{
+	if (wParam == view.quitButtonID) ::PostQuitMessage(0);
+	if (wParam == view.printButtonID) cout << model.getMessage() << endl;
+}
+
+void Controller::onStart(HINSTANCE instance)
+{
+	hInstance = instance;
+}
+
+void Controller::registerWindowClass()
+{
+	WNDCLASS wc = {0};
+	wc.lpfnWndProc = windowProcedure;
+	wc.style = CS_HREDRAW | CS_VREDRAW;
+	wc.hInstance = hInstance;
+	wc.lpszClassName = "MainWindowClass";
+	wc.hCursor = ::LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_APPWORKSPACE);
+	
+	::RegisterClass(&wc);
+}
+
+void Controller::runMainLoop()
+{
+	while(true)
+		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			if (msg.message == WM_QUIT)
+				break;
+			
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+		}
+}
+
+void Controller::onStop() {}
+
+//====================
+
+Controller controller = Controller();
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow)
+{
+	return controller.run(hInstance);
+}
+
+LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	if (message == WM_COMMAND) controller.onClick(wParam);
+	return ::DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+
+
+// TODO: 
+// 1. Implement the simplest window displaying with MVC.
+// 2. Add the GDI window, which shows triangle and square.
+// 3. Implement more advanced example with two GDI windows, control panel (within main window) and opening settings panels.
