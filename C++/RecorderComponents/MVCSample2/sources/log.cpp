@@ -31,8 +31,9 @@ string Log::getTime()
 	string hour		= (time.wHour	< 10 ? "0" : "") + to_string(time.wHour);
 	string minute	= (time.wMinute	< 10 ? "0" : "") + to_string(time.wMinute);
 	string second	= (time.wSecond < 10 ? "0" : "") + to_string(time.wSecond);
+	string millis	= (time.wMilliseconds < 100 ? "0" : "") + to_string(time.wMilliseconds);
 	
-	return hour + ":" + minute + ":" + second + " ";
+	return hour + ":" + minute + ":" + second + ":" + millis + " ";
 }
 
 string Log::getDate()
