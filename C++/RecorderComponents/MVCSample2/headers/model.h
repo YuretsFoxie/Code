@@ -31,6 +31,8 @@ public:
 	virtual ~SubjectInterface() {};
 	virtual void addObserver(ObserverInterface* observer) = 0;
 	virtual void removeObserver(ObserverInterface* observer) = 0;
+	
+private:
 	virtual void notify(const Shape& shape) = 0;
 };
 
@@ -39,17 +41,15 @@ public:
 class Model: public SubjectInterface
 {
 public:
-	virtual ~Model() {}
-	
 	void addObserver(ObserverInterface* observer) override;
 	void removeObserver(ObserverInterface* observer) override;
-	void notify(const Shape& shape) override;
-	
 	void toggleShape();
+	
+private:
+	void notify(const Shape& shape) override;
 	string getShapeName();
 	vector<POINT> getShape();
 	
-private:
 	const vector<POINT> triangle = {{100, 300}, {300, 300}, {200, 100}, {100, 300}};
 	const vector<POINT> square = {{50, 50}, {250, 50}, {250, 250}, {50, 250}, {50, 50}};
 	

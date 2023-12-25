@@ -11,8 +11,6 @@ using namespace std;
 class Controller: public ObserverInterface
 {
 public:
-	~Controller() {}
-	
 	WPARAM run(HINSTANCE hInstance);
 	void onClick(WPARAM wParam);
 	void onResize();

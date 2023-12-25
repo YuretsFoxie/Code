@@ -8,7 +8,7 @@ using namespace std;
 
 class GDIView
 {
-public:
+public:	
 	void onStart(HINSTANCE instance, HWND parent);
 	void onStop();
 	void resize();
@@ -20,10 +20,10 @@ private:
 	void createWindow();
 	
 	static DWORD WINAPI staticDraw(void* Param);
-	DWORD draw();
-	void draw(HDC& hdc, RECT& window);
-	void prepareDrawing(HDC& hdc, RECT& window);
-	void drawShape(HDC& hdc);
+	DWORD drawIfNeeded();
+	void draw();
+	void prepareDrawing();
+	void drawShape();
 	
 	HINSTANCE hInstance;
 	HWND parentWindow;

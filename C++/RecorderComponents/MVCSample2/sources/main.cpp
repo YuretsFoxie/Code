@@ -1,4 +1,3 @@
-#include <windows.h>
 #include "controller.h"
 
 Controller controller;
@@ -17,9 +16,5 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-
-
 // TODO:
-// Add logging, check if everything is constructed and destroyed correctly.
 // Implement more advanced example with two GDI windows, control panel (within main window) and opening settings panels.
-// Perform refactoring.

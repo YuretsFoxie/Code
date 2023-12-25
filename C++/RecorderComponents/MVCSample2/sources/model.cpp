@@ -10,21 +10,18 @@ void Model::removeObserver(ObserverInterface* observer)
 	observers.remove(observer);
 }
 
+void Model::toggleShape()
+{
+	isTriangle = !isTriangle;
+	notify( {getShapeName(), getShape()} );
+}
+
 void Model::notify(const Shape& shape)
 {
 	list<ObserverInterface *>::iterator iterator = observers.begin();
 	
-	while (iterator != observers.end())
-	{
+	for (; iterator != observers.end(); ++iterator)
 		(*iterator)->update(shape);
-		++iterator;
-	}
-}
-
-void Model::toggleShape()
-{
-	isTriangle = !isTriangle;
-	isTriangle ? notify( {"Triangle", triangle} ) : notify( {"Square", square} );
 }
 
 string Model::getShapeName()

@@ -8,7 +8,7 @@ using namespace std;
 
 class View
 {
-public:
+public:	
 	HWND onStart(HINSTANCE instance);
 	void update(const string& shape);
 	

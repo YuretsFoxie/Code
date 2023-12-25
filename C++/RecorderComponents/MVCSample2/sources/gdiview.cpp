@@ -7,14 +7,13 @@ void GDIView::onStart(HINSTANCE instance, HWND parent)
 {	
 	hInstance = instance;
 	parentWindow = parent;
+	isDrawing = true;
+	greenPen = ::CreatePen(PS_SOLID, 1, RGB(0, 255, 0));
+    drawingThreadHandle = ::CreateThread(NULL, 0, staticDraw, (void*) this, 0, NULL);
 	
 	registerWindowClass();
 	createWindow();
 	resize();
-	
-	isDrawing = true;
-	greenPen = ::CreatePen(PS_SOLID, 1, RGB(0, 255, 0));
-    drawingThreadHandle = ::CreateThread(NULL, 0, staticDraw, (void*) this, 0, NULL);
 }
 
 void GDIView::onStop()
@@ -79,34 +78,34 @@ void GDIView::createWindow()
 
 DWORD WINAPI GDIView::staticDraw(void* Param)
 {
-	return ((GDIView*) Param)->draw();
+	return ((GDIView*) Param)->drawIfNeeded();
 }
 
-DWORD GDIView::draw()
+DWORD GDIView::drawIfNeeded()
 {
 	while(isDrawing)
 	{
-		draw(memDC, window);
+		draw();
 		::RedrawWindow(gdiWnd, NULL, NULL, RDW_INVALIDATE);		
 		::Sleep(100);
 	}
 }
 
-void GDIView::draw(HDC& hdc, RECT& window)
+void GDIView::draw()
 {
-	prepareDrawing(hdc, window);
-	drawShape(hdc);
+	prepareDrawing();
+	drawShape();
 }
 
-void GDIView::prepareDrawing(HDC& hdc, RECT& window)
+void GDIView::prepareDrawing()
 {
-	::FillRect(hdc, &window, reinterpret_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH)));
-	::SelectObject(hdc, greenPen);
-	::SetBkColor(hdc, RGB(0, 0, 0));
-	::SetTextColor(hdc, RGB(0, 255, 0));
+	::FillRect(memDC, &window, reinterpret_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH)));
+	::SelectObject(memDC, greenPen);
+	::SetBkColor(memDC, RGB(0, 0, 0));
+	::SetTextColor(memDC, RGB(0, 255, 0));
 }
 
-void GDIView::drawShape(HDC& hdc)
+void GDIView::drawShape()
 {
-	::Polyline(hdc, &buffer[0], buffer.size());
+	::Polyline(memDC, &buffer[0], buffer.size());
 }
