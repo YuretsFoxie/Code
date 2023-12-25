@@ -1,0 +1,2 @@
+isConsole=1
+libraries= -lgdi32 -lcomdlg32
