@@ -10,20 +10,27 @@ class View
 {
 public:	
 	HWND onStart(HINSTANCE instance);
-	void update(const string& shape);
+	
+	void onConnect();
+	void onDisconnect();
+	void enableCOMControls();
+	void disableCOMControls();
 	
 	const int quitButtonID = 100;
-	const int shapeButtonID = 101;
+	const int connectButtonID = 101;
+	const int comSettingsButtonID = 102;
 	
 private:
 	void registerWindowClass();
 	void createWindow();
+	void enterFullScreen();
 	void addControls();
 	
 	HINSTANCE hInstance;
 	HWND window;
 	HWND quitButton;
-	HWND shapeButton;
+	HWND connectButton;
+	HWND comSettingsButton;
 };
 
 #endif // VIEW_H_INCLUDED

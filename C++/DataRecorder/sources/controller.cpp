@@ -1,20 +1,24 @@
 #include "controller.h"
+#include "log.h"
 
 // Public Functions
 
-WPARAM Controller::run(HINSTANCE hInstance)
+WPARAM Controller::run(HINSTANCE instance)
 {
-	onStart(hInstance);	
+	onStart(instance);
 	runMainLoop();
 	onStop();
 	
 	return msg.wParam;
 }
 
-void Controller::onClick(WPARAM wParam)
+void Controller::onClick(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == view.quitButtonID) ::PostQuitMessage(0);
-	if (wParam == view.shapeButtonID) model.toggleShape();
+	if (wParam == view.quitButtonID)		::PostQuitMessage(0);
+	if (wParam == view.connectButtonID)		toggleConnection();
+	if (wParam == view.comSettingsButtonID)	showCOMSettings();
+	if (wParam == comView.okButtonID)		onCOMOK();
+	if (wParam == comView.cancelButtonID) 	onCOMCancel();
 }
 
 void Controller::onResize()
@@ -27,10 +31,14 @@ void Controller::onPaint()
 	gdiView.paint();
 }
 
-void Controller::update(const Shape& shape)
+void Controller::update(const string& message)
 {
-	view.update(shape.name);
-	gdiView.update(shape.points);
+	Log::shared().save(message);
+}
+
+void Controller::update(const int value)
+{
+	Log::shared().save(value);
 }
 
 // Private Functions
@@ -40,8 +48,14 @@ void Controller::onStart(HINSTANCE instance)
 	HWND window = view.onStart(instance);
 	gdiView.onStart(instance, window);
 	
-	model.addObserver(this);
-	model.toggleShape();
+	comView.onStart({
+		instance,
+		window,
+		comSettings.findPorts(),
+		comSettings.getBaudrates()
+	});
+	
+	ports.addObserver(this);
 }
 
 void Controller::runMainLoop()
@@ -60,5 +74,39 @@ void Controller::runMainLoop()
 void Controller::onStop()
 {
 	gdiView.onStop();
-	model.removeObserver(this);
+	ports.removeObserver(this);
+}
+
+void Controller::toggleConnection()
+{
+	if (ports.isConnected())
+	{	
+		ports.transmit("0");
+		ports.disconnect();
+		view.onDisconnect();
+	}
+	else
+	{
+		ports.selectPort(comSettings.getData());
+		ports.transmit("1");
+		view.onConnect();
+	}
+}
+
+void Controller::showCOMSettings()
+{
+	view.disableCOMControls();
+	comView.show(comSettings.getData());
+}
+
+void Controller::onCOMOK()
+{
+	comSettings.setData(comView.hide());
+	view.enableCOMControls();
+}
+
+void Controller::onCOMCancel()
+{
+	view.enableCOMControls();
+	comView.hide();
 }

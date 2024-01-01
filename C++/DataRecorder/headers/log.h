@@ -10,7 +10,12 @@ class Log
 {
 public:
 	static Log& shared();
-	void save(const string& message);
+	
+	template<typename T>
+	void save(const T& data)
+	{
+		file << getTime() << data << '\n';
+	}
 	
 private:
 	Log();

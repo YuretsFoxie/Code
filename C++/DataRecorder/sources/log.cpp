@@ -7,11 +7,6 @@ Log& Log::shared()
 	return log;
 }
 
-void Log::save(const string& message)
-{
-	file << getTime() + message << '\n';
-}
-
 Log::Log(): file(name.c_str(), ios::app)
 {
 	file << "========== started: " + getDate() + getTime() + "==========\n";
