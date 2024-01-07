@@ -33,12 +33,13 @@ void Controller::onPaint()
 
 void Controller::update(const string& message)
 {
-	Log::shared().save(message);
+	// Log::shared().save(message);
+	gdiView.print(message);
 }
 
 void Controller::update(const int value)
 {
-	Log::shared().save(value);
+	// Log::shared().save(value);
 }
 
 // Private Functions

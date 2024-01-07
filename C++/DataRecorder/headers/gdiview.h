@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -13,7 +14,8 @@ public:
 	void onStop();
 	void resize();
 	void paint();
-	void update(const vector<POINT>& shape);
+	// void update(const vector<POINT>& shape);
+	void print(const string& message);
 	
 private:
 	void registerWindowClass();
@@ -25,6 +27,12 @@ private:
 	void prepareDrawing();
 	void drawShape();
 	
+	//=====
+	
+	void drawText();
+	
+	//=====
+	
 	HINSTANCE hInstance;
 	HWND parentWindow;
 	HWND gdiWnd;
@@ -34,6 +42,12 @@ private:
 	HBITMAP bitmap;
 	HANDLE drawingThreadHandle;
 	HPEN greenPen;
+	
+	//=====
+	
+	vector<string> consoleBuffer;
+	
+	//=====
 	
 	vector<POINT> buffer;
 	bool isDrawing;

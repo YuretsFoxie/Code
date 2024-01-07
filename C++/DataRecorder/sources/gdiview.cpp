@@ -44,9 +44,16 @@ void GDIView::paint()
 	::EndPaint(gdiWnd, &ps);
 }
 
+/*
 void GDIView::update(const vector<POINT>& shape)
 {
 	buffer = shape;
+}
+*/
+
+void GDIView::print(const string& message)
+{
+	consoleBuffer.push_back(message);
 }
 
 // Private Functions
@@ -95,6 +102,7 @@ void GDIView::draw()
 {
 	prepareDrawing();
 	drawShape();
+	drawText();
 }
 
 void GDIView::prepareDrawing()
@@ -108,4 +116,13 @@ void GDIView::prepareDrawing()
 void GDIView::drawShape()
 {
 	::Polyline(memDC, &buffer[0], buffer.size());
+}
+
+void GDIView::drawText()
+{
+	for (int i = 0; i < consoleBuffer.size(); i++)
+	{
+		string message = consoleBuffer[i] + "\n";
+		::TextOut(memDC, 10, 10 + i * 20, message.c_str(), message.length());
+	}
 }

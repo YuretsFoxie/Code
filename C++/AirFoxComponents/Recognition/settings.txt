@@ -1,0 +1,2 @@
+isConsole=1
+libraries= -lgdiplus -lgdi32
