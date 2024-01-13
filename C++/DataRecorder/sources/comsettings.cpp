@@ -69,5 +69,5 @@ void COMSettings::load()
 	}
 	
 	file >> data.port >> data.baudrate;
-    file.close();
+	file.close();
 }

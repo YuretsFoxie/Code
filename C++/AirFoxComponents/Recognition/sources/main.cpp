@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <Eigen/Dense>
 
 #include "gplus.h"
 #include "image.h"
@@ -8,6 +9,7 @@
 
 using namespace std;
 
+/*
 void printDigit(const int n)
 {
 	Image image = Image("images/" + to_string(n) + ".png");
@@ -24,6 +26,7 @@ void printDigit(const int n)
 	
 	cout << endl << endl;
 }
+*/
 
 int main()
 {
@@ -31,8 +34,8 @@ int main()
 	gdiPlus.start();
 	Profiler profiler;
 	
-	for (int i = 0; i <= 9; i++)
-		printDigit(i);
+	Eigen::MatrixXd d;
+	cout << "matrix created";
 	
 	gdiPlus.stop();
 	cin.get();
