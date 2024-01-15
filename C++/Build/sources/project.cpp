@@ -70,21 +70,28 @@ bool Project::performInitialCheck()
 bool Project::compileIfNeeded()
 {
 	vector<string> sources = file.findAll("sources");
-	for (string source: sources)
+	for (string s: sources)
 	{
-		string name = file.extractName(source);
-		string header = "headers/" + name + ".h";
+		string name = file.extractName(s);
 		string object = "objects/" + name + ".o";
+		string source = "sources/" + name + ".cpp";
+		string header = "headers/" + name + ".h";
 		
-		FILETIME objectTime = file.getTime(object);
+		if (file.isExist(object))
+		{
+			FILETIME objectTime = file.getTime(object);
+			bool isSourceChanged = file.isLater(file.getTime(source), objectTime);
+			bool isHeaderChanged = (file.isExist(header) && file.isLater(file.getTime(header), objectTime));
 			
-		bool isObject = file.isExist(object);
-		bool isSourceChanged = file.isLater(file.getTime(source), objectTime);
-		bool isHeaderChanged = ( file.isExist(header) && file.isLater(file.getTime(header), objectTime));
-		
-		if (!isObject || isSourceChanged || isHeaderChanged)
+			if (isSourceChanged || isHeaderChanged)
+				if (!compile(name))
+					return false;
+		}
+		else
+		{
 			if (!compile(name))
 				return false;
+		}
 	}
 	
 	return true;

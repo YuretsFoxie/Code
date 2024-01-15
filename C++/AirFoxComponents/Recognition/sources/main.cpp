@@ -1,6 +1,6 @@
 #include <iostream>
 #include <iomanip>
-#include <Eigen/Dense>
+#include <Eigen/Eigen/Dense>
 
 #include "gplus.h"
 #include "image.h"
@@ -34,8 +34,12 @@ int main()
 	gdiPlus.start();
 	Profiler profiler;
 	
+	//=====
+	
 	Eigen::MatrixXd d;
 	cout << "matrix created";
+	
+	//=====
 	
 	gdiPlus.stop();
 	cin.get();

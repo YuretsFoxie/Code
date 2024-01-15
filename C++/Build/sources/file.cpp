@@ -59,9 +59,9 @@ string File::extractName(const string& fullName)
 
 FILETIME File::getTime(const string& name)
 {
-	HANDLE file = ::CreateFile(name.c_str(), GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE file = ::CreateFile(name.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	FILETIME writeTime;
-	::GetFileTime(file, NULL, NULL, &writeTime);
+	::GetFileTime(file, NULL, NULL, &writeTime);	
 	::CloseHandle(file);
 	
 	return writeTime;
