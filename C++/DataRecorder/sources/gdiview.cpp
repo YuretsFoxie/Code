@@ -1,5 +1,6 @@
 #include "gdiview.h"
 #include "windowprocedure.h"
+#include "layout.h"
 
 // Public Functions
 
@@ -7,13 +8,11 @@ void GDIView::onStart(HINSTANCE instance, HWND parent)
 {	
 	hInstance = instance;
 	parentWindow = parent;
-	isDrawing = true;
-	greenPen = ::CreatePen(PS_SOLID, 1, RGB(0, 255, 0));
-    drawingThreadHandle = ::CreateThread(NULL, 0, staticDraw, (void*) this, 0, NULL);
 	
 	registerWindowClass();
 	createWindow();
-	resize();
+	setup();
+	addSubviews();
 }
 
 void GDIView::onStop()
@@ -27,15 +26,6 @@ void GDIView::onStop()
 	::ReleaseDC(gdiWnd, hDC);
 }
 
-void GDIView::resize()
-{
-	hDC = ::GetDC(gdiWnd);
-	memDC = ::CreateCompatibleDC(hDC);
-	::GetClientRect(gdiWnd, &window);
-	bitmap = ::CreateCompatibleBitmap(hDC, window.right, window.bottom);
-	::SelectObject(memDC, bitmap);
-}
-
 void GDIView::paint()
 {
 	PAINTSTRUCT ps;
@@ -44,16 +34,19 @@ void GDIView::paint()
 	::EndPaint(gdiWnd, &ps);
 }
 
-/*
-void GDIView::update(const vector<POINT>& shape)
-{
-	buffer = shape;
-}
-*/
-
 void GDIView::print(const string& message)
 {
-	consoleBuffer.push_back(message);
+	console.print(message);
+}
+
+void GDIView::scrollUp()
+{
+	console.scrollUp();
+}
+
+void GDIView::scrollDown()
+{
+	console.scrollDown();
 }
 
 // Private Functions
@@ -83,6 +76,29 @@ void GDIView::createWindow()
 							  parentWindow, NULL, hInstance, NULL);
 }
 
+void GDIView::setup()
+{
+	isDrawing = true;
+	greenPen = ::CreatePen(PS_SOLID, 1, RGB(0, 255, 0));
+    drawingThreadHandle = ::CreateThread(NULL, 0, staticDraw, (void*) this, 0, NULL);
+	hDC = ::GetDC(gdiWnd);
+	memDC = ::CreateCompatibleDC(hDC);
+	
+	::GetClientRect(gdiWnd, &window);
+	bitmap = ::CreateCompatibleBitmap(hDC, window.right, window.bottom);
+	::SelectObject(memDC, bitmap);
+}
+
+void GDIView::addSubviews()
+{
+	console = Console(memDC);
+	// console.print("test");
+	
+	graph = Graph(memDC);
+	
+	// console = Console(memDC, Layout(0.5, 0.5));
+}
+
 DWORD WINAPI GDIView::staticDraw(void* Param)
 {
 	return ((GDIView*) Param)->drawIfNeeded();
@@ -92,17 +108,13 @@ DWORD GDIView::drawIfNeeded()
 {
 	while(isDrawing)
 	{
+		prepareDrawing();
 		draw();
 		::RedrawWindow(gdiWnd, NULL, NULL, RDW_INVALIDATE);		
 		::Sleep(100);
 	}
-}
-
-void GDIView::draw()
-{
-	prepareDrawing();
-	drawShape();
-	drawText();
+	
+	return 0;
 }
 
 void GDIView::prepareDrawing()
@@ -113,16 +125,8 @@ void GDIView::prepareDrawing()
 	::SetTextColor(memDC, RGB(0, 255, 0));
 }
 
-void GDIView::drawShape()
+void GDIView::draw()
 {
-	::Polyline(memDC, &buffer[0], buffer.size());
-}
-
-void GDIView::drawText()
-{
-	for (int i = 0; i < consoleBuffer.size(); i++)
-	{
-		string message = consoleBuffer[i] + "\n";
-		::TextOut(memDC, 10, 10 + i * 20, message.c_str(), message.length());
-	}
+	// graph.render();
+	console.render();
 }

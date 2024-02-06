@@ -1,3 +1,4 @@
+#include <vector>
 #include "comports.h"
 
 // Public Functions
@@ -220,7 +221,7 @@ DWORD COMPorts::receive()
 		
         ::ClearCommError(portHandle, &errors, &stat);
 		
-		if (errors & CE_BREAK)		notify("error in receive (2): CE_BREAK");
+		// if (errors & CE_BREAK)		notify("error in receive (2): CE_BREAK");
 		if (errors & CE_FRAME)		notify("error in receive (2): CE_FRAME");
 		if (errors & CE_OVERRUN)	notify("error in receive (2): CE_OVERRUN");
 		if (errors & CE_RXOVER)		notify("error in receive (2): CE_RXOVER");

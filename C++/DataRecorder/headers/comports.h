@@ -2,7 +2,6 @@
 #define COMPORTS_H_INCLUDED
 
 #include <windows.h>
-#include <vector>
 #include <string>
 #include <bitset>
 #include "observablemodel.h"

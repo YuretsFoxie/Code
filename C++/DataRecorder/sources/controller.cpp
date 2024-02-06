@@ -12,7 +12,7 @@ WPARAM Controller::run(HINSTANCE instance)
 	return msg.wParam;
 }
 
-void Controller::onClick(WPARAM wParam, LPARAM lParam)
+void Controller::onClick(WPARAM wParam)
 {
 	if (wParam == view.quitButtonID)		::PostQuitMessage(0);
 	if (wParam == view.connectButtonID)		toggleConnection();
@@ -21,9 +21,10 @@ void Controller::onClick(WPARAM wParam, LPARAM lParam)
 	if (wParam == comView.cancelButtonID) 	onCOMCancel();
 }
 
-void Controller::onResize()
+void Controller::onPress(WPARAM wParam)
 {
-	gdiView.resize();
+	if (wParam == VK_UP)	gdiView.scrollUp();
+	if (wParam == VK_DOWN)	gdiView.scrollDown();
 }
 
 void Controller::onPaint()

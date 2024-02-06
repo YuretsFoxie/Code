@@ -14,8 +14,8 @@ class Controller: public ObserverInterface
 {
 public:
 	WPARAM run(HINSTANCE instance);
-	void onClick(WPARAM wParam, LPARAM lParam);
-	void onResize();
+	void onClick(WPARAM wParam);
+	void onPress(WPARAM wParam);
 	void onPaint();
 	
 	void update(const string& message) override;

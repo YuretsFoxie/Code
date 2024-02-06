@@ -67,7 +67,7 @@ void COMView::createWindow()
 							   "Connection Settings",
 							   WS_MINIMIZEBOX | WS_VISIBLE,
 							   x, y, width, height,
-							   configuration.window, NULL, configuration.instance, NULL);
+							   configuration.window, NULL, configuration.instance, NULL);			   
 }
 
 void COMView::addControls()
@@ -97,7 +97,7 @@ void COMView::addRadioButtons()
 		DWORD style = i == 0 ? WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP : WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON;
 		int y = 65 + 25 * i;
 		
-		HWND button = ::CreateWindowEx(0, "button", name.c_str(), style, 20, y, 85, 25, window, (HMENU)(radioButtonID + i), configuration.instance, 0);
+		HWND button = ::CreateWindowEx(0, "button", name.c_str(), style, 20, y, 85, 25, window, reinterpret_cast<HMENU>(radioButtonID + i), configuration.instance, 0);
 		
 		if (name == settings.port)
 			::SendMessage(button, BM_CLICK, 0, 0);
@@ -108,8 +108,8 @@ void COMView::addRadioButtons()
 
 void COMView::addButtons()
 {
-	HWND okButton = ::CreateWindowEx(0, "button", ("OK"), WS_VISIBLE | WS_CHILD | WS_TABSTOP, 20, height - 80, 90, 40, window, (HMENU)okButtonID, configuration.instance, 0);
-	HWND cancelButton = ::CreateWindowEx(0, "button", ("Cancel"), WS_VISIBLE | WS_CHILD | WS_TABSTOP, 130, height - 80, 90, 40, window, (HMENU)cancelButtonID, configuration.instance, 0);
+	HWND okButton = ::CreateWindowEx(0, "button", ("OK"), WS_VISIBLE | WS_CHILD | WS_TABSTOP, 20, height - 80, 90, 40, window, reinterpret_cast<HMENU>(okButtonID), configuration.instance, 0);
+	HWND cancelButton = ::CreateWindowEx(0, "button", ("Cancel"), WS_VISIBLE | WS_CHILD | WS_TABSTOP, 130, height - 80, 90, 40, window, reinterpret_cast<HMENU>(cancelButtonID), configuration.instance, 0);
 	
 	::SendMessage(okButton, WM_CHANGEUISTATE, (WPARAM)(0x10001), 0);
 	::SendMessage(cancelButton, WM_CHANGEUISTATE, (WPARAM)(0x10001), 0);

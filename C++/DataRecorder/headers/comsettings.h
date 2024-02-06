@@ -39,7 +39,7 @@ private:
 	void save();
 	void load();
 	
-	const string name = "comsettings.txt";
+	const string name = "comsettings.ini";
 	const int bufferSize = 64;
 	
 	COMSettingsData data;
