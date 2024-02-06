@@ -34,7 +34,13 @@ public:
 	
 	void render()
 	{
-		// ::DrawText(memDC, buffer.c_str(), buffer.length(), &frame, DT_WORDBREAK | DT_EDITCONTROL);
+		string buffer;
+		
+		for (string s: lines)
+		{
+			buffer += s + "\n";
+			::DrawText(memDC, buffer.c_str(), buffer.length(), &frame, DT_WORDBREAK | DT_EDITCONTROL);
+		}
 	}
 	
 private:
@@ -61,8 +67,8 @@ private:
 			
 			if (height < newHeight)
 			{
-				lines.push_back(s);
-				buffer = "";
+				lines.push_back(buffer);
+				buffer = words[i] + " ";
 			}
 			else
 				buffer = s;
@@ -77,7 +83,7 @@ private:
 	vector<string> words;
 	vector<string> lines;
 	
-	RECT frame = {10, 10, 100, 500};
+	RECT frame = {10, 10, 200, 500};
 	HDC memDC;
 };
 
