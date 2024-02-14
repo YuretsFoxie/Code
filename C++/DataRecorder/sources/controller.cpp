@@ -1,5 +1,5 @@
 #include "controller.h"
-#include "log.h"
+#include "console.h"
 
 // Public Functions
 
@@ -21,11 +21,7 @@ void Controller::onClick(WPARAM wParam)
 	if (wParam == comView.cancelButtonID) 	onCOMCancel();
 }
 
-void Controller::onPress(WPARAM wParam)
-{
-	if (wParam == VK_UP)	gdiView.scrollUp();
-	if (wParam == VK_DOWN)	gdiView.scrollDown();
-}
+void Controller::onPress(WPARAM wParam) {}
 
 void Controller::onPaint()
 {
@@ -34,19 +30,21 @@ void Controller::onPaint()
 
 void Controller::update(const string& message)
 {
-	// Log::shared().save(message);
-	gdiView.print(message);
+	Console::shared().print(message);
 }
 
 void Controller::update(const int value)
 {
-	// Log::shared().save(value);
+	Console::shared().print(value);
 }
 
 // Private Functions
 
 void Controller::onStart(HINSTANCE instance)
 {
+	Console::shared().setFrame();
+	Console::shared().print("started...");
+	
 	HWND window = view.onStart(instance);
 	gdiView.onStart(instance, window);
 	

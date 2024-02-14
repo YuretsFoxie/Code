@@ -56,7 +56,7 @@ void View::createWindow()
 							   "MainWindowClass",
 							   "Data Recorder",
 							   WS_MINIMIZEBOX | WS_VISIBLE,
-							   0, 0, ::GetSystemMetrics(SM_CXVIRTUALSCREEN), ::GetSystemMetrics(SM_CYVIRTUALSCREEN),
+							   0, 0, ::GetSystemMetrics(SM_CXVIRTUALSCREEN), ::GetSystemMetrics(SM_CYVIRTUALSCREEN) * 0.8,
 							   NULL, NULL, hInstance, NULL);
 }
 
@@ -68,8 +68,8 @@ void View::enterFullScreen()
 	::SetWindowLong(window, GWL_STYLE, dwNewStyle);
 	::SetWindowPos(window, NULL, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 	
-	HDC hDC = ::GetWindowDC(NULL); 
-	::SetWindowPos(window, NULL, 0, 0, ::GetDeviceCaps(hDC, HORZRES), ::GetDeviceCaps(hDC, VERTRES), SWP_FRAMECHANGED);
+	// HDC hDC = ::GetWindowDC(NULL); 
+	// ::SetWindowPos(window, NULL, 0, 0, ::GetDeviceCaps(hDC, HORZRES), ::GetDeviceCaps(hDC, VERTRES), SWP_FRAMECHANGED);
 }
 
 void View::addControls()

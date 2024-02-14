@@ -16,17 +16,13 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-// TODO: Implement the Console and Graph as a GraphicsView subclasses (use the converted coordinate systems), implement scrolling with buttons, limit the messages size. Consider using the Decorator.
-
-// TODO: Fix the COM errors (can not disconnect, the Connect button can be clicked when unneeded, there were also switching problems).
-// TODO: Check sending data from the MCU unit, remove the unneeded error messages, peform COM refactoring.
+// TODO: Complete the SoundGraph, use the converted coordinate systems.
 // TODO: Implement displaying the UART data as a graph.
 
-// TODO: Consider unifiing printing with the Log.
-// TODO: Consider implementing the Commands, perform general refactoring.
+// TODO: Fix the COM errors (can not disconnect, the Connect button can be clicked when unneeded, there were also switching problems).
+// TODO: Check sending data from the MCU unit, remove the unneeded error messages.
 
-// TODO: Add the FFT unit to the application and test it.
-// TODO: Implement displaying the signal spectrum.
+// TODO: Perform general refactoring.
 
 /*
 View Facade(s)?

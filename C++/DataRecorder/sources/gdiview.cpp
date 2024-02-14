@@ -1,6 +1,6 @@
+#include <iostream>
 #include "gdiview.h"
 #include "windowprocedure.h"
-#include "layout.h"
 
 // Public Functions
 
@@ -12,7 +12,7 @@ void GDIView::onStart(HINSTANCE instance, HWND parent)
 	registerWindowClass();
 	createWindow();
 	setup();
-	addSubviews();
+	addGraphs();
 }
 
 void GDIView::onStop()
@@ -32,21 +32,6 @@ void GDIView::paint()
 	hDC = ::BeginPaint(gdiWnd, &ps);
 	::BitBlt(hDC, 0, 0, window.right, window.bottom, memDC, 0, 0, SRCCOPY);
 	::EndPaint(gdiWnd, &ps);
-}
-
-void GDIView::print(const string& message)
-{
-	console.print(message);
-}
-
-void GDIView::scrollUp()
-{
-	console.scrollUp();
-}
-
-void GDIView::scrollDown()
-{
-	console.scrollDown();
 }
 
 // Private Functions
@@ -89,14 +74,19 @@ void GDIView::setup()
 	::SelectObject(memDC, bitmap);
 }
 
-void GDIView::addSubviews()
+void GDIView::addGraphs()
 {
-	console = Console(memDC);
-	// console.print("test");
+	graphs.push_back(new SoundGraph(memDC, findQuadrantRect(0)));
+}
+
+RECT GDIView::findQuadrantRect(const int quadrant)
+{
+	if (quadrant == 0) return {0, 0, window.right / 2, window.bottom / 2};
+	if (quadrant == 1) return {window.right / 2, 0, window.right, window.bottom / 2};
+	if (quadrant == 2) return {0, window.bottom / 2, window.right / 2, window.bottom};
+	if (quadrant == 3) return {window.right / 2, window.bottom / 2, window.right, window.bottom};
 	
-	graph = Graph(memDC);
-	
-	// console = Console(memDC, Layout(0.5, 0.5));
+	return {0, 0, 0, 0};
 }
 
 DWORD WINAPI GDIView::staticDraw(void* Param)
@@ -127,6 +117,6 @@ void GDIView::prepareDrawing()
 
 void GDIView::draw()
 {
-	// graph.render();
-	console.render();
+	for (auto graph: graphs)
+		graph->render();
 }
