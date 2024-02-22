@@ -28,15 +28,21 @@ public:
 	void render();
 	
 private:
-	int calculateDx(const int index, const int scale = 1);
+	int calculateDx(const int index);
 	int calculateScreenY(const int value);
 	void drawBackground();
 	void drawBuffer();
 	
+	const double xPointsCount = 128.0; // 128 x scale
+	
+	double dx;
+	double yZero;
+	double yPoints;
+	
 	HDC hDC;
 	RECT frame;
-	vector<POINT> buffer;
-	int count = 1;
+	deque<POINT> buffer;
+	vector<POINT> screenBuffer;
 };
 
 #endif // GRAPH_H_INCLUDED

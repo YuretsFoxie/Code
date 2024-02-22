@@ -105,7 +105,7 @@ DWORD GDIView::drawIfNeeded()
 		prepareDrawing();
 		draw();
 		::RedrawWindow(gdiWnd, NULL, NULL, RDW_INVALIDATE);		
-		::Sleep(100);
+		::Sleep(10);
 	}
 	
 	return 0;

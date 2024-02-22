@@ -1,3 +1,9 @@
+//=====
+
+#include <math.h>
+
+//=====
+
 #include "controller.h"
 #include "console.h"
 
@@ -130,10 +136,13 @@ DWORD WINAPI Controller::staticRunTest(void* Param)
 
 DWORD Controller::test()
 {
-	for (int i = 0; i < 511; i++)
+	double x = 0;
+	while (true)
 	{
-		gdiView.addValue(i);
-		::Sleep(10);
+		gdiView.addValue(sin(x) * 500);
+		x += 0.1;
+		
+		::Sleep(1000.0 / 128.0);
 	}
 	
 	::TerminateThread(testThread, 0);

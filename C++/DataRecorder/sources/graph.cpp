@@ -3,12 +3,20 @@
 
 RawDataGraph::RawDataGraph(const HDC& hDC, const Frame& f): hDC(hDC), frame(f.getFrame())
 {
+	screenBuffer.reserve(xPointsCount);
+	dx = (frame.right - frame.left) / xPointsCount;
 	
+	int height = frame.bottom - frame.top;
+	yZero = frame.top + height / 2;
+	yPoints = height / 1024.0;
 }
 
 void RawDataGraph::addValue(const int value) // one second is 1/10 of the screen width, there are 128 values per second
 {
-	buffer.push_back({0, calculateScreenY(value)});
+	if (buffer.size() > xPointsCount)
+		buffer.pop_front();
+	
+	buffer.push_back({0, calculateScreenY(value)});	
 }
 
 void RawDataGraph::render()
@@ -17,20 +25,14 @@ void RawDataGraph::render()
 	drawBuffer();
 }
 
-int RawDataGraph::calculateDx(const int index, const int scale)
+int RawDataGraph::calculateDx(const int index)
 {
-	int width = frame.right - frame.left;
-	double dx = width / (128.0 * scale);
 	return frame.right - index * dx;
 }
 
 int RawDataGraph::calculateScreenY(const int value) // the value range is from -512 to +511
-{	
-	int height = frame.bottom - frame.top;
-	int zero = frame.top + height / 2;
-	double shift = value * height / 1024.0;
-	
-	return zero - shift;
+{
+	return yZero - value * yPoints;
 }
 
 void RawDataGraph::drawBackground()
@@ -48,11 +50,11 @@ void RawDataGraph::drawBackground()
 
 void RawDataGraph::drawBuffer()
 {
-	vector<POINT> screenBuffer;
+	screenBuffer.clear();
 	
 	for (int i = 0; i < buffer.size(); i++)
 	{
-		POINT p = { calculateDx( buffer.size() - i - 1 ), buffer[i].y};
+		POINT p = { calculateDx( buffer.size() - i - 1 ), buffer[i].y };
 		screenBuffer.push_back(p);
 	}
 	
