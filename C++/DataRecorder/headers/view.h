@@ -19,6 +19,7 @@ public:
 	const int quitButtonID = 100;
 	const int connectButtonID = 101;
 	const int comSettingsButtonID = 102;
+	const int testButtonID = 103;
 	
 private:
 	void registerWindowClass();
@@ -31,6 +32,7 @@ private:
 	HWND quitButton;
 	HWND connectButton;
 	HWND comSettingsButton;
+	HWND testButton;
 };
 
 #endif // VIEW_H_INCLUDED

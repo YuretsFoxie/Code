@@ -28,8 +28,17 @@ private:
 	
 	void toggleConnection();
 	void showCOMSettings();
+	void runTest();
 	void onCOMOK();
 	void onCOMCancel();
+	
+	//=====
+	
+	static DWORD WINAPI staticRunTest(void* Param);
+	DWORD test();
+	HANDLE testThread;
+	
+	//=====
 	
 	COMPorts ports;
 	COMSettings comSettings;

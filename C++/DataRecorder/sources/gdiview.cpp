@@ -1,6 +1,7 @@
 #include <iostream>
 #include "gdiview.h"
 #include "windowprocedure.h"
+#include "frame.h"
 
 // Public Functions
 
@@ -32,6 +33,12 @@ void GDIView::paint()
 	hDC = ::BeginPaint(gdiWnd, &ps);
 	::BitBlt(hDC, 0, 0, window.right, window.bottom, memDC, 0, 0, SRCCOPY);
 	::EndPaint(gdiWnd, &ps);
+}
+
+void GDIView::addValue(const int value)
+{
+	for (auto graph: graphs)
+		graph->addValue(value);
 }
 
 // Private Functions
@@ -76,17 +83,14 @@ void GDIView::setup()
 
 void GDIView::addGraphs()
 {
-	graphs.push_back(new SoundGraph(memDC, findQuadrantRect(0)));
-}
-
-RECT GDIView::findQuadrantRect(const int quadrant)
-{
-	if (quadrant == 0) return {0, 0, window.right / 2, window.bottom / 2};
-	if (quadrant == 1) return {window.right / 2, 0, window.right, window.bottom / 2};
-	if (quadrant == 2) return {0, window.bottom / 2, window.right / 2, window.bottom};
-	if (quadrant == 3) return {window.right / 2, window.bottom / 2, window.right, window.bottom};
+	/*
+	graphs.push_back(new RawDataGraph(memDC, FirstQuadrant(window)));
+	graphs.push_back(new RawDataGraph(memDC, SecondQuadrant(window)));
+	graphs.push_back(new RawDataGraph(memDC, ThirdQuadrant(window)));
+	graphs.push_back(new RawDataGraph(memDC, FourthQuadrant(window)));
+	*/
 	
-	return {0, 0, 0, 0};
+	graphs.push_back(new RawDataGraph(memDC, AllQuadrants(window)));
 }
 
 DWORD WINAPI GDIView::staticDraw(void* Param)

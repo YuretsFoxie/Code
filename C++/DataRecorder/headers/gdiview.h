@@ -2,6 +2,7 @@
 #define GDIVIEW_H_INCLUDED
 
 #include <windows.h>
+#include <vector>
 #include <string>
 #include "graph.h"
 
@@ -13,7 +14,7 @@ public:
 	void onStart(HINSTANCE instance, HWND parent);
 	void onStop();
 	void paint();
-	void print(const string& message);
+	void addValue(const int value);
 	
 private:
 	void registerWindowClass();

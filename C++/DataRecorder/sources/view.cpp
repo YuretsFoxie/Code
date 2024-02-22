@@ -76,9 +76,11 @@ void View::addControls()
 {
 	connectButton = ::CreateWindow("button", "Connect", WS_CHILD | WS_VISIBLE, 0, 0, 110, 50, window, reinterpret_cast<HMENU>(connectButtonID), hInstance, NULL);
 	comSettingsButton = ::CreateWindow("button", "Settings", WS_CHILD | WS_VISIBLE, 0, 50, 110, 50, window, reinterpret_cast<HMENU>(comSettingsButtonID), hInstance, NULL);
-	quitButton = ::CreateWindow("button", "Quit", WS_CHILD | WS_VISIBLE, 0, 100, 110, 50, window, reinterpret_cast<HMENU>(quitButtonID), hInstance, NULL);
+	testButton = ::CreateWindow("button", "Test", WS_CHILD | WS_VISIBLE, 0, 100, 110, 50, window, reinterpret_cast<HMENU>(testButtonID), hInstance, NULL);
+	quitButton = ::CreateWindow("button", "Quit", WS_CHILD | WS_VISIBLE, 0, 150, 110, 50, window, reinterpret_cast<HMENU>(quitButtonID), hInstance, NULL);
 	
 	::SendMessage(connectButton, WM_CHANGEUISTATE, (WPARAM)(0x10001), 0);
 	::SendMessage(comSettingsButton, WM_CHANGEUISTATE, (WPARAM)(0x10001), 0);
+	::SendMessage(testButton, WM_CHANGEUISTATE, (WPARAM)(0x10001), 0);
 	::SendMessage(quitButton, WM_CHANGEUISTATE, (WPARAM)(0x10001), 0);
 }

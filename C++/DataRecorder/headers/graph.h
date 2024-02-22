@@ -3,6 +3,8 @@
 
 #include <windows.h>
 #include <vector>
+#include <deque>
+#include "frame.h"
 
 using namespace std;
 
@@ -16,19 +18,25 @@ public:
 
 
 
-class SoundGraph: public GraphInterface
+class RawDataGraph: public GraphInterface
 {
 public:
-	SoundGraph() {}
-	SoundGraph(const HDC& memDC, const RECT& frame);
+	RawDataGraph() {}
+	RawDataGraph(const HDC& hDC, const Frame& f);
 	
 	void addValue(const int value);
 	void render();
 	
 private:
-	HDC memDC;
+	int calculateDx(const int index, const int scale = 1);
+	int calculateScreenY(const int value);
+	void drawBackground();
+	void drawBuffer();
+	
+	HDC hDC;
 	RECT frame;
 	vector<POINT> buffer;
+	int count = 1;
 };
 
 #endif // GRAPH_H_INCLUDED

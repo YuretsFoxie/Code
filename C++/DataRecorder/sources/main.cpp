@@ -16,13 +16,13 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-// TODO: Complete the SoundGraph, use the converted coordinate systems.
-// TODO: Implement displaying the UART data as a graph.
+// TODO: Complete and test the RawDataGraph.
 
 // TODO: Fix the COM errors (can not disconnect, the Connect button can be clicked when unneeded, there were also switching problems).
 // TODO: Check sending data from the MCU unit, remove the unneeded error messages.
+// TODO: Implement displaying the UART data as a graph.
 
-// TODO: Perform general refactoring.
+// TODO: Perform general refactoring, rename GDIView.
 
 /*
 View Facade(s)?

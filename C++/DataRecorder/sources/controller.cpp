@@ -17,6 +17,7 @@ void Controller::onClick(WPARAM wParam)
 	if (wParam == view.quitButtonID)		::PostQuitMessage(0);
 	if (wParam == view.connectButtonID)		toggleConnection();
 	if (wParam == view.comSettingsButtonID)	showCOMSettings();
+	if (wParam == view.testButtonID)		runTest();
 	if (wParam == comView.okButtonID)		onCOMOK();
 	if (wParam == comView.cancelButtonID) 	onCOMCancel();
 }
@@ -99,6 +100,15 @@ void Controller::showCOMSettings()
 	comView.show(comSettings.getData());
 }
 
+void Controller::runTest()
+{
+	//=====
+	
+	testThread = ::CreateThread(NULL, 0, staticRunTest, (void*) this, 0, NULL);
+	
+	//=====
+}
+
 void Controller::onCOMOK()
 {
 	comSettings.setData(comView.hide());
@@ -110,3 +120,26 @@ void Controller::onCOMCancel()
 	view.enableCOMControls();
 	comView.hide();
 }
+
+//=====
+
+DWORD WINAPI Controller::staticRunTest(void* Param)
+{
+    return ((Controller*) Param)->test();
+}
+
+DWORD Controller::test()
+{
+	for (int i = 0; i < 511; i++)
+	{
+		gdiView.addValue(i);
+		::Sleep(10);
+	}
+	
+	::TerminateThread(testThread, 0);
+	::CloseHandle(testThread);
+	
+	return 0;
+}
+
+//=====

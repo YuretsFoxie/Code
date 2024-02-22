@@ -18,6 +18,12 @@ public:
 		count++;
 	}
 	
+	void endl()
+	{
+		cout << count << "> " << '\n';
+		count++;
+	}	
+	
 private:
 	Console() {}
 	~Console() {}

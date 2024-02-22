@@ -1,18 +1,60 @@
 #include "graph.h"
 #include "console.h"
 
-SoundGraph::SoundGraph(const HDC& memDC, const RECT& frame): memDC(memDC), frame(frame)
-{
-	// buffer = {{0, 0}, {0, 200}, {200, 200}, {200, 0}, {0, 0}};	
-	buffer = {{frame.left, frame.top}, {frame.right, frame.top}, {frame.right, frame.bottom}, {frame.left, frame.bottom}, {frame.left, frame.top}};
-}
-
-void SoundGraph::addValue(const int value)
+RawDataGraph::RawDataGraph(const HDC& hDC, const Frame& f): hDC(hDC), frame(f.getFrame())
 {
 	
 }
 
-void SoundGraph::render()
+void RawDataGraph::addValue(const int value) // one second is 1/10 of the screen width, there are 128 values per second
 {
-	::Polyline(memDC, &buffer[0], buffer.size());
+	buffer.push_back({0, calculateScreenY(value)});
+}
+
+void RawDataGraph::render()
+{
+	drawBackground();
+	drawBuffer();
+}
+
+int RawDataGraph::calculateDx(const int index, const int scale)
+{
+	int width = frame.right - frame.left;
+	double dx = width / (128.0 * scale);
+	return frame.right - index * dx;
+}
+
+int RawDataGraph::calculateScreenY(const int value) // the value range is from -512 to +511
+{	
+	int height = frame.bottom - frame.top;
+	int zero = frame.top + height / 2;
+	double shift = value * height / 1024.0;
+	
+	return zero - shift;
+}
+
+void RawDataGraph::drawBackground()
+{
+	::MoveToEx(hDC, frame.left, frame.top, NULL);
+	::LineTo(hDC, frame.right - 1, frame.top);
+	::LineTo(hDC, frame.right - 1, frame.bottom - 1);
+	::LineTo(hDC, frame.left, frame.bottom - 1);
+	::LineTo(hDC, frame.left, frame.top);
+	
+	int y = calculateScreenY(0);
+	::MoveToEx(hDC, frame.left, y, NULL);
+	::LineTo(hDC, frame.right, y);
+}
+
+void RawDataGraph::drawBuffer()
+{
+	vector<POINT> screenBuffer;
+	
+	for (int i = 0; i < buffer.size(); i++)
+	{
+		POINT p = { calculateDx( buffer.size() - i - 1 ), buffer[i].y};
+		screenBuffer.push_back(p);
+	}
+	
+	::Polyline(hDC, &screenBuffer[0], screenBuffer.size());
 }
