@@ -5,7 +5,7 @@
 #include "comports.h"
 #include "comsettings.h"
 #include "view.h"
-#include "gdiview.h"
+#include "graphicsview.h"
 #include "comview.h"
 
 using namespace std;
@@ -27,24 +27,19 @@ private:
 	void onStop();
 	
 	void toggleConnection();
+	void connect();
+	void disconnect();
+	
 	void showCOMSettings();
 	void runTest();
 	void onCOMOK();
 	void onCOMCancel();
 	
-	//=====
-	
-	static DWORD WINAPI staticRunTest(void* Param);
-	DWORD test();
-	HANDLE testThread;
-	
-	//=====
-	
 	COMPorts ports;
 	COMSettings comSettings;
 	
 	View view;
-	GDIView gdiView;
+	GraphicsView graphicsView;
 	COMView comView;
 	
 	MSG msg;

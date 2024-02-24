@@ -1,34 +1,27 @@
 #ifndef CONSOLE_H_INCLUDED
 #define CONSOLE_H_INCLUDED
 
-#include <iostream>
+#include <vector>
+#include <string>
+#include "graphinterface.h"
+#include "frame.h"
 
 using namespace std;
 
-class Console
+class Console: public GraphInterface
 {
 public:
-	static Console& shared();
-	void setFrame();
-	
-	template<typename T>
-	void print(const T& data)
-	{
-		cout << count << "> " << data << '\n';
-		count++;
-	}
-	
-	void endl()
-	{
-		cout << count << "> " << '\n';
-		count++;
-	}	
+	Console(const HDC& hDC, const Frame& f);
+	void addValue(const int value) {}
+	void print(const int value);
+	void print(const string& message);
+	void render();
 	
 private:
-	Console() {}
-	~Console() {}
-	
-	int count = 1;
+	vector<string> lines;
+	HDC hDC;
+	RECT frame;
+	int maxLinesNumber;
 };
 
 #endif // CONSOLE_H_INCLUDED

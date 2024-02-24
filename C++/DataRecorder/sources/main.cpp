@@ -16,13 +16,14 @@ LRESULT CALLBACK windowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-// TODO: Complete and test the RawDataGraph.
+// TODO: Implement the simplified Console as a Graph.
 
-// TODO: Fix the COM errors (can not disconnect, the Connect button can be clicked when unneeded, there were also switching problems).
 // TODO: Check sending data from the MCU unit, remove the unneeded error messages.
-// TODO: Implement displaying the UART data as a graph.
+// TODO: Implement displaying the UART data at the Graph.
 
-// TODO: Perform general refactoring, rename GDIView.
+// TODO: Implement the tests.
+// TODO: Optimize drawing.
+// TODO: Perform general refactoring.
 
 /*
 View Facade(s)?

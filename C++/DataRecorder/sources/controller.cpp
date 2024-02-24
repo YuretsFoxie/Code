@@ -1,11 +1,4 @@
-//=====
-
-#include <math.h>
-
-//=====
-
 #include "controller.h"
-#include "console.h"
 
 // Public Functions
 
@@ -32,28 +25,27 @@ void Controller::onPress(WPARAM wParam) {}
 
 void Controller::onPaint()
 {
-	gdiView.paint();
+	graphicsView.paint();
 }
 
 void Controller::update(const string& message)
 {
-	Console::shared().print(message);
+	graphicsView.print(message);
 }
 
 void Controller::update(const int value)
 {
-	Console::shared().print(value);
+	graphicsView.print(value);
 }
 
 // Private Functions
 
 void Controller::onStart(HINSTANCE instance)
 {
-	Console::shared().setFrame();
-	Console::shared().print("started...");
+	graphicsView.print("started...");
 	
 	HWND window = view.onStart(instance);
-	gdiView.onStart(instance, window);
+	graphicsView.onStart(instance, window);
 	
 	comView.onStart({
 		instance,
@@ -80,24 +72,31 @@ void Controller::runMainLoop()
 
 void Controller::onStop()
 {
-	gdiView.onStop();
+	graphicsView.onStop();
 	ports.removeObserver(this);
 }
 
 void Controller::toggleConnection()
 {
+	ports.isConnected() ? disconnect() : connect();
+}
+
+void Controller::connect()
+{
+	ports.selectPort(comSettings.getData());
+	ports.transmit("1");
+	
 	if (ports.isConnected())
-	{	
-		ports.transmit("0");
-		ports.disconnect();
-		view.onDisconnect();
-	}
-	else
-	{
-		ports.selectPort(comSettings.getData());
-		ports.transmit("1");
 		view.onConnect();
-	}
+}
+
+void Controller::disconnect()
+{
+	ports.transmit("0");
+	ports.disconnect();
+	
+	if (!ports.isConnected())
+		view.onDisconnect();
 }
 
 void Controller::showCOMSettings()
@@ -106,14 +105,7 @@ void Controller::showCOMSettings()
 	comView.show(comSettings.getData());
 }
 
-void Controller::runTest()
-{
-	//=====
-	
-	testThread = ::CreateThread(NULL, 0, staticRunTest, (void*) this, 0, NULL);
-	
-	//=====
-}
+void Controller::runTest() {}
 
 void Controller::onCOMOK()
 {
@@ -126,29 +118,3 @@ void Controller::onCOMCancel()
 	view.enableCOMControls();
 	comView.hide();
 }
-
-//=====
-
-DWORD WINAPI Controller::staticRunTest(void* Param)
-{
-    return ((Controller*) Param)->test();
-}
-
-DWORD Controller::test()
-{
-	double x = 0;
-	while (true)
-	{
-		gdiView.addValue(sin(x) * 500);
-		x += 0.1;
-		
-		::Sleep(1000.0 / 128.0);
-	}
-	
-	::TerminateThread(testThread, 0);
-	::CloseHandle(testThread);
-	
-	return 0;
-}
-
-//=====

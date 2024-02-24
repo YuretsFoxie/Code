@@ -1,5 +1,4 @@
-#include "graph.h"
-#include "console.h"
+#include "rawdatagraph.h"
 
 RawDataGraph::RawDataGraph(const HDC& hDC, const Frame& f): hDC(hDC), frame(f.getFrame())
 {
@@ -11,12 +10,12 @@ RawDataGraph::RawDataGraph(const HDC& hDC, const Frame& f): hDC(hDC), frame(f.ge
 	yPoints = height / 1024.0;
 }
 
-void RawDataGraph::addValue(const int value) // one second is 1/10 of the screen width, there are 128 values per second
+void RawDataGraph::addValue(const int value)
 {
 	if (buffer.size() > xPointsCount)
 		buffer.pop_front();
 	
-	buffer.push_back({0, calculateScreenY(value)});	
+	buffer.push_back({0, calculateScreenY(value)});
 }
 
 void RawDataGraph::render()

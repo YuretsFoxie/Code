@@ -1,30 +1,21 @@
-#ifndef GRAPH_H_INCLUDED
-#define GRAPH_H_INCLUDED
+#ifndef RAWDATAGRAPH_H_INCLUDED
+#define RAWDATAGRAPH_H_INCLUDED
 
 #include <windows.h>
 #include <vector>
 #include <deque>
+#include "graphinterface.h"
 #include "frame.h"
 
 using namespace std;
 
-class GraphInterface
-{
-public:
-	virtual ~GraphInterface() {};
-	virtual void addValue(const int value) = 0;
-	virtual void render() = 0;
-};
-
-
-
 class RawDataGraph: public GraphInterface
 {
 public:
-	RawDataGraph() {}
 	RawDataGraph(const HDC& hDC, const Frame& f);
-	
 	void addValue(const int value);
+	void print(const int value) {}
+	void print(const string& message) {}
 	void render();
 	
 private:
@@ -33,7 +24,7 @@ private:
 	void drawBackground();
 	void drawBuffer();
 	
-	const double xPointsCount = 128.0; // 128 x scale
+	const double xPointsCount = 128.0; // 128 x scale, one second is 1/scale of the screen width, there are 128 values per second
 	
 	double dx;
 	double yZero;
@@ -45,4 +36,4 @@ private:
 	vector<POINT> screenBuffer;
 };
 
-#endif // GRAPH_H_INCLUDED
+#endif // RAWDATAGRAPH_H_INCLUDED

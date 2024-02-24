@@ -36,7 +36,7 @@ private:
 	static const int bufferSize = 64;
 	const int timeout = 1000;
 	
-	bool isReceiving;
+	bool isReceiving = false;
 	uint8_t buffer[bufferSize];
 	DWORD baudrate;
 	HANDLE portHandle;

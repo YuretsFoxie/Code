@@ -1,11 +1,11 @@
-#include <iostream>
-#include "gdiview.h"
+#include "graphicsview.h"
 #include "windowprocedure.h"
-#include "frame.h"
+#include "rawdatagraph.h"
+#include "console.h"
 
 // Public Functions
 
-void GDIView::onStart(HINSTANCE instance, HWND parent)
+void GraphicsView::onStart(HINSTANCE instance, HWND parent)
 {	
 	hInstance = instance;
 	parentWindow = parent;
@@ -16,7 +16,7 @@ void GDIView::onStart(HINSTANCE instance, HWND parent)
 	addGraphs();
 }
 
-void GDIView::onStop()
+void GraphicsView::onStop()
 {
 	isDrawing = false;
 	::TerminateThread(drawingThreadHandle, 0);
@@ -27,7 +27,7 @@ void GDIView::onStop()
 	::ReleaseDC(gdiWnd, hDC);
 }
 
-void GDIView::paint()
+void GraphicsView::paint()
 {
 	PAINTSTRUCT ps;
 	hDC = ::BeginPaint(gdiWnd, &ps);
@@ -35,15 +35,27 @@ void GDIView::paint()
 	::EndPaint(gdiWnd, &ps);
 }
 
-void GDIView::addValue(const int value)
+void GraphicsView::addValue(const int value)
 {
 	for (auto graph: graphs)
 		graph->addValue(value);
 }
 
+void GraphicsView::print(const int value)
+{
+	for (auto graph: graphs)
+		graph->print(value);
+}
+
+void GraphicsView::print(const string& message)
+{
+	for (auto graph: graphs)
+		graph->print(message);
+}
+
 // Private Functions
 
-void GDIView::registerWindowClass()
+void GraphicsView::registerWindowClass()
 {
 	WNDCLASS wc = {0};
 	wc.lpfnWndProc = windowProcedure;
@@ -51,11 +63,11 @@ void GDIView::registerWindowClass()
 	wc.hInstance = hInstance;
 	wc.lpszClassName = "GDIWindowClass";
 	wc.hCursor = ::LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_APPWORKSPACE);
+	wc.hbrBackground = NULL; // reinterpret_cast<HBRUSH>(COLOR_APPWORKSPACE);
 	::RegisterClass(&wc);
 }
 
-void GDIView::createWindow()
+void GraphicsView::createWindow()
 {
 	RECT client;
 	::GetClientRect(parentWindow, &client);
@@ -68,7 +80,7 @@ void GDIView::createWindow()
 							  parentWindow, NULL, hInstance, NULL);
 }
 
-void GDIView::setup()
+void GraphicsView::setup()
 {
 	isDrawing = true;
 	greenPen = ::CreatePen(PS_SOLID, 1, RGB(0, 255, 0));
@@ -81,7 +93,7 @@ void GDIView::setup()
 	::SelectObject(memDC, bitmap);
 }
 
-void GDIView::addGraphs()
+void GraphicsView::addGraphs()
 {
 	/*
 	graphs.push_back(new RawDataGraph(memDC, FirstQuadrant(window)));
@@ -90,28 +102,31 @@ void GDIView::addGraphs()
 	graphs.push_back(new RawDataGraph(memDC, FourthQuadrant(window)));
 	*/
 	
-	graphs.push_back(new RawDataGraph(memDC, AllQuadrants(window)));
+	graphs.push_back(new Console(memDC, FirstQuadrant(window)));
+	graphs.push_back(new RawDataGraph(memDC, SecondQuadrant(window)));
+	
+	// graphs.push_back(new RawDataGraph(memDC, AllQuadrants(window)));
 }
 
-DWORD WINAPI GDIView::staticDraw(void* Param)
+DWORD WINAPI GraphicsView::staticDraw(void* Param)
 {
-	return ((GDIView*) Param)->drawIfNeeded();
+	return ((GraphicsView*) Param)->drawIfNeeded();
 }
 
-DWORD GDIView::drawIfNeeded()
+DWORD GraphicsView::drawIfNeeded()
 {
 	while(isDrawing)
 	{
 		prepareDrawing();
 		draw();
-		::RedrawWindow(gdiWnd, NULL, NULL, RDW_INVALIDATE);		
+		::RedrawWindow(gdiWnd, NULL, NULL, RDW_INVALIDATE);
 		::Sleep(10);
 	}
 	
 	return 0;
 }
 
-void GDIView::prepareDrawing()
+void GraphicsView::prepareDrawing()
 {
 	::FillRect(memDC, &window, reinterpret_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH)));
 	::SelectObject(memDC, greenPen);
@@ -119,7 +134,7 @@ void GDIView::prepareDrawing()
 	::SetTextColor(memDC, RGB(0, 255, 0));
 }
 
-void GDIView::draw()
+void GraphicsView::draw()
 {
 	for (auto graph: graphs)
 		graph->render();

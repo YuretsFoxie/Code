@@ -1,20 +1,21 @@
-#ifndef GDIVIEW_H_INCLUDED
-#define GDIVIEW_H_INCLUDED
+#ifndef GRAPHICSVIEW_H_INCLUDED
+#define GRAPHICSVIEW_H_INCLUDED
 
 #include <windows.h>
 #include <vector>
-#include <string>
-#include "graph.h"
+#include "graphinterface.h"
 
 using namespace std;
 
-class GDIView
+class GraphicsView
 {
 public:	
 	void onStart(HINSTANCE instance, HWND parent);
 	void onStop();
 	void paint();
 	void addValue(const int value);
+	void print(const int value);
+	void print(const string& message);
 	
 private:
 	void registerWindowClass();
@@ -42,4 +43,4 @@ private:
 	bool isDrawing;
 };
 
-#endif // GDIVIEW_H_INCLUDED
+#endif // GRAPHICSVIEW_H_INCLUDED
