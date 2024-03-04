@@ -30,8 +30,10 @@ QFrame {
 }
 
 QTextBrowser {
+	color: rgba(0, 255, 0, 1.0);
 	background-color: rgba(0, 0, 0, 0.7);
-	border: 1px solid green;
+	font-size: 16px;
+	border: 0px solid rgba(0, 255, 0, 1.0);
 }
 
 QPushButton {
@@ -247,7 +249,7 @@ QPushButton:disabled {
           <number>0</number>
          </property>
          <item>
-          <widget class="QCustomPlot" name="widget" native="true"/>
+          <widget class="QCustomPlot" name="plot" native="true"/>
          </item>
         </layout>
        </widget>
@@ -282,5 +284,42 @@ QPushButton:disabled {
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>quitButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onQuit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>67</x>
+     <y>164</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>101</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>settingsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>95</x>
+     <y>70</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>109</x>
+     <y>-5</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onQuit()</slot>
+  <slot>onSettings()</slot>
+ </slots>
 </ui>

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,10 +18,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private:
+    void configurePlot();
+
 private slots:
-    void on_quitButton_clicked();
+    void onQuit();
+    void onSettings();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* ui;
+    QCPGraph* graph;
 };
+
 #endif // MAINWINDOW_H
