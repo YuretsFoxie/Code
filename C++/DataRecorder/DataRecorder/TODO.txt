@@ -1,6 +1,4 @@
 // TODO: Handle the COM Settings events at the Main Window.
-
-// TODO: Implement text printing.
 // TODO: Implement the test data provider for testing the plot.
 // TODO: Replace the QCustomPlot source with dll.
 

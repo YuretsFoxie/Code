@@ -36,6 +36,18 @@ QTextBrowser {
 	border: 0px solid rgba(0, 255, 0, 1.0);
 }
 
+QScrollBar:vertical {
+	background:  clear;
+}
+
+QScrollBar::handle:vertical {
+	background: rgba(0, 255, 0, 1.0);
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { 		
+	background: clear;
+}
+
 QPushButton {
 	color: rgba(0, 255, 0, 1.0);
 	background-color: rgba(0, 0, 0, 0.0);

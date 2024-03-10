@@ -18,6 +18,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::print(const QString& message)
+{
+    QString time = QTime::currentTime().toString();
+    ui->textBrowser->append("    " + time + "    " + message);
+}
+
 void MainWindow::configurePlot()
 {
     QCustomPlot* plot = ui->plot;
@@ -87,6 +93,7 @@ void MainWindow::onSettings()
 void MainWindow::onTest()
 {
     clickSound->play();
+
 }
 
 void MainWindow::onQuit()

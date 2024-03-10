@@ -9,7 +9,7 @@ COMSettings::COMSettings(QWidget *parent)
     ui->ports->addItems({"COM 1", "COM 2"});
     ui->baudrates->addItems({"110", "256", "1024"});
     clickSound = new Sound("buttonclick");
-    comboboxSound = new Sound("buttonclickrelease");
+    comboboxSound = new Sound("buttonrollover");
 
     connect(ui->okButton, QPushButton::clicked, this, onOK);
     connect(ui->cancelButton, QPushButton::clicked, this, onCancel);
