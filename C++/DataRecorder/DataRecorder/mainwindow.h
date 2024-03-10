@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "qcustomplot.h"
+#include "sound.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -12,22 +13,25 @@ QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
-
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private:
-    void configurePlot();
-
 private slots:
-    void onQuit();
+    void onSoundCompleted();
+    void onConnect();
     void onSettings();
+    void onTest();
+    void onQuit();
 
 private:
+    Q_OBJECT
     Ui::MainWindow* ui;
     QCPGraph* graph;
+    Sound* clickSound;
+    bool isQuit = false;
+
+    void configurePlot();
 };
 
 #endif // MAINWINDOW_H

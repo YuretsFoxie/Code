@@ -1,6 +1,6 @@
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport multimedia
 
 CONFIG += c++17
 
@@ -12,12 +12,14 @@ SOURCES += \
     comsettings.cpp \
     main.cpp \
     mainwindow.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    sound.cpp
 
 HEADERS += \
     comsettings.h \
     mainwindow.h \
-    qcustomplot.h
+    qcustomplot.h \
+    sound.h
 
 FORMS += \
     comsettings.ui \

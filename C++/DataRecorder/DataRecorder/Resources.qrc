@@ -2,5 +2,13 @@
     <qresource prefix="/Resources">
         <file>images/Andromeda-galaxy.png</file>
         <file>images/Stars-galaxy.png</file>
+        <file>sounds/battery_pickup.wav</file>
+        <file>sounds/blip1.wav</file>
+        <file>sounds/button3.wav</file>
+        <file>sounds/button14.wav</file>
+        <file>sounds/buttonclick.wav</file>
+        <file>sounds/buttonclickrelease.wav</file>
+        <file>sounds/buttonrollover.wav</file>
+        <file>sounds/combine_bank_alarm_loop4.wav</file>
     </qresource>
 </RCC>

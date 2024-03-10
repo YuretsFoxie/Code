@@ -1,0 +1,19 @@
+// TODO: Handle the COM Settings events at the Main Window.
+
+// TODO: Implement text printing.
+// TODO: Implement the test data provider for testing the plot.
+// TODO: Replace the QCustomPlot source with dll.
+
+// Read the documentation: https://doc.qt.io/qt-6/model-view-programming.html
+// TODO: Refactor the existing functionality to make it a View part of MVC, consider adding the Controller.
+
+// TODO: Research the COM ports using.
+// TODO: Show the COM settings at the Settings window.
+// TODO: Implement the COM connection.
+
+
+
+// Known minor bugs, don't touch them:
+    // Comboboxes style is incorrect.
+    // Combobox list blinks when opened.
+    // There is no sound on button hover.

@@ -8,10 +8,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     configurePlot();
+    clickSound = new Sound("buttonclick");
+    connect(clickSound, Sound::completionSignal, this, onSoundCompleted);
 }
 
 MainWindow::~MainWindow()
 {
+    delete clickSound;
     delete ui;
 }
 
@@ -19,6 +22,9 @@ void MainWindow::configurePlot()
 {
     QCustomPlot* plot = ui->plot;
 
+    //=====
+
+    /*
     int size = 100;
     QVector<double> xValues(size), yValues(size);
 
@@ -31,6 +37,7 @@ void MainWindow::configurePlot()
 
     graph = plot->addGraph();
     graph->setData(xValues, yValues);
+    */
 
     //=====
 
@@ -57,15 +64,33 @@ void MainWindow::configurePlot()
     plot->yAxis->setRange(-4, 4);
 }
 
-void MainWindow::onQuit()
+void MainWindow::onSoundCompleted()
 {
-    QApplication::quit();
+    if (isQuit)
+        QApplication::quit();
+}
+
+void MainWindow::onConnect()
+{
+    clickSound->play();
 }
 
 void MainWindow::onSettings()
 {
+    clickSound->play();
     COMSettings* settings = new COMSettings();
     settings->setModal(true);
     settings->setWindowFlags(Qt::FramelessWindowHint);
     settings->show();
+}
+
+void MainWindow::onTest()
+{
+    clickSound->play();
+}
+
+void MainWindow::onQuit()
+{
+    clickSound->play();
+    isQuit = true;
 }
