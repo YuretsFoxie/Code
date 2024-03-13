@@ -1,6 +1,4 @@
-// TODO: Handle the COM Settings events at the Main Window.
 // TODO: Implement the test data provider for testing the plot.
-// TODO: Replace the QCustomPlot source with dll.
 
 // Read the documentation: https://doc.qt.io/qt-6/model-view-programming.html
 // TODO: Refactor the existing functionality to make it a View part of MVC, consider adding the Controller.
@@ -11,7 +9,11 @@
 
 
 
-// Known minor bugs, don't touch them:
+// LATER:
+// TODO: Handle the libraries correctly (QCustomPlot and dlls for the application export).
+// TODO: Setup Git correctly.
+
+// Known minor bugs:
     // Comboboxes style is incorrect.
     // Combobox list blinks when opened.
     // There is no sound on button hover.

@@ -1,0 +1,10 @@
+debug/comsettings.o
+debug/main.o
+debug/mainwindow.o
+debug/qcustomplot.o
+debug/sound.o
+debug/qrc_Resources.o
+debug/moc_comsettings.o
+debug/moc_mainwindow.o
+debug/moc_qcustomplot.o
+debug/moc_sound.o

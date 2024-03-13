@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QString>
 #include "qcustomplot.h"
+#include "comsettings.h"
 #include "sound.h"
 
 QT_BEGIN_NAMESPACE
@@ -12,12 +13,13 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
+class MainWindow: public QMainWindow
 {
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void print(const QString& message);
+    void onSettingsSelected(COMSettingsData data);
 
 private slots:
     void onSoundCompleted();

@@ -1,5 +1,6 @@
 #include "comsettings.h"
 #include "ui_comsettings.h"
+#include "mainwindow.h"
 
 COMSettings::COMSettings(QWidget *parent)
     : QDialog(parent)
@@ -27,6 +28,12 @@ COMSettings::~COMSettings()
 void COMSettings::onOK()
 {
     clickSound->play();
+
+    MainWindow* window = qobject_cast<MainWindow*>(parentWidget());
+    QString port = ui->ports->currentText();
+    QString rate = ui->baudrates->currentText();
+    window->onSettingsSelected({port, rate.toInt()});
+
     close();
 }
 

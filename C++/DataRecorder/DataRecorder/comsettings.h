@@ -4,11 +4,19 @@
 #include <QDialog>
 #include "sound.h"
 
+struct COMSettingsData
+{
+    QString name;
+    int baudrate;
+};
+
+
+
 namespace Ui {
 class COMSettings;
 }
 
-class COMSettings : public QDialog
+class COMSettings: public QDialog
 {
 public:
     explicit COMSettings(QWidget *parent = nullptr);

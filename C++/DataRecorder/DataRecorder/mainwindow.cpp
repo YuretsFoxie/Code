@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "comsettings.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -8,20 +7,27 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     configurePlot();
+
     clickSound = new Sound("buttonclick");
     connect(clickSound, Sound::completionSignal, this, onSoundCompleted);
 }
 
 MainWindow::~MainWindow()
 {
-    delete clickSound;
     delete ui;
+    delete clickSound;
 }
 
 void MainWindow::print(const QString& message)
 {
     QString time = QTime::currentTime().toString();
     ui->textBrowser->append("    " + time + "    " + message);
+}
+
+void MainWindow::onSettingsSelected(COMSettingsData data)
+{
+    QString rate = tr("%1").arg(data.baudrate);
+    print(data.name + " " + rate);
 }
 
 void MainWindow::configurePlot()
@@ -84,7 +90,8 @@ void MainWindow::onConnect()
 void MainWindow::onSettings()
 {
     clickSound->play();
-    COMSettings* settings = new COMSettings();
+
+    COMSettings* settings = new COMSettings(this);
     settings->setModal(true);
     settings->setWindowFlags(Qt::FramelessWindowHint);
     settings->show();
@@ -93,7 +100,6 @@ void MainWindow::onSettings()
 void MainWindow::onTest()
 {
     clickSound->play();
-
 }
 
 void MainWindow::onQuit()
