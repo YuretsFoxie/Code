@@ -1,7 +1,8 @@
-// TODO: Implement the test data provider for testing the plot.
-
 // Read the documentation: https://doc.qt.io/qt-6/model-view-programming.html
-// TODO: Refactor the existing functionality to make it a View part of MVC, consider adding the Controller.
+// TODO: Refactor the existing functionality to make it a View part of MVC.
+    // Consider adding the Controller.
+    // Fix the COMSettings initialization in MainWindow constructor (now it causes the crash).
+    // Add the signals/slots for it.
 
 // TODO: Research the COM ports using.
 // TODO: Show the COM settings at the Settings window.
@@ -10,7 +11,7 @@
 
 
 // LATER:
-// TODO: Handle the libraries correctly (QCustomPlot and dlls for the application export).
+// TODO: Handle the libraries correctly (dlls for the application export and the others).
 // TODO: Setup Git correctly.
 
 // Known minor bugs:

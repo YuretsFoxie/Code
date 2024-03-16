@@ -12,12 +12,14 @@ SOURCES += \
     comsettings.cpp \
     main.cpp \
     mainwindow.cpp \
-    sound.cpp
+    sound.cpp \
+    testdataprovider.cpp
 
 HEADERS += \
     comsettings.h \
     mainwindow.h \
-    sound.h
+    sound.h \
+    testdataprovider.h
 
 FORMS += \
     comsettings.ui \
