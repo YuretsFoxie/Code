@@ -3,13 +3,13 @@
 
 // Public Functions
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent):
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
-    setupPlot();
+    setupGraph();
     setupSounds();
     setupCOMSettings();
 }
@@ -22,36 +22,15 @@ MainWindow::~MainWindow()
     delete settings;
 }
 
-void MainWindow::print(const int value)
-{
-    print(tr("%1").arg(value));
-}
-
-void MainWindow::print(const QString& message)
-{
-    QString time = QTime::currentTime().toString();
-    ui->textBrowser->append("      " + time + "    " + message);
-}
-
 void MainWindow::onSelected(const COMSettingsData& data)
 {
     file->save(data);
 }
 
-//=====
-// TODO: use this function at the Graph class
-
-/*
-void MainWindow::updateSlot(int value)
+void MainWindow::onUpdate(int value)
 {
-    int count = graph->dataCount();
-    graph->addData(count, value);
-    ui->plot->xAxis->setRange(count + 1, 128, Qt::AlignRight);
-    ui->plot->replot();
+    emit update(value);
 }
-*/
-
-//=====
 
 // Private Functions
 
@@ -77,7 +56,6 @@ void MainWindow::onSettings()
 
 void MainWindow::onTest()
 {
-    print("test");
     clickSound->play();
 }
 
@@ -87,30 +65,11 @@ void MainWindow::onQuit()
     isQuit = true;
 }
 
-void MainWindow::setupPlot()
+void MainWindow::setupGraph()
 {
-    QCustomPlot* plot = ui->plot;
-    graph = plot->addGraph();
-    graph->setPen(QPen(Qt::green, 1));
-
-    plot->setBackground(Qt::transparent);
-    plot->xAxis->setBasePen(QPen(Qt::green, 1));
-    plot->yAxis->setBasePen(QPen(Qt::green, 1));
-    plot->xAxis->setTickPen(QPen(Qt::green, 1));
-    plot->yAxis->setTickPen(QPen(Qt::green, 1));
-    plot->xAxis->setSubTickPen(QPen(Qt::green, 1));
-    plot->yAxis->setSubTickPen(QPen(Qt::green, 1));
-    plot->xAxis->setTickLabelColor(Qt::transparent);
-    plot->yAxis->setTickLabelColor(Qt::transparent);
-
-    plot->xAxis->grid()->setPen(QPen(Qt::transparent));
-    plot->yAxis->grid()->setPen(QPen(Qt::transparent));
-    plot->xAxis->grid()->setZeroLinePen(QPen(Qt::transparent));
-    plot->yAxis->grid()->setZeroLinePen(QPen(Qt::transparent));
-
-    plot->rescaleAxes();
-    plot->xAxis->setRange(-128, 0);
-    plot->yAxis->setRange(-520, 520); // -512 - 511
+    graph = new Graph(this);
+    graph->setPlot(ui->plot);
+    connect(this, update, graph, Graph::onUpdate);
 }
 
 void MainWindow::setupSounds()
@@ -127,4 +86,15 @@ void MainWindow::setupCOMSettings()
 
     connect(settings, COMSettings::select, this, onSelected);
     connect(this, select, settings, COMSettings::onSelected);
+}
+
+void MainWindow::print(const int value)
+{
+    print(tr("%1").arg(value));
+}
+
+void MainWindow::print(const QString& message)
+{
+    QString time = QTime::currentTime().toString();
+    ui->textBrowser->append("      " + time + "    " + message);
 }

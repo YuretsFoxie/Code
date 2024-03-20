@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 #include <QString>
+#include "graph.h"
 #include "sound.h"
-#include "qcustomplot.h"
 #include "comsettings.h"
 #include "comsettingsfile.h"
 
@@ -23,11 +23,13 @@ public:
 
 signals:
     void select(const COMSettingsData& data);
+    void update(int value);
+
     // void toggleDataProviderSignal();
 
 public slots:
     void onSelected(const COMSettingsData& data);
-    // void updateSlot(int value);
+    void onUpdate(int value);
 
 private slots:
     void onSoundCompleted();
@@ -39,14 +41,14 @@ private slots:
 private:
     Q_OBJECT
     Ui::MainWindow* ui;
-    QCPGraph* graph;
+    Graph* graph;
     COMSettings* settings;
     COMSettingsFile* file;
     Sound* clickSound;
     Sound* connectSound;
     bool isQuit = false;
 
-    void setupPlot();
+    void setupGraph();
     void setupSounds();
     void setupCOMSettings();
 
