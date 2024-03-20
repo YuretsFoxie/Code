@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport multimedia
 
@@ -9,14 +9,19 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    comports.cpp \
     comsettings.cpp \
+    comsettingsfile.cpp \
     main.cpp \
     mainwindow.cpp \
     sound.cpp \
     testdataprovider.cpp
 
 HEADERS += \
+    comports.h \
     comsettings.h \
+    comsettingsdata.h \
+    comsettingsfile.h \
     mainwindow.h \
     sound.h \
     testdataprovider.h

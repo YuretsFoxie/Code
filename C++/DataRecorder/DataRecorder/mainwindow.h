@@ -3,14 +3,17 @@
 
 #include <QMainWindow>
 #include <QString>
+#include "sound.h"
 #include "qcustomplot.h"
 #include "comsettings.h"
-#include "testdataprovider.h"
-#include "sound.h"
+#include "comsettingsfile.h"
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
+namespace Ui
+{
+    class MainWindow;
+}
+
+
 
 class MainWindow: public QMainWindow
 {
@@ -18,15 +21,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void print(const int value);
-    void print(const QString& message);
-    void onSettingsSelected(COMSettingsData data);
-
 signals:
-    void toggleDataProviderSignal();
+    void select(const COMSettingsData& data);
+    // void toggleDataProviderSignal();
 
 public slots:
-    void updateSlot(int value);
+    void onSelected(const COMSettingsData& data);
+    // void updateSlot(int value);
 
 private slots:
     void onSoundCompleted();
@@ -39,13 +40,18 @@ private:
     Q_OBJECT
     Ui::MainWindow* ui;
     QCPGraph* graph;
+    COMSettings* settings;
+    COMSettingsFile* file;
     Sound* clickSound;
-    TestDataProvider* dataProvider;
+    Sound* connectSound;
     bool isQuit = false;
 
     void setupPlot();
-    void setupSound();
-    void setupDataProvider();
+    void setupSounds();
+    void setupCOMSettings();
+
+    void print(const int value);
+    void print(const QString& message);
 };
 
 #endif // MAINWINDOW_H

@@ -184,6 +184,10 @@ Makefile: ../DataRecorder/DataRecorder.pro C:/Qt/6.6.2/mingw_64/mkspecs/win32-g+
 		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_quicktestutilsprivate_private.pri \
 		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_quickwidgets.pri \
 		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_quickwidgets_private.pri \
+		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_serialbus.pri \
+		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_serialbus_private.pri \
+		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_serialport.pri \
+		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_serialport_private.pri \
 		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_spatialaudio.pri \
 		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_spatialaudio_private.pri \
 		C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_sql.pri \
@@ -237,6 +241,7 @@ Makefile: ../DataRecorder/DataRecorder.pro C:/Qt/6.6.2/mingw_64/mkspecs/win32-g+
 		C:/Qt/6.6.2/mingw_64/lib/Qt6Widgets.prl \
 		C:/Qt/6.6.2/mingw_64/lib/Qt6Multimedia.prl \
 		C:/Qt/6.6.2/mingw_64/lib/Qt6Gui.prl \
+		C:/Qt/6.6.2/mingw_64/lib/Qt6SerialPort.prl \
 		C:/Qt/6.6.2/mingw_64/lib/Qt6Network.prl \
 		C:/Qt/6.6.2/mingw_64/lib/Qt6Core.prl \
 		C:/Qt/6.6.2/mingw_64/lib/Qt6EntryPoint.prl \
@@ -357,6 +362,10 @@ C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_quicktemplates2_private.pri:
 C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_quicktestutilsprivate_private.pri:
 C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_quickwidgets.pri:
 C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_quickwidgets_private.pri:
+C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_serialbus.pri:
+C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_serialbus_private.pri:
+C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_serialport.pri:
+C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_serialport_private.pri:
 C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_spatialaudio.pri:
 C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_spatialaudio_private.pri:
 C:/Qt/6.6.2/mingw_64/mkspecs/modules/qt_lib_sql.pri:
@@ -410,6 +419,7 @@ C:/Qt/6.6.2/mingw_64/lib/Qt6PrintSupport.prl:
 C:/Qt/6.6.2/mingw_64/lib/Qt6Widgets.prl:
 C:/Qt/6.6.2/mingw_64/lib/Qt6Multimedia.prl:
 C:/Qt/6.6.2/mingw_64/lib/Qt6Gui.prl:
+C:/Qt/6.6.2/mingw_64/lib/Qt6SerialPort.prl:
 C:/Qt/6.6.2/mingw_64/lib/Qt6Network.prl:
 C:/Qt/6.6.2/mingw_64/lib/Qt6Core.prl:
 C:/Qt/6.6.2/mingw_64/lib/Qt6EntryPoint.prl:

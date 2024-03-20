@@ -1,9 +1,12 @@
+release/comports.o
 release/comsettings.o
+release/comsettingsfile.o
 release/main.o
 release/mainwindow.o
 release/sound.o
 release/testdataprovider.o
 release/qrc_Resources.o
+release/moc_comports.o
 release/moc_comsettings.o
 release/moc_mainwindow.o
 release/moc_sound.o

@@ -10,5 +10,14 @@
         <file>sounds/buttonclickrelease.wav</file>
         <file>sounds/buttonrollover.wav</file>
         <file>sounds/combine_bank_alarm_loop4.wav</file>
+        <file>sounds/siren.wav</file>
+        <file>sounds/aheli_damaged_alarm1.wav</file>
+        <file>sounds/aheli_megabomb_siren1.wav</file>
+        <file>sounds/gunship_ping_search.wav</file>
+        <file>sounds/warn1.wav</file>
+        <file>sounds/ping_search.wav</file>
+        <file>sounds/suitchargeno1.wav</file>
+        <file>sounds/suitchargeok1.wav</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

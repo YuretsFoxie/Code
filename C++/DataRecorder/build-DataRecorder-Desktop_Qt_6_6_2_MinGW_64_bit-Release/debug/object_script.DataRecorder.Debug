@@ -1,9 +1,12 @@
+debug/comports.o
 debug/comsettings.o
+debug/comsettingsfile.o
 debug/main.o
 debug/mainwindow.o
 debug/sound.o
 debug/testdataprovider.o
 debug/qrc_Resources.o
+debug/moc_comports.o
 debug/moc_comsettings.o
 debug/moc_mainwindow.o
 debug/moc_sound.o

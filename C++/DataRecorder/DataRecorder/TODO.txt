@@ -1,12 +1,5 @@
-// Read the documentation: https://doc.qt.io/qt-6/model-view-programming.html
-// TODO: Refactor the existing functionality to make it a View part of MVC.
-    // Consider adding the Controller.
-    // Fix the COMSettings initialization in MainWindow constructor (now it causes the crash).
-    // Add the signals/slots for it.
-
-// TODO: Research the COM ports using.
-// TODO: Show the COM settings at the Settings window.
 // TODO: Implement the COM connection.
+// TODO: Perform refactoring.
 
 
 

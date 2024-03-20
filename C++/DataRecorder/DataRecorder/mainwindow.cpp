@@ -10,14 +10,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setupPlot();
-    setupSound();
-    setupDataProvider();
+    setupSounds();
+    setupCOMSettings();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     delete clickSound;
+    delete file;
+    delete settings;
 }
 
 void MainWindow::print(const int value)
@@ -28,15 +30,18 @@ void MainWindow::print(const int value)
 void MainWindow::print(const QString& message)
 {
     QString time = QTime::currentTime().toString();
-    ui->textBrowser->append("    " + time + "    " + message);
+    ui->textBrowser->append("      " + time + "    " + message);
 }
 
-void MainWindow::onSettingsSelected(COMSettingsData data)
+void MainWindow::onSelected(const COMSettingsData& data)
 {
-    QString rate = tr("%1").arg(data.baudrate);
-    print(data.name + " " + rate);
+    file->save(data);
 }
 
+//=====
+// TODO: use this function at the Graph class
+
+/*
 void MainWindow::updateSlot(int value)
 {
     int count = graph->dataCount();
@@ -44,6 +49,9 @@ void MainWindow::updateSlot(int value)
     ui->plot->xAxis->setRange(count + 1, 128, Qt::AlignRight);
     ui->plot->replot();
 }
+*/
+
+//=====
 
 // Private Functions
 
@@ -55,23 +63,22 @@ void MainWindow::onSoundCompleted()
 
 void MainWindow::onConnect()
 {
-    clickSound->play();
+    connectSound->play();
 }
 
 void MainWindow::onSettings()
 {
     clickSound->play();
-
-    COMSettings* settings = new COMSettings(this);
     settings->setModal(true);
     settings->setWindowFlags(Qt::FramelessWindowHint);
     settings->show();
+    emit select(file->load());
 }
 
 void MainWindow::onTest()
 {
+    print("test");
     clickSound->play();
-    emit toggleDataProviderSignal();
 }
 
 void MainWindow::onQuit()
@@ -106,15 +113,18 @@ void MainWindow::setupPlot()
     plot->yAxis->setRange(-520, 520); // -512 - 511
 }
 
-void MainWindow::setupSound()
+void MainWindow::setupSounds()
 {
+    connectSound = new Sound("suitchargeok1");
     clickSound = new Sound("buttonclick");
     connect(clickSound, Sound::completionSignal, this, onSoundCompleted);
 }
 
-void MainWindow::setupDataProvider()
+void MainWindow::setupCOMSettings()
 {
-    dataProvider = new TestDataProvider();
-    connect(dataProvider, TestDataProvider::updateSignal, this, updateSlot);
-    connect(this, toggleDataProviderSignal, dataProvider, TestDataProvider::toggleSlot);
+    settings = new COMSettings(this);
+    file = new COMSettingsFile();
+
+    connect(settings, COMSettings::select, this, onSelected);
+    connect(this, select, settings, COMSettings::onSelected);
 }
