@@ -32,19 +32,23 @@ void MainWindow::onUpdateConnected()
 {
     connectSound->play();
     ui->connectLabel->setText("Online");
-    print("port connected");
 }
 
 void MainWindow::onUpdateDisconnected()
 {
     disconnectSound->play();
-    ui->connectLabel->setText("Offline");
-    print("port disconnected");
+    ui->connectLabel->setText("");
 }
 
 void MainWindow::onUpdateMessage(const QString& message)
 {
     print(message);
+}
+
+void MainWindow::onUpdateError(const QString &message)
+{
+    onUpdateMessage("error: " + message);
+    errorSound->play();
 }
 
 void MainWindow::onUpdateValue(const int value)
@@ -97,6 +101,7 @@ void MainWindow::setupSounds()
     connectSound = new Sound("suitchargeok1");
     disconnectSound = new Sound("suitchargeno1");
     clickSound = new Sound("buttonclick");
+    errorSound = new Sound("warn1");
     connect(clickSound, Sound::completionSignal, this, onSoundCompleted);
 }
 
@@ -108,6 +113,7 @@ void MainWindow::setupCOMPorts()
     connect(ports, COMPorts::notifyConnected, this, onUpdateConnected);
     connect(ports, COMPorts::notifyDisconnected, this, onUpdateDisconnected);
     connect(ports, COMPorts::notifyMessage, this, onUpdateMessage);
+    connect(ports, COMPorts::notifyError, this, onUpdateError);
     connect(ports, COMPorts::notifyValue, this, onUpdateValue);
 }
 

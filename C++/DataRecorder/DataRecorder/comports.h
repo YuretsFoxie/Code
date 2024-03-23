@@ -15,6 +15,7 @@ signals:
     void notifyConnected();
     void notifyDisconnected();
     void notifyMessage(const QString& message);
+    void notifyError(const QString& message);
     void notifyValue(const int value);
 
 public slots:

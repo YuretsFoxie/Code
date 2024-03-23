@@ -2,7 +2,7 @@
 .include "m16Adef.inc"
 
 .equ XTAL	      	= 16000000
-.equ baudrate     	= 250000
+.equ baudrate     	= 9600
 .equ uartSetting	= XTAL / (16 * baudrate) - 1
 
 .def flags			= R18

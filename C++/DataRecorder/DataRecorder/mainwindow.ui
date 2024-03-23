@@ -280,7 +280,7 @@ QLabel {
           <string notr="true"/>
          </property>
          <property name="text">
-          <string>Offline</string>
+          <string/>
          </property>
         </widget>
        </item>

@@ -33,6 +33,7 @@ public slots:
     void onUpdateConnected();
     void onUpdateDisconnected();
     void onUpdateMessage(const QString& message);
+    void onUpdateError(const QString& message);
     void onUpdateValue(const int value);
 
 private slots:
@@ -52,6 +53,7 @@ private:
     Sound* clickSound;
     Sound* connectSound;
     Sound* disconnectSound;
+    Sound* errorSound;
     bool isQuit = false;
 
     void setupGraph();

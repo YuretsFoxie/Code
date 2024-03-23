@@ -3,7 +3,7 @@
 
 // Public Functions
 
-COMPorts::COMPorts(QObject *parent): QObject{parent} {}
+COMPorts::COMPorts(QObject *parent): QObject{parent}, port(nullptr) {}
 
 COMPorts::~COMPorts()
 {
@@ -54,18 +54,18 @@ void COMPorts::connect(const COMSettingsData& data)
 
     if (port->isOpen())
     {
-        // transmit(1);
+        transmit(1);
         emit notifyConnected();
     }
     else
-        emit notifyMessage("error: could not open port");
+        emit notifyError("could not open port");
 }
 
 void COMPorts::disconnect()
 {
     if (port)
     {
-        // transmit(0);
+        transmit(0);
         port->close();
         delete port;
         port = nullptr;
@@ -76,7 +76,10 @@ void COMPorts::disconnect()
 void COMPorts::transmit(const int value)
 {
     if (!port->isOpen())
-        emit notifyMessage("error: port is not opened");
+        emit notifyError("port is not opened");
 
-    port->write(QByteArray().setNum(value));
+    qint64 bytes = port->write(QByteArray().setNum(value));
+
+    if (bytes == -1)
+        emit notifyError("transmission failed");
 }
