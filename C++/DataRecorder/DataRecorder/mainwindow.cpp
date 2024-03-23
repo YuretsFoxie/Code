@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent):
 
     setupGraph();
     setupSounds();
+    setupCOMPorts();
     setupCOMSettings();
 }
 
@@ -27,9 +28,28 @@ void MainWindow::onSelected(const COMSettingsData& data)
     file->save(data);
 }
 
-void MainWindow::onUpdate(int value)
+void MainWindow::onUpdateConnected()
 {
-    emit update(value);
+    connectSound->play();
+    ui->connectLabel->setText("Online");
+    print("port connected");
+}
+
+void MainWindow::onUpdateDisconnected()
+{
+    disconnectSound->play();
+    ui->connectLabel->setText("Offline");
+    print("port disconnected");
+}
+
+void MainWindow::onUpdateMessage(const QString& message)
+{
+    print(message);
+}
+
+void MainWindow::onUpdateValue(const int value)
+{
+    emit updateGraph(value);
 }
 
 // Private Functions
@@ -42,7 +62,7 @@ void MainWindow::onSoundCompleted()
 
 void MainWindow::onConnect()
 {
-    connectSound->play();
+    emit toggleCOMPort(file->load());
 }
 
 void MainWindow::onSettings()
@@ -69,21 +89,32 @@ void MainWindow::setupGraph()
 {
     graph = new Graph(this);
     graph->setPlot(ui->plot);
-    connect(this, update, graph, Graph::onUpdate);
+    connect(this, updateGraph, graph, Graph::onUpdate);
 }
 
 void MainWindow::setupSounds()
 {
     connectSound = new Sound("suitchargeok1");
+    disconnectSound = new Sound("suitchargeno1");
     clickSound = new Sound("buttonclick");
     connect(clickSound, Sound::completionSignal, this, onSoundCompleted);
 }
 
+void MainWindow::setupCOMPorts()
+{
+    ports = new COMPorts();
+    connect(this, toggleCOMPort, ports, COMPorts::onToggle);
+    connect(this, transmit, ports, COMPorts::onTransmit);
+    connect(ports, COMPorts::notifyConnected, this, onUpdateConnected);
+    connect(ports, COMPorts::notifyDisconnected, this, onUpdateDisconnected);
+    connect(ports, COMPorts::notifyMessage, this, onUpdateMessage);
+    connect(ports, COMPorts::notifyValue, this, onUpdateValue);
+}
+
 void MainWindow::setupCOMSettings()
 {
-    settings = new COMSettings(this);
     file = new COMSettingsFile();
-
+    settings = new COMSettings(this);
     connect(settings, COMSettings::select, this, onSelected);
     connect(this, select, settings, COMSettings::onSelected);
 }

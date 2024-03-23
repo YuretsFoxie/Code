@@ -15,8 +15,7 @@ SOURCES += \
     graph.cpp \
     main.cpp \
     mainwindow.cpp \
-    sound.cpp \
-    testdataprovider.cpp
+    sound.cpp
 
 HEADERS += \
     comports.h \
@@ -25,8 +24,7 @@ HEADERS += \
     comsettingsfile.h \
     graph.h \
     mainwindow.h \
-    sound.h \
-    testdataprovider.h
+    sound.h
 
 FORMS += \
     comsettings.ui \

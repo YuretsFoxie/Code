@@ -5,6 +5,7 @@
 #include <QString>
 #include "graph.h"
 #include "sound.h"
+#include "comports.h"
 #include "comsettings.h"
 #include "comsettingsfile.h"
 
@@ -23,13 +24,16 @@ public:
 
 signals:
     void select(const COMSettingsData& data);
-    void update(int value);
-
-    // void toggleDataProviderSignal();
+    void updateGraph(const int value);
+    void toggleCOMPort(const COMSettingsData& data);
+    void transmit(const int value);
 
 public slots:
     void onSelected(const COMSettingsData& data);
-    void onUpdate(int value);
+    void onUpdateConnected();
+    void onUpdateDisconnected();
+    void onUpdateMessage(const QString& message);
+    void onUpdateValue(const int value);
 
 private slots:
     void onSoundCompleted();
@@ -43,13 +47,16 @@ private:
     Ui::MainWindow* ui;
     Graph* graph;
     COMSettings* settings;
+    COMPorts* ports;
     COMSettingsFile* file;
     Sound* clickSound;
     Sound* connectSound;
+    Sound* disconnectSound;
     bool isQuit = false;
 
     void setupGraph();
     void setupSounds();
+    void setupCOMPorts();
     void setupCOMSettings();
 
     void print(const int value);
