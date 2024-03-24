@@ -1,7 +1,7 @@
 // TODO: Complete the COM connection, fix the missing COM3 case.
 // TODO: Perform refactoring.
 
-// Connection parameters: COM3 9600
+// Connection parameters: COM3 57600
 
 
 

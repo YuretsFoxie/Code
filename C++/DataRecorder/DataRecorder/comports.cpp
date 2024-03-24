@@ -1,4 +1,5 @@
 #include <QSerialPortInfo>
+#include <QtEndian>
 #include "comports.h"
 
 // Public Functions
@@ -25,17 +26,11 @@ void COMPorts::onTransmit(const int value)
 void COMPorts::onDataReady()
 {
     if (port->isOpen())
-    {
-        QByteArray buffer = port->readAll();
-        QDataStream stream(buffer);
-        int value;
-
-        while (!stream.atEnd())
+        for (auto byte: port->readAll())
         {
-            stream >> value;
+            int value = qFromLittleEndian<unsigned char>(byte);
             emit notifyValue(value);
         }
-    }
 }
 
 void COMPorts::connect(const COMSettingsData& data)

@@ -2419,6 +2419,10 @@ release/comports.o: ../DataRecorder/comports.cpp C:/Qt/6.6.2/mingw_64/include/Qt
 		C:/Qt/6.6.2/mingw_64/include/QtCore/qscopedpointer.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialportglobal.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qtserialportexports.h \
+		C:/Qt/6.6.2/mingw_64/include/QtCore/QtEndian \
+		C:/Qt/6.6.2/mingw_64/include/QtCore/qendian.h \
+		C:/Qt/6.6.2/mingw_64/include/QtCore/qfloat16.h \
+		C:/Qt/6.6.2/mingw_64/include/QtCore/qmath.h \
 		../DataRecorder/comports.h \
 		C:/Qt/6.6.2/mingw_64/include/QtCore/QObject \
 		C:/Qt/6.6.2/mingw_64/include/QtCore/qobject.h \
@@ -2430,8 +2434,6 @@ release/comports.o: ../DataRecorder/comports.cpp C:/Qt/6.6.2/mingw_64/include/Qt
 		C:/Qt/6.6.2/mingw_64/include/QtCore/qcompare.h \
 		C:/Qt/6.6.2/mingw_64/include/QtCore/qdatastream.h \
 		C:/Qt/6.6.2/mingw_64/include/QtCore/qiodevicebase.h \
-		C:/Qt/6.6.2/mingw_64/include/QtCore/qfloat16.h \
-		C:/Qt/6.6.2/mingw_64/include/QtCore/qmath.h \
 		C:/Qt/6.6.2/mingw_64/include/QtCore/qiterable.h \
 		C:/Qt/6.6.2/mingw_64/include/QtCore/qmetacontainer.h \
 		C:/Qt/6.6.2/mingw_64/include/QtCore/qcontainerinfo.h \

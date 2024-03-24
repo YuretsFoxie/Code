@@ -47,7 +47,7 @@ void MainWindow::onUpdateMessage(const QString& message)
 
 void MainWindow::onUpdateError(const QString &message)
 {
-    onUpdateMessage("error: " + message);
+    print("error: " + message);
     errorSound->play();
 }
 
@@ -98,7 +98,7 @@ void MainWindow::setupGraph()
 
 void MainWindow::setupSounds()
 {
-    connectSound = new Sound("suitchargeok1");
+    connectSound = new Sound("battery_pickup");
     disconnectSound = new Sound("suitchargeno1");
     clickSound = new Sound("buttonclick");
     errorSound = new Sound("warn1");

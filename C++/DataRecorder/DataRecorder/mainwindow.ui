@@ -81,7 +81,7 @@ QPushButton:disabled {
 
 QLabel {
 	background-color: transparent;
-	color: cyan;
+	color: rgba(0, 255, 0, 1.0);
 	padding: 10px;
 	font-size: 20px;
 }
