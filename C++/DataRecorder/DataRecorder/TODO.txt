@@ -1,5 +1,5 @@
-// TODO: Complete the COM connection, fix the missing COM3 case.
 // TODO: Perform refactoring.
+// TODO: Check if the correct sound data can be obtained.
 
 // Connection parameters: COM3 57600
 
@@ -8,8 +8,3 @@
 // LATER:
 // TODO: Handle the libraries correctly (dlls for the application export and the others).
 // TODO: Setup Git correctly.
-
-// Known minor bugs:
-    // Comboboxes style is incorrect.
-    // Combobox list blinks when opened.
-    // There is no sound on button hover.

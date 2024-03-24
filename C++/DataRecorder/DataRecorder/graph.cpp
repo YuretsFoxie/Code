@@ -6,6 +6,7 @@ void Graph::setPlot(QCustomPlot *plot)
     this->plot = plot;
     graph = plot->addGraph();
     graph->setPen(QPen(Qt::green, 1));
+    graph->setAntialiased(false);
 
     plot->setBackground(Qt::transparent);
     plot->xAxis->setBasePen(QPen(Qt::green, 1));
@@ -25,6 +26,12 @@ void Graph::setPlot(QCustomPlot *plot)
     plot->rescaleAxes();
     plot->xAxis->setRange(-128, 0);
     plot->yAxis->setRange(-520, 520); // -512 - 511
+}
+
+void Graph::clear()
+{
+    graph->data()->clear();
+    plot->replot();
 }
 
 void Graph::onUpdate(int value)

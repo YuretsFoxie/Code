@@ -10,8 +10,6 @@ CONFIG += c++17
 
 SOURCES += \
     comports.cpp \
-    comsettings.cpp \
-    comsettingsfile.cpp \
     graph.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -19,15 +17,12 @@ SOURCES += \
 
 HEADERS += \
     comports.h \
-    comsettings.h \
     comsettingsdata.h \
-    comsettingsfile.h \
     graph.h \
     mainwindow.h \
     sound.h
 
 FORMS += \
-    comsettings.ui \
     mainwindow.ui
 
 # Default rules for deployment.

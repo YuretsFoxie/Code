@@ -175,7 +175,7 @@ QLabel {
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="settingsButton">
+        <widget class="QPushButton" name="clearButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -195,32 +195,7 @@ QLabel {
           </size>
          </property>
          <property name="text">
-          <string>Settings</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="testButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>120</width>
-           <height>50</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Test</string>
+          <string>Clear</string>
          </property>
         </widget>
        </item>
@@ -358,72 +333,7 @@ QLabel {
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>quitButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onQuit()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>67</x>
-     <y>164</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>101</x>
-     <y>369</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>settingsButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onSettings()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>95</x>
-     <y>70</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>109</x>
-     <y>-5</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>testButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onTest()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>77</x>
-     <y>129</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>121</x>
-     <y>413</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>connectButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>onConnect()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>65</x>
-     <y>26</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>50</x>
-     <y>-5</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>onQuit()</slot>
   <slot>onSettings()</slot>

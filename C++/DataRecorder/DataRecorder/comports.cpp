@@ -1,4 +1,3 @@
-#include <QSerialPortInfo>
 #include <QtEndian>
 #include "comports.h"
 
@@ -11,9 +10,9 @@ COMPorts::~COMPorts()
     disconnect();
 }
 
-void COMPorts::onToggle(const COMSettingsData& data)
+void COMPorts::onToggle()
 {
-    port ? disconnect() : connect(data);
+    port ? disconnect() : connect();
 }
 
 void COMPorts::onTransmit(const int value)
@@ -33,13 +32,14 @@ void COMPorts::onDataReady()
         }
 }
 
-void COMPorts::connect(const COMSettingsData& data)
+void COMPorts::connect()
 {
     disconnect();
 
+    COMSettingsData data;
     port = new QSerialPort(this);
-    port->setPortName( QSerialPortInfo::availablePorts()[data.portIndex].portName() );
-    port->setBaudRate( QSerialPortInfo::standardBaudRates()[data.baudrateIndex] );
+    port->setPortName(data.port);
+    port->setBaudRate(data.baudrate);
     port->setDataBits(QSerialPort::Data8);
     port->setParity(QSerialPort::NoParity);
     port->setStopBits(QSerialPort::OneStop);

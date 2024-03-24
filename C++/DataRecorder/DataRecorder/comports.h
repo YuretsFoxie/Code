@@ -19,14 +19,14 @@ signals:
     void notifyValue(const int value);
 
 public slots:
-    void onToggle(const COMSettingsData& data);
+    void onToggle();
     void onTransmit(const int value);
 
 private slots:
     void onDataReady();
 
 private:
-    void connect(const COMSettingsData& data);
+    void connect();
     void disconnect();
     void transmit(const int value);
 

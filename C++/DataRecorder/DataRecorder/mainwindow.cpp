@@ -12,20 +12,13 @@ MainWindow::MainWindow(QWidget *parent):
     setupGraph();
     setupSounds();
     setupCOMPorts();
-    setupCOMSettings();
+    setupButtons();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     delete clickSound;
-    delete file;
-    delete settings;
-}
-
-void MainWindow::onSelected(const COMSettingsData& data)
-{
-    file->save(data);
 }
 
 void MainWindow::onUpdateConnected()
@@ -66,21 +59,14 @@ void MainWindow::onSoundCompleted()
 
 void MainWindow::onConnect()
 {
-    emit toggleCOMPort(file->load());
+    emit toggleCOMPort();
 }
 
-void MainWindow::onSettings()
+void MainWindow::onClear()
 {
     clickSound->play();
-    settings->setModal(true);
-    settings->setWindowFlags(Qt::FramelessWindowHint);
-    settings->show();
-    emit select(file->load());
-}
-
-void MainWindow::onTest()
-{
-    clickSound->play();
+    ui->textBrowser->clear();
+    graph->clear();
 }
 
 void MainWindow::onQuit()
@@ -109,7 +95,6 @@ void MainWindow::setupCOMPorts()
 {
     ports = new COMPorts();
     connect(this, toggleCOMPort, ports, COMPorts::onToggle);
-    connect(this, transmit, ports, COMPorts::onTransmit);
     connect(ports, COMPorts::notifyConnected, this, onUpdateConnected);
     connect(ports, COMPorts::notifyDisconnected, this, onUpdateDisconnected);
     connect(ports, COMPorts::notifyMessage, this, onUpdateMessage);
@@ -117,12 +102,20 @@ void MainWindow::setupCOMPorts()
     connect(ports, COMPorts::notifyValue, this, onUpdateValue);
 }
 
-void MainWindow::setupCOMSettings()
+void MainWindow::setupButtons()
 {
-    file = new COMSettingsFile();
-    settings = new COMSettings(this);
-    connect(settings, COMSettings::select, this, onSelected);
-    connect(this, select, settings, COMSettings::onSelected);
+    COMSettingsData data;
+    QVector<QString> names;
+
+    for (auto port: QSerialPortInfo::availablePorts())
+        names.append(port.portName());
+
+    bool isEnabled = names.contains(data.port);
+    ui->connectButton->setEnabled(isEnabled);
+
+    connect(ui->connectButton, QPushButton::clicked, this, onConnect);
+    connect(ui->clearButton, QPushButton::clicked, this, onClear);
+    connect(ui->quitButton, QPushButton::clicked, this, onQuit);
 }
 
 void MainWindow::print(const int value)
