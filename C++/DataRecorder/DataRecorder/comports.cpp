@@ -1,5 +1,6 @@
 #include <QtEndian>
 #include "comports.h"
+#include "comsettingsdata.h"
 
 // Public Functions
 
@@ -10,14 +11,34 @@ COMPorts::~COMPorts()
     disconnect();
 }
 
-void COMPorts::onToggle()
+void COMPorts::toggle()
 {
     port ? disconnect() : connect();
 }
 
-void COMPorts::onTransmit(const int value)
+void COMPorts::transmit(const int value)
 {
-    transmit(value);
+    if (port->isOpen())
+    {
+        QByteArray array;
+        array.setNum(value);
+
+        if (port->write(array) == -1)
+            emit notifyError("transmission failed");
+    }
+    else
+        emit notifyError("port is not opened");
+}
+
+bool COMPorts::isPortAvailable()
+{
+    COMSettingsData data;
+    QVector<QString> names;
+
+    for (auto port: QSerialPortInfo::availablePorts())
+        names.append(port.portName());
+
+    return names.contains(data.port);
 }
 
 // Private Functions
@@ -35,25 +56,8 @@ void COMPorts::onDataReady()
 void COMPorts::connect()
 {
     disconnect();
-
-    COMSettingsData data;
-    port = new QSerialPort(this);
-    port->setPortName(data.port);
-    port->setBaudRate(data.baudrate);
-    port->setDataBits(QSerialPort::Data8);
-    port->setParity(QSerialPort::NoParity);
-    port->setStopBits(QSerialPort::OneStop);
-
-    if (port->open(QIODevice::ReadWrite))
-        QObject::connect(port, QSerialPort::readyRead, this, onDataReady);
-
-    if (port->isOpen())
-    {
-        transmit(1);
-        emit notifyConnected();
-    }
-    else
-        emit notifyError("could not open port");
+    setupPort();
+    openPort();
 }
 
 void COMPorts::disconnect()
@@ -68,13 +72,25 @@ void COMPorts::disconnect()
     }
 }
 
-void COMPorts::transmit(const int value)
+void COMPorts::setupPort()
 {
-    if (!port->isOpen())
-        emit notifyError("port is not opened");
+    COMSettingsData data;
+    port = new QSerialPort(this);
+    port->setPortName(data.port);
+    port->setBaudRate(data.baudrate);
+    port->setDataBits(QSerialPort::Data8);
+    port->setParity(QSerialPort::NoParity);
+    port->setStopBits(QSerialPort::OneStop);
+}
 
-    qint64 bytes = port->write(QByteArray().setNum(value));
-
-    if (bytes == -1)
-        emit notifyError("transmission failed");
+void COMPorts::openPort()
+{
+    if (port->open(QIODevice::ReadWrite))
+    {
+        QObject::connect(port, QSerialPort::readyRead, this, onDataReady);
+        transmit(1);
+        emit notifyConnected();
+    }
+    else
+        emit notifyError("could not open port");
 }

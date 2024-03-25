@@ -1,14 +1,14 @@
 #include "sound.h"
 
-Sound::Sound(const QString& name)
+Sound::Sound(const QString& name, const int volume)
 {
     player = new QMediaPlayer();
     output = new QAudioOutput();
-    QString url = "qrc:/Resources/sounds/" + name + ".wav";
+    QString url = path + name + type;
 
     player->setAudioOutput(output);
     player->setSource(QUrl(url));
-    output->setVolume(100);
+    output->setVolume(volume);
 
     connect(player, &QMediaPlayer::playbackStateChanged, this, completionSlot);
 }

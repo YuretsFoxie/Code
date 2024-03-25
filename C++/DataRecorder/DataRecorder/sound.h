@@ -9,8 +9,7 @@
 class Sound: public QObject
 {
 public:
-    Sound() {}
-    Sound(const QString& name);
+    Sound(const QString& name, const int volume = 100);
     void play();
 
 signals:
@@ -20,6 +19,9 @@ private slots:
     void completionSlot(QMediaPlayer::PlaybackState newState);
 
 private:
+    const QString path = "qrc:/Resources/sounds/";
+    const QString type = ".wav";
+
     Q_OBJECT
     QMediaPlayer* player;
     QAudioOutput* output;

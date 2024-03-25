@@ -24,12 +24,14 @@ MainWindow::~MainWindow()
 void MainWindow::onUpdateConnected()
 {
     connectSound->play();
+    ui->connectButton->setText("Disconnect");
     ui->connectLabel->setText("Online");
 }
 
 void MainWindow::onUpdateDisconnected()
 {
     disconnectSound->play();
+    ui->connectButton->setText("Connect");
     ui->connectLabel->setText("");
 }
 
@@ -46,7 +48,7 @@ void MainWindow::onUpdateError(const QString &message)
 
 void MainWindow::onUpdateValue(const int value)
 {
-    emit updateGraph(value);
+    graph->update(value);
 }
 
 // Private Functions
@@ -59,7 +61,7 @@ void MainWindow::onSoundCompleted()
 
 void MainWindow::onConnect()
 {
-    emit toggleCOMPort();
+    ports->toggle();
 }
 
 void MainWindow::onClear()
@@ -77,15 +79,13 @@ void MainWindow::onQuit()
 
 void MainWindow::setupGraph()
 {
-    graph = new Graph(this);
-    graph->setPlot(ui->plot);
-    connect(this, updateGraph, graph, Graph::onUpdate);
+    graph = new Graph(ui->plot);
 }
 
 void MainWindow::setupSounds()
 {
     connectSound = new Sound("battery_pickup");
-    disconnectSound = new Sound("suitchargeno1");
+    disconnectSound = new Sound("battery_pickup");
     clickSound = new Sound("buttonclick");
     errorSound = new Sound("warn1");
     connect(clickSound, Sound::completionSignal, this, onSoundCompleted);
@@ -94,7 +94,6 @@ void MainWindow::setupSounds()
 void MainWindow::setupCOMPorts()
 {
     ports = new COMPorts();
-    connect(this, toggleCOMPort, ports, COMPorts::onToggle);
     connect(ports, COMPorts::notifyConnected, this, onUpdateConnected);
     connect(ports, COMPorts::notifyDisconnected, this, onUpdateDisconnected);
     connect(ports, COMPorts::notifyMessage, this, onUpdateMessage);
@@ -104,15 +103,7 @@ void MainWindow::setupCOMPorts()
 
 void MainWindow::setupButtons()
 {
-    COMSettingsData data;
-    QVector<QString> names;
-
-    for (auto port: QSerialPortInfo::availablePorts())
-        names.append(port.portName());
-
-    bool isEnabled = names.contains(data.port);
-    ui->connectButton->setEnabled(isEnabled);
-
+    ui->connectButton->setEnabled(ports->isPortAvailable());
     connect(ui->connectButton, QPushButton::clicked, this, onConnect);
     connect(ui->clearButton, QPushButton::clicked, this, onClear);
     connect(ui->quitButton, QPushButton::clicked, this, onQuit);

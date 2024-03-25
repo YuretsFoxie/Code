@@ -254,9 +254,6 @@ release/moc_comports.cpp: ../DataRecorder/comports.h \
 		C:/Qt/6.6.2/mingw_64/include/QtCore/qiodevice.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialportglobal.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qtserialportexports.h \
-		../DataRecorder/comsettingsdata.h \
-		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/QSerialPortInfo \
-		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialportinfo.h \
 		release/moc_predefs.h \
 		C:/Qt/6.6.2/mingw_64/bin/moc.exe
 	C:\Qt\6.6.2\mingw_64\bin\moc.exe $(DEFINES) --include C:/Data/Code/C++/DataRecorder/build-DataRecorder-Desktop_Qt_6_6_2_MinGW_64_bit-Release/release/moc_predefs.h -IC:/Qt/6.6.2/mingw_64/mkspecs/win32-g++ -IC:/Data/Code/C++/DataRecorder/DataRecorder -IC:/Qt/6.6.2/mingw_64/include -IC:/Qt/6.6.2/mingw_64/include/QtPrintSupport -IC:/Qt/6.6.2/mingw_64/include/QtWidgets -IC:/Qt/6.6.2/mingw_64/include/QtMultimedia -IC:/Qt/6.6.2/mingw_64/include/QtGui -IC:/Qt/6.6.2/mingw_64/include/QtSerialPort -IC:/Qt/6.6.2/mingw_64/include/QtNetwork -IC:/Qt/6.6.2/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include ..\DataRecorder\comports.h -o release\moc_comports.cpp
@@ -1406,9 +1403,6 @@ release/moc_mainwindow.cpp: ../DataRecorder/mainwindow.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialport.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialportglobal.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qtserialportexports.h \
-		../DataRecorder/comsettingsdata.h \
-		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/QSerialPortInfo \
-		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialportinfo.h \
 		release/moc_predefs.h \
 		C:/Qt/6.6.2/mingw_64/bin/moc.exe
 	C:\Qt\6.6.2\mingw_64\bin\moc.exe $(DEFINES) --include C:/Data/Code/C++/DataRecorder/build-DataRecorder-Desktop_Qt_6_6_2_MinGW_64_bit-Release/release/moc_predefs.h -IC:/Qt/6.6.2/mingw_64/mkspecs/win32-g++ -IC:/Data/Code/C++/DataRecorder/DataRecorder -IC:/Qt/6.6.2/mingw_64/include -IC:/Qt/6.6.2/mingw_64/include/QtPrintSupport -IC:/Qt/6.6.2/mingw_64/include/QtWidgets -IC:/Qt/6.6.2/mingw_64/include/QtMultimedia -IC:/Qt/6.6.2/mingw_64/include/QtGui -IC:/Qt/6.6.2/mingw_64/include/QtSerialPort -IC:/Qt/6.6.2/mingw_64/include/QtNetwork -IC:/Qt/6.6.2/mingw_64/include/QtCore -I. -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++ -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32 -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/backward -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include -IC:/Qt/Tools/mingw1120_64/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed -IC:/Qt/Tools/mingw1120_64/x86_64-w64-mingw32/include ..\DataRecorder\mainwindow.h -o release\moc_mainwindow.cpp
@@ -3379,9 +3373,6 @@ release/main.o: ../DataRecorder/main.cpp ../DataRecorder/mainwindow.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialport.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialportglobal.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qtserialportexports.h \
-		../DataRecorder/comsettingsdata.h \
-		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/QSerialPortInfo \
-		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialportinfo.h \
 		C:/Qt/6.6.2/mingw_64/include/QtWidgets/QApplication
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\main.o ..\DataRecorder\main.cpp
 
@@ -3964,9 +3955,6 @@ release/mainwindow.o: ../DataRecorder/mainwindow.cpp ../DataRecorder/mainwindow.
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialport.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialportglobal.h \
 		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qtserialportexports.h \
-		../DataRecorder/comsettingsdata.h \
-		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/QSerialPortInfo \
-		C:/Qt/6.6.2/mingw_64/include/QtSerialPort/qserialportinfo.h \
 		ui_mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\mainwindow.o ..\DataRecorder\mainwindow.cpp
 

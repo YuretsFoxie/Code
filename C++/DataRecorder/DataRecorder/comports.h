@@ -3,13 +3,16 @@
 
 #include <QObject>
 #include <QSerialPort>
-#include "comsettingsdata.h"
 
 class COMPorts: public QObject
 {
 public:
     explicit COMPorts(QObject *parent = nullptr);
    ~COMPorts();
+
+    void toggle();
+    void transmit(const int value);
+    bool isPortAvailable();
 
 signals:
     void notifyConnected();
@@ -18,17 +21,14 @@ signals:
     void notifyError(const QString& message);
     void notifyValue(const int value);
 
-public slots:
-    void onToggle();
-    void onTransmit(const int value);
-
 private slots:
     void onDataReady();
 
 private:
     void connect();
     void disconnect();
-    void transmit(const int value);
+    void setupPort();
+    void openPort();
 
     Q_OBJECT
     QSerialPort* port;

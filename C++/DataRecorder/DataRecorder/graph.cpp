@@ -1,7 +1,6 @@
 #include "graph.h"
-Graph::Graph(QObject *parent): QObject{parent} {}
 
-void Graph::setPlot(QCustomPlot *plot)
+Graph::Graph(QCustomPlot *plot, QObject *parent): QObject(parent)
 {
     this->plot = plot;
     graph = plot->addGraph();
@@ -9,6 +8,8 @@ void Graph::setPlot(QCustomPlot *plot)
     graph->setAntialiased(false);
 
     plot->setBackground(Qt::transparent);
+    plot->rescaleAxes();
+
     plot->xAxis->setBasePen(QPen(Qt::green, 1));
     plot->yAxis->setBasePen(QPen(Qt::green, 1));
     plot->xAxis->setTickPen(QPen(Qt::green, 1));
@@ -23,21 +24,21 @@ void Graph::setPlot(QCustomPlot *plot)
     plot->xAxis->grid()->setZeroLinePen(QPen(Qt::transparent));
     plot->yAxis->grid()->setZeroLinePen(QPen(Qt::transparent));
 
-    plot->rescaleAxes();
     plot->xAxis->setRange(-128, 0);
     plot->yAxis->setRange(-520, 520); // -512 - 511
+}
+
+void Graph::update(int value)
+{
+    int count = graph->dataCount();
+    graph->addData(count, value);
+    plot->xAxis->setRange(count + 1, 128, Qt::AlignRight);
+    plot->replot();
 }
 
 void Graph::clear()
 {
     graph->data()->clear();
-    plot->replot();
-}
-
-void Graph::onUpdate(int value)
-{
-    int count = graph->dataCount();
-    graph->addData(count, value);
-    plot->xAxis->setRange(count + 1, 128, Qt::AlignRight);
+    plot->xAxis->setRange(-128, 0);
     plot->replot();
 }

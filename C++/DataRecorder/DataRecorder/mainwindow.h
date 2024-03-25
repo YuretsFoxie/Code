@@ -20,10 +20,6 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-signals:
-    void updateGraph(const int value);
-    void toggleCOMPort();
-
 public slots:
     void onUpdateConnected();
     void onUpdateDisconnected();
@@ -38,6 +34,13 @@ private slots:
     void onQuit();
 
 private:
+    void setupGraph();
+    void setupSounds();
+    void setupCOMPorts();
+    void setupButtons();
+    void print(const int value);
+    void print(const QString& message);
+
     Q_OBJECT
     Ui::MainWindow* ui;
     Graph* graph;
@@ -47,14 +50,6 @@ private:
     Sound* disconnectSound;
     Sound* errorSound;
     bool isQuit = false;
-
-    void setupGraph();
-    void setupSounds();
-    void setupCOMPorts();
-    void setupButtons();
-
-    void print(const int value);
-    void print(const QString& message);
 };
 
 #endif // MAINWINDOW_H

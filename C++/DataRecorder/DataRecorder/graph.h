@@ -7,12 +7,9 @@
 class Graph: public QObject
 {
 public:
-    explicit Graph(QObject *parent = nullptr);
-    void setPlot(QCustomPlot* plot);
+    explicit Graph(QCustomPlot* plot, QObject *parent = nullptr);
+    void update(int value);
     void clear();
-
-public slots:
-    void onUpdate(int value);
 
 private:
     Q_OBJECT
