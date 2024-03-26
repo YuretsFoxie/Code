@@ -25,7 +25,7 @@ Graph::Graph(QCustomPlot *plot, QObject *parent): QObject(parent)
     plot->yAxis->grid()->setZeroLinePen(QPen(Qt::transparent));
 
     plot->xAxis->setRange(-128, 0);
-    plot->yAxis->setRange(-520, 520); // -512 - 511
+    plot->yAxis->setRange(-140, 140); // -128 - 127
 }
 
 void Graph::update(int value)

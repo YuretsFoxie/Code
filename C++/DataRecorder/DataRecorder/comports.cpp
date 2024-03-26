@@ -48,7 +48,7 @@ void COMPorts::onDataReady()
     if (port->isOpen())
         for (auto byte: port->readAll())
         {
-            int value = qFromLittleEndian<unsigned char>(byte);
+            int value = qFromLittleEndian<signed char>(byte);
             emit notifyValue(value);
         }
 }
