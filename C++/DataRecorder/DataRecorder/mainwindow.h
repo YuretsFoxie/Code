@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QString>
 #include "graph.h"
 #include "sound.h"
 #include "comports.h"

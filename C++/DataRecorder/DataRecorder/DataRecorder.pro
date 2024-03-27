@@ -13,14 +13,16 @@ SOURCES += \
     graph.cpp \
     main.cpp \
     mainwindow.cpp \
-    sound.cpp
+    sound.cpp \
+    spectrumanalyzer.cpp
 
 HEADERS += \
     comports.h \
     comsettingsdata.h \
     graph.h \
     mainwindow.h \
-    sound.h
+    sound.h \
+    spectrumanalyzer.h
 
 FORMS += \
     mainwindow.ui

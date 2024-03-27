@@ -1,0 +1,10 @@
+release/comports.o
+release/graph.o
+release/main.o
+release/mainwindow.o
+release/sound.o
+release/qrc_Resources.o
+release/moc_comports.o
+release/moc_graph.o
+release/moc_mainwindow.o
+release/moc_sound.o
