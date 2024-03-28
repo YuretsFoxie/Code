@@ -5,6 +5,8 @@
 #include "graph.h"
 #include "sound.h"
 #include "comports.h"
+#include "signalgenerator.h"
+#include "spectrumanalyzer.h"
 
 namespace Ui
 {
@@ -29,6 +31,7 @@ public slots:
 private slots:
     void onSoundCompleted();
     void onConnect();
+    void onTest();
     void onClear();
     void onQuit();
 
@@ -37,6 +40,8 @@ private:
     void setupSounds();
     void setupCOMPorts();
     void setupButtons();
+    void setupGenerator();
+    void setupSpectrumAnalyzer();
     void print(const int value);
     void print(const QString& message);
 
@@ -44,6 +49,8 @@ private:
     Ui::MainWindow* ui;
     Graph* graph;
     COMPorts* ports;
+    SignalGenerator* generator;
+    SpectrumAnalyzer* spectrumAnalyzer;
     Sound* clickSound;
     Sound* connectSound;
     Sound* disconnectSound;

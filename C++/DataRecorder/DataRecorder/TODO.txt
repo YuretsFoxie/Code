@@ -16,6 +16,8 @@ Optimise the FFT by caching the results if needed.
 
 An article:
 https://www.gaussianwaves.com/2015/11/interpreting-fft-results-obtaining-magnitude-and-phase-information/
+x(t)=Acos(2πft+phase);  x(t)=0.5cos(2π10t+π/6)
+df=fs/N; frequency resolution
 
 
 
@@ -51,3 +53,5 @@ fundamental frequency of a signal. I have a feeling that this is what you really
 
 Online calculator with good description, read it:
 https://scistatcalc.blogspot.com/2013/12/fft-calculator.html?m=1
+
+

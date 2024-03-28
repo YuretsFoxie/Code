@@ -33,6 +33,7 @@ public:
     QFrame *controlPanel;
     QVBoxLayout *verticalLayout_2;
     QPushButton *connectButton;
+    QPushButton *testButton;
     QPushButton *clearButton;
     QPushButton *quitButton;
     QSpacerItem *verticalSpacer;
@@ -47,7 +48,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(372, 353);
+        MainWindow->resize(378, 338);
         MainWindow->setCursor(QCursor(Qt::ArrowCursor));
         QIcon icon(QIcon::fromTheme(QString::fromUtf8("accessories-calculator")));
         MainWindow->setWindowIcon(icon);
@@ -153,6 +154,15 @@ public:
 
         verticalLayout_2->addWidget(connectButton);
 
+        testButton = new QPushButton(controlPanel);
+        testButton->setObjectName("testButton");
+        sizePolicy1.setHeightForWidth(testButton->sizePolicy().hasHeightForWidth());
+        testButton->setSizePolicy(sizePolicy1);
+        testButton->setMinimumSize(QSize(120, 50));
+        testButton->setMaximumSize(QSize(120, 50));
+
+        verticalLayout_2->addWidget(testButton);
+
         clearButton = new QPushButton(controlPanel);
         clearButton->setObjectName("clearButton");
         sizePolicy1.setHeightForWidth(clearButton->sizePolicy().hasHeightForWidth());
@@ -236,6 +246,7 @@ public:
     {
         MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "Data Recorder", nullptr));
         connectButton->setText(QCoreApplication::translate("MainWindow", "Connect", nullptr));
+        testButton->setText(QCoreApplication::translate("MainWindow", "Test", nullptr));
         clearButton->setText(QCoreApplication::translate("MainWindow", "Clear", nullptr));
         quitButton->setText(QCoreApplication::translate("MainWindow", "Quit", nullptr));
         connectLabel->setText(QString());

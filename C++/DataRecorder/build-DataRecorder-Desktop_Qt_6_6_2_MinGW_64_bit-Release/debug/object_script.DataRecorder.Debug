@@ -2,11 +2,13 @@ debug/comports.o
 debug/graph.o
 debug/main.o
 debug/mainwindow.o
+debug/signalgenerator.o
 debug/sound.o
 debug/spectrumanalyzer.o
 debug/qrc_Resources.o
 debug/moc_comports.o
 debug/moc_graph.o
 debug/moc_mainwindow.o
+debug/moc_signalgenerator.o
 debug/moc_sound.o
 debug/moc_spectrumanalyzer.o

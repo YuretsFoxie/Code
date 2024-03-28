@@ -13,6 +13,7 @@ SOURCES += \
     graph.cpp \
     main.cpp \
     mainwindow.cpp \
+    signalgenerator.cpp \
     sound.cpp \
     spectrumanalyzer.cpp
 
@@ -21,6 +22,7 @@ HEADERS += \
     comsettingsdata.h \
     graph.h \
     mainwindow.h \
+    signalgenerator.h \
     sound.h \
     spectrumanalyzer.h
 

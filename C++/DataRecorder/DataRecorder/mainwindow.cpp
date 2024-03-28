@@ -13,12 +13,21 @@ MainWindow::MainWindow(QWidget *parent):
     setupSounds();
     setupCOMPorts();
     setupButtons();
+    setupGenerator();
+    setupSpectrumAnalyzer();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete graph;
+    delete ports;
+    delete connectSound;
+    delete disconnectSound;
     delete clickSound;
+    delete errorSound;
+    delete generator;
+    delete spectrumAnalyzer;
 }
 
 void MainWindow::onUpdateConnected()
@@ -64,6 +73,12 @@ void MainWindow::onConnect()
     ports->toggle();
 }
 
+void MainWindow::onTest()
+{
+    connectSound->play();
+    generator->toggle();
+}
+
 void MainWindow::onClear()
 {
     clickSound->play();
@@ -105,8 +120,20 @@ void MainWindow::setupButtons()
 {
     ui->connectButton->setEnabled(ports->isPortAvailable());
     connect(ui->connectButton, QPushButton::clicked, this, onConnect);
+    connect(ui->testButton, QPushButton::clicked, this, onTest);
     connect(ui->clearButton, QPushButton::clicked, this, onClear);
     connect(ui->quitButton, QPushButton::clicked, this, onQuit);
+}
+
+void MainWindow::setupGenerator()
+{
+    generator = new SignalGenerator();
+    connect(generator, SignalGenerator::notifyValue, this, onUpdateValue);
+}
+
+void MainWindow::setupSpectrumAnalyzer()
+{
+    spectrumAnalyzer = new SpectrumAnalyzer();
 }
 
 void MainWindow::print(const int value)
