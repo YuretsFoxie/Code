@@ -8,7 +8,8 @@ SignalGenerator::SignalGenerator(QObject *parent): QObject{parent}
     timer->setInterval(timeInterval);
     connect(timer, QTimer::timeout, this, onTimer);
 
-    signal = new Signal(100, 1, 0);
+    signal1 = new Signal(200, 10, 0);
+    signal2 = new Signal(200, 30, 0);
 }
 
 SignalGenerator::~SignalGenerator()
@@ -17,7 +18,8 @@ SignalGenerator::~SignalGenerator()
         stop();
 
     delete timer;
-    delete signal;
+    delete signal1;
+    delete signal2;
 }
 
 void SignalGenerator::toggle()
@@ -29,7 +31,7 @@ void SignalGenerator::toggle()
 
 void SignalGenerator::onTimer()
 {
-    emit notifyValue(signal->calculate(t));
+    emit notifyValue(signal1->calculate(t) + signal2->calculate(t));
     t += 1.0 / samplingRate;
 }
 

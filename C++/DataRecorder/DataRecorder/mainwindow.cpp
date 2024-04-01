@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent):
 {
     ui->setupUi(this);
 
-    setupGraph();
+    setupGraphs();
     setupSounds();
     setupCOMPorts();
     setupButtons();
@@ -20,7 +20,8 @@ MainWindow::MainWindow(QWidget *parent):
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete graph;
+    // delete graph;
+    delete spectrum;
     delete ports;
     delete connectSound;
     delete disconnectSound;
@@ -57,7 +58,13 @@ void MainWindow::onUpdateError(const QString &message)
 
 void MainWindow::onUpdateValue(const int value)
 {
-    graph->update(value);
+    // graph->update(value);
+    spectrumAnalyzer->push(value);
+}
+
+void MainWindow::onFFTReady(const QVector<double> &result)
+{
+    spectrum->update(result);
 }
 
 // Private Functions
@@ -83,7 +90,7 @@ void MainWindow::onClear()
 {
     clickSound->play();
     ui->textBrowser->clear();
-    graph->clear();
+    // graph->clear();
 }
 
 void MainWindow::onQuit()
@@ -92,9 +99,10 @@ void MainWindow::onQuit()
     isQuit = true;
 }
 
-void MainWindow::setupGraph()
+void MainWindow::setupGraphs()
 {
-    graph = new Graph(ui->plot);
+    // graph = new Graph(ui->plot);
+    spectrum = new Spectrum(ui->plot);
 }
 
 void MainWindow::setupSounds()
@@ -134,6 +142,7 @@ void MainWindow::setupGenerator()
 void MainWindow::setupSpectrumAnalyzer()
 {
     spectrumAnalyzer = new SpectrumAnalyzer();
+    connect(spectrumAnalyzer, SpectrumAnalyzer::notifyFFTReady, this, onFFTReady);
 }
 
 void MainWindow::print(const int value)

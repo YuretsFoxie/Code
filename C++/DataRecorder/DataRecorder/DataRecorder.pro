@@ -15,6 +15,7 @@ SOURCES += \
     mainwindow.cpp \
     signalgenerator.cpp \
     sound.cpp \
+    spectrum.cpp \
     spectrumanalyzer.cpp
 
 HEADERS += \
@@ -24,6 +25,7 @@ HEADERS += \
     mainwindow.h \
     signalgenerator.h \
     sound.h \
+    spectrum.h \
     spectrumanalyzer.h
 
 FORMS += \

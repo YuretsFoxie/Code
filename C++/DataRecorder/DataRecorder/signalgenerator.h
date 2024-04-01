@@ -45,12 +45,13 @@ private:
     void stop();
 
     const double pi = acos(-1);
-    const double samplingRate = 128.0;
+    const double samplingRate = 100.0; // 100 for the test signal, 64 or 128 for the real signal
     const int timeInterval = 1000.0 / samplingRate; // 8, 1000 / 128 = 7.8125
 
     Q_OBJECT
     QTimer* timer;
-    Signal* signal;
+    Signal* signal1;
+    Signal* signal2;
     double t = 0;
 };
 

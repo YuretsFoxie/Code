@@ -3,10 +3,11 @@
 
 #include <QMainWindow>
 #include "graph.h"
+#include "spectrum.h"
 #include "sound.h"
 #include "comports.h"
-#include "signalgenerator.h"
 #include "spectrumanalyzer.h"
+#include "signalgenerator.h"
 
 namespace Ui
 {
@@ -27,6 +28,7 @@ public slots:
     void onUpdateMessage(const QString& message);
     void onUpdateError(const QString& message);
     void onUpdateValue(const int value);
+    void onFFTReady(const QVector<double>& result);
 
 private slots:
     void onSoundCompleted();
@@ -36,7 +38,7 @@ private slots:
     void onQuit();
 
 private:
-    void setupGraph();
+    void setupGraphs();
     void setupSounds();
     void setupCOMPorts();
     void setupButtons();
@@ -48,6 +50,7 @@ private:
     Q_OBJECT
     Ui::MainWindow* ui;
     Graph* graph;
+    Spectrum* spectrum;
     COMPorts* ports;
     SignalGenerator* generator;
     SpectrumAnalyzer* spectrumAnalyzer;
