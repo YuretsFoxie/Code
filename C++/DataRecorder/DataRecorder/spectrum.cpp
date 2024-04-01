@@ -33,7 +33,7 @@ Spectrum::Spectrum(QCustomPlot *plot, QObject* parent): QObject(parent)
 
 Spectrum::~Spectrum()
 {
-    delete bars;
+    plot->clearPlottables();
 }
 
 void Spectrum::update(const QVector<double>& values)
