@@ -1,7 +1,7 @@
 release/comports.o
-release/graph.o
 release/main.o
 release/mainwindow.o
+release/scope.o
 release/settings.o
 release/signal.o
 release/signalgenerator.o
@@ -10,8 +10,8 @@ release/spectrum.o
 release/spectrumanalyzer.o
 release/qrc_Resources.o
 release/moc_comports.o
-release/moc_graph.o
 release/moc_mainwindow.o
+release/moc_scope.o
 release/moc_signalgenerator.o
 release/moc_sound.o
 release/moc_spectrum.o

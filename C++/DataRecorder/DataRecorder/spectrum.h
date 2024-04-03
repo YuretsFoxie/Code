@@ -12,12 +12,14 @@ public:
    ~Spectrum();
 
     void update(const QVector<double>& values);
+    void clear();
 
 private:
     Q_OBJECT
     QCustomPlot* plot;
     QCPBars* bars;
     QVector<double> x;
+    QVector<double> clearY;
     int width = Settings::shared().getData().spectrumN / 2;
     int count = 0;
 };

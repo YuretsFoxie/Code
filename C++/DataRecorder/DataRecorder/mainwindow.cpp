@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent):
 MainWindow::~MainWindow()
 {
     delete ui;
-    // delete graph;
+    delete scope;
     delete spectrum;
     delete ports;
     delete connectSound;
@@ -59,7 +59,7 @@ void MainWindow::onUpdateError(const QString &message)
 
 void MainWindow::onUpdateValue(const int value)
 {
-    // graph->update(value);
+    scope->update(value);
     spectrumAnalyzer->push(value);
 }
 
@@ -91,7 +91,8 @@ void MainWindow::onClear()
 {
     clickSound->play();
     ui->textBrowser->clear();
-    // graph->clear();
+    scope->clear();
+    spectrum->clear();
 }
 
 void MainWindow::onQuit()
@@ -102,8 +103,8 @@ void MainWindow::onQuit()
 
 void MainWindow::setupGraphs()
 {
-    // graph = new Graph(ui->plot);
-    spectrum = new Spectrum(ui->plot);
+    scope = new Scope(ui->scope);
+    spectrum = new Spectrum(ui->spectrum);
 }
 
 void MainWindow::setupSounds()

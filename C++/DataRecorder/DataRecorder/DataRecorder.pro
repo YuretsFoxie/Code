@@ -8,9 +8,9 @@ CONFIG += c++17
 
 SOURCES += \
     comports.cpp \
-    graph.cpp \
     main.cpp \
     mainwindow.cpp \
+    scope.cpp \
     settings.cpp \
     signal.cpp \
     signalgenerator.cpp \
@@ -20,8 +20,8 @@ SOURCES += \
 
 HEADERS += \
     comports.h \
-    graph.h \
     mainwindow.h \
+    scope.h \
     settings.h \
     signal.h \
     signalgenerator.h \

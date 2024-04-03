@@ -1,7 +1,8 @@
 Sampling frequency: 100 Hz for the test signal, 128 Hz for the real data (it will be 64 Hz when two values are measured)
 
 TODO:
-Show both Graph and Spectrum simultaneously.
+Adjust the displayed data.
+Play with the application to see what should be done next.
 
 
 

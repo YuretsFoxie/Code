@@ -1,7 +1,7 @@
 debug/comports.o
-debug/graph.o
 debug/main.o
 debug/mainwindow.o
+debug/scope.o
 debug/settings.o
 debug/signal.o
 debug/signalgenerator.o
@@ -10,8 +10,8 @@ debug/spectrum.o
 debug/spectrumanalyzer.o
 debug/qrc_Resources.o
 debug/moc_comports.o
-debug/moc_graph.o
 debug/moc_mainwindow.o
+debug/moc_scope.o
 debug/moc_signalgenerator.o
 debug/moc_sound.o
 debug/moc_spectrum.o

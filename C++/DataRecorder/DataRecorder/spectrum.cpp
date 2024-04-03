@@ -49,3 +49,10 @@ void Spectrum::update(const QVector<double>& values)
     plot->yAxis->setRange(0, *max);
     plot->replot();
 }
+
+void Spectrum::clear()
+{
+    bars->setData(x, clearY);
+    plot->yAxis->setRange(0, 100);
+    plot->replot();
+}

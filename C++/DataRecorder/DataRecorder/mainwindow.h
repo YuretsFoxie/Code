@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "graph.h"
+#include "scope.h"
 #include "spectrum.h"
 #include "sound.h"
 #include "comports.h"
@@ -49,7 +49,7 @@ private:
 
     Q_OBJECT
     Ui::MainWindow* ui;
-    Graph* graph;
+    Scope* scope;
     Spectrum* spectrum;
     COMPorts* ports;
     SignalGenerator* generator;
