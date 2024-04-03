@@ -3,28 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
-
-
-
-class Signal
-{
-public:
-    Signal(double amplitude, double frequency, double phaseMultiplier):
-        a(amplitude), f(frequency), pm(phaseMultiplier) {}
-
-    double calculate(const double& t)
-    {
-        return a * sin((2 * pi * f * t) + (pm * pi));
-    }
-
-private:
-    const double pi = acos(-1);
-    const double a;
-    const double f;
-    const double pm;
-};
-
-
+#include "settings.h"
 
 class SignalGenerator: public QObject
 {
@@ -45,13 +24,12 @@ private:
     void stop();
 
     const double pi = acos(-1);
-    const double samplingRate = 100.0; // 100 for the test signal, 64 or 128 for the real signal
-    const int timeInterval = 1000.0 / samplingRate; // 8, 1000 / 128 = 7.8125
+    const double samplingFrequency = Settings::shared().getData().samplingFrequency;
+    const int timeInterval = 1000.0 / samplingFrequency;
 
     Q_OBJECT
     QTimer* timer;
-    Signal* signal1;
-    Signal* signal2;
+    QVector<Signal> testSignals = Settings::shared().getSignals();
     double t = 0;
 };
 

@@ -2,6 +2,8 @@ release/comports.o
 release/graph.o
 release/main.o
 release/mainwindow.o
+release/settings.o
+release/signal.o
 release/signalgenerator.o
 release/sound.o
 release/spectrum.o

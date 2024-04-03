@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QSerialPort>
+#include "settings.h"
 
 class COMPorts: public QObject
 {
@@ -32,6 +33,7 @@ private:
 
     Q_OBJECT
     QSerialPort* port;
+    SettingsData settings = Settings::shared().getData();
 };
 
 #endif // COMPORTS_H

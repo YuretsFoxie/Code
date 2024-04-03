@@ -24,7 +24,7 @@ Graph::Graph(QCustomPlot *plot, QObject *parent): QObject(parent)
     plot->xAxis->grid()->setZeroLinePen(QPen(Qt::transparent));
     plot->yAxis->grid()->setZeroLinePen(QPen(Qt::transparent));
 
-    plot->xAxis->setRange(-128, 0);
+    plot->xAxis->setRange(-settings.spectrumN, 0);
     plot->yAxis->setRange(-140, 140); // -128 - 127
 }
 
@@ -32,13 +32,13 @@ void Graph::update(int value)
 {
     int count = graph->dataCount();
     graph->addData(count, value);
-    plot->xAxis->setRange(count + 1, 128, Qt::AlignRight);
+    plot->xAxis->setRange(count + 1, settings.spectrumN, Qt::AlignRight);
     plot->replot();
 }
 
 void Graph::clear()
 {
     graph->data()->clear();
-    plot->xAxis->setRange(-128, 0);
+    plot->xAxis->setRange(-settings.spectrumN, 0);
     plot->replot();
 }

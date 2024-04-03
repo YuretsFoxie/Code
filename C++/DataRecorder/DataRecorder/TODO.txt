@@ -1,16 +1,7 @@
-The software initial stage is ready.
-Connection parameters: COM3 57600
-Sampling frequency: 128 Hz (it will be 64 Hz when two values are measured)
-
-
+Sampling frequency: 100 Hz for the test signal, 128 Hz for the real data (it will be 64 Hz when two values are measured)
 
 TODO:
-Research the FFT results interpretation.
-Test the spectrum analyzer with the test data provider.
-Implement displaying the FFT results at the graph.
-
-LATER: 
-Optimise the FFT by caching the results if needed.
+Show both Graph and Spectrum simultaneously.
 
 
 
@@ -18,40 +9,3 @@ An article:
 https://www.gaussianwaves.com/2015/11/interpreting-fft-results-obtaining-magnitude-and-phase-information/
 x(t)=Acos(2πft+phase);  x(t)=0.5cos(2π10t+π/6)
 df=fs/N; frequency resolution
-
-
-
-FFT results imterpretation (https://stackoverflow.com/questions/6740545/understanding-fft-output): 
-1. You should neither look for the real or imaginative part of a complex number 
-(that what's your real and imaginary array is). Instead you want to look for the magnitude 
-of the frequency which is defined as sqrt (real * real + imag * imag). This number will 
-always be positive. Now all you have to search is for the maximum value (ignore the first 
-entry in your array. That is your DC offset and carries no frequency dependent information).
-
-2. You get 32 real and 32 imaginary outputs because you are using a complex to complex FFT.
-Remember that you've converted your 32 samples into 64 values (or 32 complex values) by 
-extending it with zero imaginary parts. This results in a symetric FFT output where the 
-frequency result occurs twice. Once ready to use in the outputs 0 to N/2, and once mirrored 
-in the outputs N/2 to N. In your case it's easiest to simply ignore the outputs N/2 to N. 
-You don't need them, they are just an artifact on how you calculate your FFT.
-
-3. The frequency to fft-bin equation is (bin_id * freq/2) / (N/2) where freq is your 
-sample-frequency (aka 32 Hz, and N is the size of your FFT). In your case this simplifies 
-to 1 Hz per bin. The bins N/2 to N represent negative frequencies (strange concept, I know). 
-For your case they don't contain any significant information because they are just a mirror 
-of the first N/2 frequencies.
-
-4. Your real and imaginary parts of each bin form a complex number. It is okay if real and 
-imaginary parts are negative while the magnitude of the frequency itself is positive (see my 
-answer to question 1). I suggest that you read up on complex numbers. Explaining how they work 
-(and why they are useful) exceeds what is possible to explain in a single stackoverflow-question.
-
-Note: You may also want to read up what autocorrelation is, and how it is used to find the 
-fundamental frequency of a signal. I have a feeling that this is what you really want.
-
-
-
-Online calculator with good description, read it:
-https://scistatcalc.blogspot.com/2013/12/fft-calculator.html?m=1
-
-

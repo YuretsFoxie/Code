@@ -1,6 +1,4 @@
-QT       += core gui serialport
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport multimedia
+QT       += core gui serialport widgets printsupport multimedia
 
 CONFIG += c++17
 
@@ -13,6 +11,8 @@ SOURCES += \
     graph.cpp \
     main.cpp \
     mainwindow.cpp \
+    settings.cpp \
+    signal.cpp \
     signalgenerator.cpp \
     sound.cpp \
     spectrum.cpp \
@@ -20,9 +20,10 @@ SOURCES += \
 
 HEADERS += \
     comports.h \
-    comsettingsdata.h \
     graph.h \
     mainwindow.h \
+    settings.h \
+    signal.h \
     signalgenerator.h \
     sound.h \
     spectrum.h \

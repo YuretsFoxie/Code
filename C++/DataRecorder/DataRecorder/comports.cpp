@@ -1,6 +1,6 @@
+#include <QSerialPortInfo>
 #include <QtEndian>
 #include "comports.h"
-#include "comsettingsdata.h"
 
 // Public Functions
 
@@ -32,13 +32,12 @@ void COMPorts::transmit(const int value)
 
 bool COMPorts::isPortAvailable()
 {
-    COMSettingsData data;
     QVector<QString> names;
 
     for (auto port: QSerialPortInfo::availablePorts())
         names.append(port.portName());
 
-    return names.contains(data.port);
+    return names.contains(settings.port);
 }
 
 // Private Functions
@@ -74,10 +73,9 @@ void COMPorts::disconnect()
 
 void COMPorts::setupPort()
 {
-    COMSettingsData data;
     port = new QSerialPort(this);
-    port->setPortName(data.port);
-    port->setBaudRate(data.baudrate);
+    port->setPortName(settings.port);
+    port->setBaudRate(settings.baudrate);
     port->setDataBits(QSerialPort::Data8);
     port->setParity(QSerialPort::NoParity);
     port->setStopBits(QSerialPort::OneStop);

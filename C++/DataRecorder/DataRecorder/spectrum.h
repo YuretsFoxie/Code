@@ -3,8 +3,9 @@
 
 #include <QObject>
 #include "qcustomplot.h"
+#include "settings.h"
 
-class Spectrum : public QObject
+class Spectrum: public QObject
 {
 public:
     explicit Spectrum(QCustomPlot* plot, QObject* parent = nullptr);
@@ -17,6 +18,7 @@ private:
     QCustomPlot* plot;
     QCPBars* bars;
     QVector<double> x;
+    int width = Settings::shared().getData().spectrumN / 2;
     int count = 0;
 };
 

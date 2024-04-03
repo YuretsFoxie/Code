@@ -2,6 +2,8 @@ debug/comports.o
 debug/graph.o
 debug/main.o
 debug/mainwindow.o
+debug/settings.o
+debug/signal.o
 debug/signalgenerator.o
 debug/sound.o
 debug/spectrum.o

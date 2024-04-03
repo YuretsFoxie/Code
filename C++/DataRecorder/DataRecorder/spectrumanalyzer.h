@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <complex>
+#include "settings.h"
 
 using namespace std;
 typedef complex<double> cd;
@@ -28,7 +29,7 @@ private:
     SplittedItems split(const QList<cd>& v);
     QList<cd> calculateFFT(const QList<cd>& v);
 
-    const int n = 128; // n must be a power of two
+    const int n = Settings::shared().getData().spectrumN; // n must be a power of two
     const double pi = acos(-1);
     const cd i = cd(0.0, 1.0);
 

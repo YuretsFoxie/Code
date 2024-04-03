@@ -20,14 +20,14 @@ Spectrum::Spectrum(QCustomPlot *plot, QObject* parent): QObject(parent)
     plot->xAxis->setTickLabelColor(Qt::transparent);
     plot->yAxis->setTickLabelColor(Qt::transparent);
 
-    plot->xAxis->setRange(0, 64);
+    plot->xAxis->setRange(0, width);
 
     bars = new QCPBars(plot->xAxis, plot->yAxis);
     bars->setWidth(0.8);
     bars->setPen(Qt::NoPen);
     bars->setBrush(Qt::green);
 
-    for (int i = 0; i < 64; i++)
+    for (int i = 0; i < width; i++)
         x.append(i);
 }
 
@@ -39,7 +39,7 @@ Spectrum::~Spectrum()
 void Spectrum::update(const QVector<double>& values)
 {
     count++;
-    if (count < 64)
+    if (count < width)
         return;
 
     count = 0;

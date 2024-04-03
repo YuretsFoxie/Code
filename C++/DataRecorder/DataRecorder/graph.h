@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "qcustomplot.h"
+#include "settings.h"
 
 class Graph: public QObject
 {
@@ -15,6 +16,7 @@ private:
     Q_OBJECT
     QCustomPlot* plot;
     QCPGraph* graph;
+    SettingsData settings = Settings::shared().getData();
 };
 
 #endif // GRAPH_H
