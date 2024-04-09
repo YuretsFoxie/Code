@@ -8,7 +8,6 @@ Scope::Scope(QCustomPlot *plot, QObject *parent): QObject(parent)
     graph->setAntialiased(false);
 
     plot->setBackground(Qt::transparent);
-    plot->rescaleAxes();
 
     plot->xAxis->setBasePen(QPen(Qt::green, 1));
     plot->yAxis->setBasePen(QPen(Qt::green, 1));

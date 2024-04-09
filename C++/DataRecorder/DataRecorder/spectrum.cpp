@@ -4,7 +4,6 @@ Spectrum::Spectrum(QCustomPlot *plot, QObject* parent): QObject(parent)
 {
     this->plot = plot;
     plot->setBackground(Qt::transparent);
-    plot->rescaleAxes();
 
     plot->xAxis->grid()->setPen(QPen(Qt::transparent));
     plot->yAxis->grid()->setPen(QPen(Qt::transparent));

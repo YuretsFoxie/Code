@@ -61,6 +61,7 @@ void MainWindow::onUpdateValue(const int value)
 {
     scope->update(value);
     spectrumAnalyzer->push(value);
+    print(value);
 }
 
 void MainWindow::onFFTReady(const QVector<double> &result)
