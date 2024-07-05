@@ -1,0 +1,79 @@
+; ADMUX
+; Bit 7:6 – REFS1:0: Reference Selection Bits
+; 0 0 AREF, Internal Vref turned off
+; 0 1 AVCC with external capacitor at AREF pin
+; 1 0 Reserved
+; 1 1 Internal 2.56V Voltage Reference with external capacitor at AREF pin
+
+; Bit 5 – ADLAR: ADC Left Adjust Result
+; 1 - left adjusted (one result register is used)
+
+; Bits 4:0 – MUX4:0: Analog Channel and Gain Selection Bits
+; 10000 ADC0 ADC1 x1
+; 10001 ADC1 ADC1 x1 - calibration
+; 10010 ADC2 ADC1 x1
+; 10011 ADC3 ADC1 x1
+
+
+
+; ADCSRA
+; Bit 7 – ADEN: ADC Enable
+
+; Bit 6 – ADSC: ADC Start Conversion
+; Write 1 to start conversion.
+; On first conversion it takes 25 ADC clock cycles instead of the normal 13.
+; The first conversion performs initialization of the ADC.
+; Bit 5 – ADATE: ADC Auto Trigger Enable
+
+; Bit 5 – ADATE: ADC Auto Trigger Enable
+
+; Bit 4 – ADIF: ADC Interrupt Flag
+; 1 - cleared
+
+; Bit 3 – ADIE: ADC Interrupt Enable
+; 1 - enabled
+
+; Bits 2:0 – ADPS2:0: ADC Prescaler Select Bits
+; These bits determine the division factor between the XTAL frequency and the input clock to the ADC.
+; ADPS2 ADPS1 ADPS0 Division Factor
+; 0     0     0       2
+; 0     0     1       2
+; 0     1     0       4
+; 0     1     1       8
+; 1     0     0      16
+; 1     0     1      32
+; 1     1     0      64
+; 1     1     1     128
+
+
+
+; MCUCR
+; Bits 7, 5, 4 – SM2:0: Sleep Mode Select Bits 2, 1, and 0
+; SM2 SM1 SM0 Sleep Mode
+; 0   0   1   ADC Noise Reduction
+
+; Bit 6 – SE: Sleep Enable
+
+
+
+; SFIOR
+; Bit 1 – PSR2: Prescaler Reset Timer/Counter2
+
+
+
+; ASSR
+; Bit 3 – AS2: Asynchronous Timer/Counter2
+; 1 - asynchronous mode enabled
+
+
+
+; TIMSK 
+; Bit 7 – OCIE2: Timer/Counter2 Output Compare Match Interrupt Enable
+; Bit 6 – TOIE2: Timer/Counter2 Overflow Interrupt Enable
+
+
+
+; OCR2
+; Output Compare Register
+
+
