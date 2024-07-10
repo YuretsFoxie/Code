@@ -1,6 +1,7 @@
-Sampling frequency: 100 Hz for the test signal, 128 Hz for the real data (it will be 64 Hz when two values are measured)
+Sampling frequency: 100 Hz for the test signal, 512 Hz for the real data (4 channels are used, it would be 2048 for 1 channel)
 
 TODO:
+Implement displaying data from 3 channels + calibration.
 Adjust the displayed data.
 Play with the application to see what should be done next.
 

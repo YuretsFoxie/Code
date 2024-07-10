@@ -31,6 +31,48 @@ and R16, R17
 out @0, R16
 .endm
 
+.macro SetFlag
+set
+.endm
+
+.macro ClearFlag
+clt
+.endm
+
+.macro CheckFlag
+brts IsFlag
+.endm
+
+.macro Switch
+in R16, @0
+.endm
+
+.macro Case
+cpi R16, @0
+breq @1
+.endm
+
+.macro ResetTimer
+Load TCNT2, 0b00000000
+.endm
+
+.macro EnableSleepMode
+SetBits MCUCR, 1<<SE
+.endm
+
+.macro DisableSleepMode
+ClearBits MCUCR, 1<<SE
+.endm
+
+.macro EnableADCInterrupt
+sbi ADCSRA, ADIE
+.endm
+
+.macro TransmitMeasurementResult
+in R16, ADCH
+out UDR, R16
+.endm
+
 .macro InitStack
 Load SPL, low(RAMEND)
 Load SPH, high(RAMEND)
@@ -45,62 +87,28 @@ Load UCSRC, 1<<URSEL | 1<<UCSZ0 | 1<<UCSZ1
 .endm
 
 .macro InitADC
-Load ADMUX, 1<<REFS1 | 1<<REFS0 | 1<<ADLAR | 1<<MUX4 | 0<<MUX3 | 0<<MUX2 | 1<<MUX1 | 1<<MUX0	; internal 2.56V Voltage Reference, left adjusted result, differential mode (ecg2 selected, to be skiped)
-Load ADCSRA, 1<<ADEN | 1<<ADSC | 0<<ADATE | 1<<ADIF | 1<<ADIE | 1<<ADPS2 | 1<<ADPS1 | 1<<ADPS0	; ADC conversion is started to initialize ADC, it should end before starting the main measurements
+Load ADMUX,  1<<REFS1 | 1<<REFS0 | 1<<ADLAR | 1<<MUX4 | 0<<MUX3 | 0<<MUX2 | 1<<MUX1 | 1<<MUX0	; internal 2.56V Voltage Reference, left adjusted result, differential mode (ecg2 selected, to be skiped)
+Load ADCSRA, 1<<ADEN | 1<<ADSC | 0<<ADATE | 1<<ADIF | 0<<ADIE | 1<<ADPS2 | 1<<ADPS1 | 1<<ADPS0	; ADC conversion is started to initialize ADC, it should end before starting the main measurements, ADC interrupt disabled
 .endm
 
 .macro InitTimer
-Load ASSR, 1<<AS2						; use the external clock oscillator as the clock source for the Timer/Counter2 (async mode)
-Load TCCR2, 0<<CS22 | 0<<CS21 | 1<<CS20	; no prescaling (f = 32 768 Hz, 1/128 of second)
+Load ASSR,  1<<AS2						; use the external clock oscillator as the clock source for the Timer/Counter2 (async mode)
+Load TCCR2, 1<<WGM21 | 1<<CS20			; Clear Timer on Compare match (CTC) mode, no prescaling
 Load TIMSK, 1<<OCIE2					; Timer/Counter2 Compare Match Interrupt Enable
-Load TIFR, 0b11111111					; clear all interrupt flags
-Load OCR2, 127							; 255 is max value
+Load TIFR,  0b11111111					; clear all interrupt flags
+Load OCR2,  15							; 16 ticks for each measurement + transmission
 .endm
 
 .macro InitSleep
 Load MCUCR, 0<<SM2 | 0<<SM1 | 1<<SM0	; ADC Noise Reduction mode
 .endm
 
-.macro DisableUnused
+.macro DisableComparator
 Load ACSR, 1<<ACD | 0<<ACIE				; Analogous Comparator is off
 .endm
 
 .macro EnableInterrupts
 sei
-.endm
-
-.macro ClearFlag
-clt
-.endm
-
-.macro Switch
-in R16, @0
-.endm
-
-.macro Case
-cpi R16, @0
-breq @1
-.endm
-
-.macro ResetTimer
-SetBits SFIOR, 1<<PSR2
-.endm
-
-.macro EnableSleepMode
-SetBits MCUCR, 1<<SE
-.endm
-
-.macro DisableSleepMode
-ClearBits MCUCR, 1<<SE
-.endm
-
-.macro Transmit
-in R16, @0
-out UDR, R16
-.endm
-
-.macro SetFlag
-set
 .endm
 
 ;=====
@@ -111,12 +119,13 @@ InitUART
 InitADC
 InitTimer
 InitSleep
-DisableUnused
+DisableComparator
 EnableInterrupts
 .endm
 
 .macro Run
-Main: sleep
+Main:
+sleep
 rjmp Main
 .endm
 
@@ -136,7 +145,7 @@ Run
 ;=====
 
 Timer2CompareMatch:
-brts IsFlag
+CheckFlag
 reti
 
 IsFlag:
@@ -153,10 +162,10 @@ reti
 
 OnCommandStart:
 ResetTimer
-EnableSleepMode
+EnableADCInterrupt
 SetFlag
 reti
-	
+
 OnCommandStop:
 ClearFlag
 reti
@@ -165,7 +174,7 @@ reti
 
 ADCConversionIsCompleted:
 DisableSleepMode
-Transmit ADCH
+TransmitMeasurementResult
 
 Switch MCUCR
 Case calibration,	SetAlpha

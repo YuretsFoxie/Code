@@ -56,11 +56,6 @@
 
 
 
-; SFIOR
-; Bit 1 – PSR2: Prescaler Reset Timer/Counter2
-
-
-
 ; ASSR
 ; Bit 3 – AS2: Asynchronous Timer/Counter2
 ; 1 - asynchronous mode enabled
@@ -75,5 +70,26 @@
 
 ; OCR2
 ; Output Compare Register
+
+
+
+; TCCR2
+; Bit 3, 6 – WGM2[1:0]: Waveform Generation Mode
+; WGM2 WGM2 Mode
+; 0    0    Normal 0xFF
+; 0    1    PWM, Phase Correct
+; 1    0    CTC
+; 1    1    Fast PWM
+
+; Bit 2:0 – CS22:0: Clock Select
+; CS22 CS21 CS20 Description
+; 0    0    0    No clock source (Timer/Counter stopped).
+; 0    0    1    clkT2S /(No prescaling)
+; 0    1    0    clkT2S /8 (From prescaler)
+; 0    1    1    clkT2S /32 (From prescaler)
+; 1    0    0    clkT2S /64 (From prescaler)
+; 1    0    1    clkT2S /128 (From prescaler)
+; 1    1    0    clkT2 S/256 (From prescaler)
+; 1    1    1    clkT2 S/1024 (From prescaler)
 
 

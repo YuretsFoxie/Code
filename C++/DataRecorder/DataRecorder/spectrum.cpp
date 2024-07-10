@@ -18,7 +18,6 @@ Spectrum::Spectrum(QCustomPlot *plot, QObject* parent): QObject(parent)
     plot->yAxis->setSubTickPen(QPen(Qt::green, 1));
     plot->xAxis->setTickLabelColor(Qt::transparent);
     plot->yAxis->setTickLabelColor(Qt::transparent);
-
     plot->xAxis->setRange(0, width);
 
     bars = new QCPBars(plot->xAxis, plot->yAxis);
@@ -28,6 +27,8 @@ Spectrum::Spectrum(QCustomPlot *plot, QObject* parent): QObject(parent)
 
     for (int i = 0; i < width; i++)
         x.append(i);
+
+    clear();
 }
 
 Spectrum::~Spectrum()
