@@ -3,9 +3,13 @@
 Scope::Scope(QCustomPlot *plot, QObject *parent): QObject(parent)
 {
     this->plot = plot;
-    graph = plot->addGraph();
-    graph->setPen(QPen(Qt::green, 1));
-    graph->setAntialiased(false);
+
+    for (int i = 0; i < settings.channelsNumber; i++)
+    {
+        graphs.append(plot->addGraph());
+        graphs[i]->setPen(QPen(Qt::green, 1));
+        graphs[i]->setAntialiased(false);
+    }
 
     plot->setBackground(Qt::transparent);
 
@@ -27,17 +31,26 @@ Scope::Scope(QCustomPlot *plot, QObject *parent): QObject(parent)
     plot->yAxis->setRange(-140, 140); // -128 - 127
 }
 
-void Scope::update(int value)
+void Scope::push(int value)
 {
-    int count = graph->dataCount();
-    graph->addData(count, value);
-    plot->xAxis->setRange(count + 1, settings.spectrumN, Qt::AlignRight);
+    int count = graphs[currentChannel]->dataCount();
+    graphs[currentChannel]->addData(count, value);
+    currentChannel++;
+
+    if (currentChannel == settings.channelsNumber)
+    {
+        currentChannel = 0;
+        plot->xAxis->setRange(count + 1, settings.spectrumN, Qt::AlignRight);
+    }
+
     plot->replot();
 }
 
 void Scope::clear()
 {
-    graph->data()->clear();
+    for (int i = 0; i < settings.channelsNumber; i++)
+        graphs[i]->data()->clear();
+
     plot->xAxis->setRange(-settings.spectrumN, 0);
     plot->replot();
 }

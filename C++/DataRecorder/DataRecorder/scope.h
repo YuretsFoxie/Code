@@ -9,13 +9,15 @@ class Scope: public QObject
 {
 public:
     explicit Scope(QCustomPlot* plot, QObject *parent = nullptr);
-    void update(int value);
+    void push(int value);
     void clear();
 
 private:
+    int currentChannel = 0;
+
     Q_OBJECT
     QCustomPlot* plot;
-    QCPGraph* graph;
+    QVector<QCPGraph*> graphs;
     SettingsData settings = Settings::shared().getData();
 };
 

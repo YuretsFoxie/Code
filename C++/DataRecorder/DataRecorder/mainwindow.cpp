@@ -59,9 +59,9 @@ void MainWindow::onUpdateError(const QString &message)
 
 void MainWindow::onUpdateValue(const int value)
 {
-    scope->update(value);
-    spectrumAnalyzer->push(value);
-    print(value);
+    scope->push(value);
+    // spectrumAnalyzer->push(value);
+    // print(value);
 }
 
 void MainWindow::onFFTReady(const QVector<double> &result)

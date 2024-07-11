@@ -22,6 +22,8 @@ private slots:
 private:
     void start();
     void stop();
+    void generateSeparately();
+    void generateSum();
 
     const double pi = acos(-1);
     const double samplingFrequency = Settings::shared().getData().samplingFrequency;
@@ -31,6 +33,7 @@ private:
     QTimer* timer;
     QVector<Signal> testSignals = Settings::shared().getSignals();
     double t = 0;
+    int currentChannel = 0;
 };
 
 #endif // SIGNALGENERATOR_H

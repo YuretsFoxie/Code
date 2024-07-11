@@ -26,13 +26,7 @@ void SignalGenerator::toggle()
 
 void SignalGenerator::onTimer()
 {
-    double signalValue = 0;
-
-    for (Signal s: testSignals)
-        signalValue += s.calculate(t);
-
-    emit notifyValue(signalValue);
-    t += 1.0 / samplingFrequency;
+    generateSeparately();
 }
 
 void SignalGenerator::start()
@@ -44,4 +38,28 @@ void SignalGenerator::stop()
 {
     timer->stop();
     t = 0;
+}
+
+void SignalGenerator::generateSeparately()
+{
+    double signalValue = testSignals[currentChannel].calculate(t);
+    emit notifyValue(signalValue);
+
+    currentChannel++;
+    if (currentChannel == testSignals.count())
+    {
+        currentChannel = 0;
+        t += 1.0 / samplingFrequency;
+    }
+}
+
+void SignalGenerator::generateSum()
+{
+    double signalValue = 0;
+
+    for (Signal s: testSignals)
+        signalValue += s.calculate(t);
+
+    emit notifyValue(signalValue);
+    t += 1.0 / samplingFrequency;
 }

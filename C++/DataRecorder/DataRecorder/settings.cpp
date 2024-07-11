@@ -26,6 +26,7 @@ Settings::Settings()
         if (v[0] == "baudrate")             data.baudrate = QSerialPort::BaudRate(read(v).toInt());
         if (v[0] == "spectrum_n")           data.spectrumN = read(v).toInt();
         if (v[0] == "sampling_frequency")   data.samplingFrequency = read(v).toInt();
+        if (v[0] == "channels_number")      data.channelsNumber = read(v).toInt();
 
         if (v[0] == "signal")               readSignal(v);
     }

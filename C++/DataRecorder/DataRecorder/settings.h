@@ -14,6 +14,7 @@ struct SettingsData
     QSerialPort::BaudRate baudrate = QSerialPort::Baud1200;
     int spectrumN = 0;
     int samplingFrequency = 0;
+    int channelsNumber = 0;
 };
 
 

@@ -176,7 +176,7 @@ ADCConversionIsCompleted:
 DisableSleepMode
 TransmitMeasurementResult
 
-Switch MCUCR
+Switch ADMUX
 Case calibration,	SetAlpha
 Case alpha,			SetECG1
 Case ecg1, 			SetECG2
@@ -184,19 +184,19 @@ Case ecg2, 			SetCalibration
 reti
 
 SetCalibration:
-Load MCUCR, calibration
+Load ADMUX, calibration
 reti
 
 SetAlpha:
-Load MCUCR, alpha
+Load ADMUX, alpha
 reti
 
 SetECG1:
-Load MCUCR, ecg1
+Load ADMUX, ecg1
 reti
 
 SetECG2:
-Load MCUCR, ecg2
+Load ADMUX, ecg2
 reti
 
 ;=====
