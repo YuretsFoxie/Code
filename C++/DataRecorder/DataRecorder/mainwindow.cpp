@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent):
     setupButtons();
     setupGenerator();
     setupSpectrumAnalyzer();
+    setupFilter();
 }
 
 MainWindow::~MainWindow()
@@ -30,6 +31,7 @@ MainWindow::~MainWindow()
     delete errorSound;
     delete generator;
     delete spectrumAnalyzer;
+    delete filter;
 }
 
 void MainWindow::onUpdateConnected()
@@ -146,6 +148,14 @@ void MainWindow::setupSpectrumAnalyzer()
 {
     spectrumAnalyzer = new SpectrumAnalyzer();
     connect(spectrumAnalyzer, SpectrumAnalyzer::notifyFFTReady, this, onFFTReady);
+}
+
+void MainWindow::setupFilter()
+{
+    filter = new Filter();
+    //connect(filter, Filter::notifyValue, this, onUpdateValue);
+    //connect(ports, COMPorts::notifyValue, filter, Filter::onUpdateValue);
+    //connect(generator, SignalGenerator::notifyValue, filter, Filter::onUpdateValue);
 }
 
 void MainWindow::print(const int value)

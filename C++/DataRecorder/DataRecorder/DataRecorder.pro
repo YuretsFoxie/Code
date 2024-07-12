@@ -8,6 +8,7 @@ CONFIG += c++17
 
 SOURCES += \
     comports.cpp \
+    filter.cpp \
     main.cpp \
     mainwindow.cpp \
     scope.cpp \
@@ -20,6 +21,7 @@ SOURCES += \
 
 HEADERS += \
     comports.h \
+    filter.h \
     mainwindow.h \
     scope.h \
     settings.h \
