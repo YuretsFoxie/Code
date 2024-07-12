@@ -1,0 +1,2 @@
+isConsole=0
+libraries= -lopengl32 -lglu32 -lgdi32 -lglew32

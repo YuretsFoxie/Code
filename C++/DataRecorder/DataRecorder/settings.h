@@ -15,6 +15,7 @@ struct SettingsData
     int spectrumN = 0;
     int samplingFrequency = 0;
     int channelsNumber = 0;
+    int filteringValuesNumber = 0;
 };
 
 

@@ -8,6 +8,7 @@
 #include "comports.h"
 #include "spectrumanalyzer.h"
 #include "signalgenerator.h"
+#include "filter.h"
 
 namespace Ui
 {
@@ -44,6 +45,7 @@ private:
     void setupButtons();
     void setupGenerator();
     void setupSpectrumAnalyzer();
+    void setupFilter();
     void print(const int value);
     void print(const QString& message);
 
@@ -54,6 +56,7 @@ private:
     COMPorts* ports;
     SignalGenerator* generator;
     SpectrumAnalyzer* spectrumAnalyzer;
+    Filter* filter;
     Sound* clickSound;
     Sound* connectSound;
     Sound* disconnectSound;
