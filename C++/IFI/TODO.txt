@@ -1,0 +1,10 @@
+Fix the connecting functionality within the COMPort class.
+	Consider refusing from closing the thread.
+	Bug: the device stops sending data soon, more bytes received error is received.
+	Bug: toggling start and stop receiving results freezing.
+	
+Implement the Generator class and display its data with the Graph class.
+Implement displaying the received data with the Graph class.
+Implement the SpectrumAnalyzer class and display the Generator data with it at the Graph.
+Implement playing the sounds.
+Implement receiving and displaying the multichannel data.

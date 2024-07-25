@@ -1,1 +1,0 @@
-Make this a new foundation of my application, it should replace the Qt project as a lightweight and more reliable tool.
