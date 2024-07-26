@@ -107,5 +107,5 @@ void Application::runMainLoop()
 
 void Application::printHint()
 {
-	showText("F1 - start/stop data receiving.    Esc - quit.");
+	showText("F1  - start/stop data receiving.\nEsc - quit.");
 }
