@@ -3,7 +3,6 @@
 
 #include <windows.h>
 #include <GL/glew.h>
-#include <GL/wglew.h>
 
 class Graph
 {
@@ -15,7 +14,7 @@ public:
     }
 	
 	void setup(HWND hwnd);
-	void update();
+	void update(const int value);
 	
 private:
 	Graph();
@@ -50,8 +49,14 @@ private:
 	HDC hdc;
 	HGLRC hrc;
 	GLuint shaderProgram;
-	GLuint VBO;
-	GLuint VAO;
+	GLuint vboIDs[2];
+	GLuint vaoID;
+	
+	size_t bufferSize = 1024 * sizeof(float);
+	size_t newDataSize = sizeof(int); // or 3 * sizeof(int) ?
+	size_t currentOffset = 0;
+	int currentVBO = 0;
+	int numVertices = 0;
 };
 
 #endif // GRAPH_H_INCLUDED

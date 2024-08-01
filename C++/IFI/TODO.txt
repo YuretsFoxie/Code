@@ -1,8 +1,4 @@
-Fix the connecting functionality within the COMPort class.
-	Consider refusing from closing the thread.
-	Bug: the device stops sending data soon, more bytes received error is received.
-	Bug: toggling start and stop receiving results freezing.
-	
+COM-port: consider adding the stop data sending check (send some code from the MCU after the stop command is accepted, instead of sending a fixed amount of zeros to it).
 Implement the Generator class and display its data with the Graph class.
 Implement displaying the received data with the Graph class.
 Implement the SpectrumAnalyzer class and display the Generator data with it at the Graph.

@@ -2,41 +2,63 @@
 
 #include <iostream>
 
+// TODO:
+// Implement shifting the new data (adding an X coordinate).
+
+// Check if the numVertices is set correctly
+// Check if newDataSize is calculated correctly
+// Consider reducind the data dimension from 3 to 2
+
 // Public Functions
 
 void Graph::setup(HWND hwnd)
 {
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f,  0.5f, 0.0f
-	};
-	
 	hWnd = hwnd;
 	enableOpenGL(hWnd, &hdc, &hrc);
 	shaderProgram = createShaderProgram();
 	
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
+	glGenBuffers(2, vboIDs);
+	glGenVertexArrays(1, &vaoID);
+	glBindVertexArray(vaoID);
 	
-	glBindVertexArray(VAO);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	for (int i = 0; i < 2; ++i)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vboIDs[i]);
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STREAM_DRAW);
+		
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+		glEnableVertexAttribArray(0);
+	}
 	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
 
-void Graph::update()
+void Graph::update(const int value)
 {
+	numVertices++;
+	
+	if (currentOffset + newDataSize > bufferSize)
+	{
+		numVertices = 1024;
+		currentOffset = 0;
+	}
+	
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(shaderProgram);
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_LINE_STRIP, 0, 3);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[currentVBO]);
+	glBufferSubData(GL_ARRAY_BUFFER, currentOffset, newDataSize, (void*)value);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
+	glBindVertexArray(vaoID);
+	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[currentVBO]);
+	glDrawArrays(GL_POINTS, 0, numVertices);
+	glBindVertexArray(0);
+	
+	currentOffset += newDataSize;
+	currentVBO = (currentVBO + 1) % 2;
+	
 	::SwapBuffers(hdc);
 }
 
@@ -46,8 +68,9 @@ Graph::Graph() {}
 
 Graph::~Graph()
 {
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &vaoID);
+	glDeleteBuffers(1, &vboIDs[0]);
+	glDeleteBuffers(1, &vboIDs[1]);
 	glDeleteProgram(shaderProgram);
 	disableOpenGL(hWnd, hdc, hrc);
 }
@@ -127,129 +150,4 @@ GLuint Graph::createShaderProgram()
 	glDeleteShader(fragmentShader);
 	
 	return shaderProgram;
-}
-
-
-
-//=====
-
-// Swap buffers
-
-// Two VBOs are created and initialized with GL_STREAM_DRAW usage. 
-// A VAO is also created and configured to store the vertex attribute setup.
-// Each frame, the current VBO is updated with new data using glBufferSubData. 
-// The VAO is then bound, and the current VBO is used for rendering. 
-// After rendering, the VBO index is swapped to alternate between the two VBOs.
-
-// Initialization
-GLuint vboIDs[2];
-glGenBuffers(2, vboIDs); // Generate two VBOs
-GLuint vaoID;
-glGenVertexArrays(1, &vaoID); // Generate a VAO
-
-glBindVertexArray(vaoID);
-
-// Setup VBOs
-for (int i = 0; i < 2; ++i)
-{
-	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[i]);
-	glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STREAM_DRAW); // Allocate buffer memory
-
-	// Setup vertex attributes (assuming a simple position attribute)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-	glEnableVertexAttribArray(0);
-}
-
-glBindBuffer(GL_ARRAY_BUFFER, 0);
-glBindVertexArray(0);
-
-
-
-// Rendering Loop
-int currentVBO = 0;
-
-while (!shouldCloseWindow)
-{
-	// Update VBO with new data
-	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[currentVBO]);
-	glBufferSubData(GL_ARRAY_BUFFER, offset, sizeof(newData), newData);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	
-	// Render using the current VBO
-	glBindVertexArray(vaoID);
-	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[currentVBO]);
-	glDrawArrays(GL_POINTS, 0, numVertices);
-	glBindVertexArray(0);
-	
-	// Swap VBOs
-	currentVBO = (currentVBO + 1) % 2;
-	
-	// Swap buffers, poll events, etc.
-	glfwSwapBuffers(window);
-	glfwPollEvents();
-}
-
-
-
-//=====
-
-// Circular buffer
-
-// A VBO and VAO are created and initialized. The VBO is allocated with a fixed buffer size using glBufferData.
-//	The currentOffset is calculated to determine where the new data should be written in the buffer.
-//	If adding the new data would exceed the buffer size, the offset wraps around to the beginning of the buffer.
-//	The glBufferSubData function is used to update the VBO with the new data at the calculated offset.
-//	The VAO is bound, and the data is rendered.
-//	The offset is updated for the next frame.
-
-// Initialization
-// First, initialize your VBO and VAO:
-
-GLuint vboID;
-glGenBuffers(1, &vboID);
-GLuint vaoID;
-glGenVertexArrays(1, &vaoID);
-
-glBindVertexArray(vaoID);
-glBindBuffer(GL_ARRAY_BUFFER, vboID);
-glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STREAM_DRAW); // Allocate buffer memory
-
-// Setup vertex attributes (assuming a simple position attribute)
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-glEnableVertexAttribArray(0);
-
-glBindBuffer(GL_ARRAY_BUFFER, 0);
-glBindVertexArray(0);
-
-
-
-// Rendering Loop
-// In the rendering loop, update the VBO with new data using a circular buffer approach:
-
-size_t bufferSize = 1024 * sizeof(float); // Example buffer size
-size_t currentOffset = 0;
-size_t newDataSize = sizeof(newData); // Size of the new data to be added
-
-while (!shouldCloseWindow)
-{
-	// Calculate the offset for the new data
-	if (currentOffset + newDataSize > bufferSize)
-		currentOffset = 0; // Wrap around if we reach the end of the buffer
-
-	// Update VBO with new data
-	glBindBuffer(GL_ARRAY_BUFFER, vboID);
-	glBufferSubData(GL_ARRAY_BUFFER, currentOffset, newDataSize, newData);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	
-	// Render using the VBO
-	glBindVertexArray(vaoID);
-	glDrawArrays(GL_POINTS, 0, numVertices);
-	glBindVertexArray(0);
-	
-	// Update the offset for the next frame
-	currentOffset += newDataSize;
-	
-	// Swap buffers, poll events, etc.
-	glfwSwapBuffers(window);
-	glfwPollEvents();
 }

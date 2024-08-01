@@ -32,6 +32,9 @@ private:
 	HINSTANCE hInstance;
 	HWND hWnd;
 	MSG msg;
+	
+	int receivedValue = 0;
+	bool isNewValueReceived = false;
 };
 
 #endif // APPLICATION_H_INCLUDED

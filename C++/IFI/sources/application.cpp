@@ -25,6 +25,9 @@ void Application::onReceived(const int value)
 {
 	std::string text = std::to_string(value);
 	showText(text);
+	
+	receivedValue = value;
+	isNewValueReceived = true;
 }
 
 void Application::showText(const std::string& str)
@@ -101,8 +104,8 @@ void Application::runMainLoop()
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
         }
-		else
-			Graph::shared().update();
+		else if (isNewValueReceived)
+			Graph::shared().update(receivedValue);
 }
 
 void Application::printHint()
