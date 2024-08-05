@@ -16,10 +16,9 @@
 .equ MATCH_MAX			= F_SYSTEM / (F_MAX * PRESCALER) - 1
 
 ; TODO: adjust the values
-.equ ADCThreshold		= 0b11101100
+.equ ADCThreshold		= 0b11111000
 .equ ADCMatchesCount	= 0b01000000
-.equ DelayNumber		= 0b00001000
-.equ DelayHalfNumber	= 0b00000100
+.equ DelayNumber		= 0b00000100
 
 .def DelayCounter		= R17
 .def ADCCounter			= R18
@@ -45,6 +44,15 @@ clt
 
 .macro CheckIsTurnedRight
 brts @0
+.endm
+
+.macro EnableTurnIfNeeded
+cpi  DelayCounter, 0
+breq ShouldEnable
+reti
+
+ShouldEnable:
+ldi DelayCounter, DelayNumber
 .endm
 
 .macro InitWatchdog
@@ -73,7 +81,7 @@ Load PCMSK, 1<<PCINT1
 .endm
 
 .macro InitPortB
-Load DDRB,  0b00010001
+Load DDRB,  0b00010000
 Load PORTB, 0b00000110
 .endm
 
@@ -121,7 +129,7 @@ Run
 ;=====
 
 ExternalInterrupt:
-ldi DelayCounter, DelayNumber
+EnableTurnIfNeeded
 reti
 
 ;=====
@@ -141,36 +149,31 @@ reti
 WatchdogTimeout:
 sbi  PINB, PB4
 
-cpi  DelayCounter, 0
-breq ReturnWatchdogTimeout
-
 cpi  DelayCounter, DelayNumber
 breq TurnLeftOrRight
 
-cpi  DelayCounter, DelayHalfNumber
-breq TurnMiddle
+cpi  DelayCounter, 0
+breq ReturnWatchdogTimeout
 
 dec  DelayCounter
-ReturnWatchdogTimeout:
-cbi DDRB, PB0
 reti
 
 TurnLeftOrRight:
+dec  DelayCounter
 sbi DDRB, PB0
-dec DelayCounter
-CheckIsTurnedRight IsTurnedRight
-SetIsTurnedRight
-Load OCR0B, MATCH_MIN
-reti
 
-IsTurnedRight:
-ClearIsTurnedRight
+CheckIsTurnedRight TurnLeft
+SetIsTurnedRight
 Load OCR0B, MATCH_MAX
 reti
 
-TurnMiddle:
+TurnLeft:
+ClearIsTurnedRight
+Load OCR0B, MATCH_MIN
+reti
+
+ReturnWatchdogTimeout:
 Load OCR0B, MATCH_MID
-dec DelayCounter
 reti
 
 ;=====
@@ -186,7 +189,7 @@ inc  ADCCounter
 reti
 
 ADCCounterIsFull:
-ldi DelayCounter, DelayNumber
+EnableTurnIfNeeded
 reti
 
 IsVoltageLess:
