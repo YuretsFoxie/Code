@@ -1,27 +1,20 @@
 .device  ATtiny13A
 .include "tn13Adef.inc"
 
-.equ F_SYSTEM			= 4800000
-.equ PRESCALER			= 1024
-.equ F_MAIN				= 50
+.equ F_SYSTEM		= 4800000
+.equ PRESCALER		= 1024
+.equ F_MAIN			= 50
+.equ F_MIN			= 400	; 500
+.equ F_MID			= 600	; 750
+.equ F_MAX			= 1600	; 1000
+.equ MATCH_MAIN		= F_SYSTEM / (F_MAIN * PRESCALER) - 1
+.equ MATCH_MIN		= F_SYSTEM / (F_MIN * PRESCALER) - 1
+.equ MATCH_MID		= F_SYSTEM / (F_MID * PRESCALER) - 1
+.equ MATCH_MAX		= F_SYSTEM / (F_MAX * PRESCALER) - 1
+.equ ADCThreshold	= 0b11111100	; 0b11111000
+.equ DelayNumber	= 0b00000100
 
-; TODO: adjust the values
-.equ F_MIN				= 400	; 500
-.equ F_MID				= 600	; 750
-.equ F_MAX				= 1600	; 1000
-
-.equ MATCH_MAIN			= F_SYSTEM / (F_MAIN * PRESCALER) - 1
-.equ MATCH_MIN			= F_SYSTEM / (F_MIN * PRESCALER) - 1
-.equ MATCH_MID			= F_SYSTEM / (F_MID * PRESCALER) - 1
-.equ MATCH_MAX			= F_SYSTEM / (F_MAX * PRESCALER) - 1
-
-; TODO: adjust the values
-.equ ADCThreshold		= 0b11111000
-.equ ADCMatchesCount	= 0b01000000
-.equ DelayNumber		= 0b00000100
-
-.def DelayCounter		= R17
-.def ADCCounter			= R18
+.def DelayCounter	= R18
 
 ;=====
 
@@ -30,20 +23,40 @@ ldi	 R16, @1
 out	 @0, R16
 .endm
 
-.macro InitStack
-Load SPL, low(RAMEND)
+.macro SetBits
+in  R16, @0
+ori R16, @1
+out @0, R16
 .endm
 
-.macro SetIsTurnedRight
+.macro ClearBits
+in R16, @0
+ldi R17, @1
+com R17
+and R16, R17
+out @0, R16
+.endm
+
+;=====
+
+.macro SetFlag
 set
 .endm
 
-.macro ClearIsTurnedRight
+.macro ClearFlag
 clt
 .endm
 
-.macro CheckIsTurnedRight
+.macro CheckFlag
 brts @0
+.endm
+
+.macro EnableSleepMode
+SetBits MCUCR, 1<<SE
+.endm
+
+.macro DisableSleepMode
+ClearBits MCUCR, 1<<SE
 .endm
 
 .macro EnableTurnIfNeeded
@@ -52,11 +65,17 @@ breq ShouldEnable
 reti
 
 ShouldEnable:
-ldi DelayCounter, DelayNumber
+ldi  DelayCounter, DelayNumber
+.endm
+
+;=====
+
+.macro InitStack
+Load SPL, low(RAMEND)
 .endm
 
 .macro InitWatchdog
-Load WDTCR, 1<<WDTIE | 1<<WDP2 | 1<<WDP0	; Watchdog interrupt is called each 0.5 second, 1<<WDP2 | 1<<WDP1 for 1 second
+Load WDTCR, 1<<WDTIE | 1<<WDP2 | 1<<WDP0	; Watchdog interrupt is called each 0.5 second
 .endm
 
 .macro InitTimer0
@@ -70,8 +89,7 @@ Load TIFR0,  0b11111111					; Clear the interrupt flags
 
 .macro InitADC
 Load ADMUX,  0<<REFS0 | 1<<ADLAR | 0<<MUX1 | 1<<MUX0									; Vcc is used as voltage reference, result is left-adjusted, ADC1 (PB2 is input)
-Load ADCSRA, 1<<ADEN | 1<<ADSC | 1<<ADATE | 1<<ADIE | 1<<ADPS2 | 1<<ADPS1 | 1<<ADPS0	; ADC enabled, start conversion, trigger source enabled (for the free running mode), interrupt enabled, prescaler 128
-Load ADCSRB, 0<<ADTS2 | 0<<ADTS1 | 0<<ADTS0												; Free running mode enabled
+Load ADCSRA, 1<<ADEN | 0<<ADSC | 0<<ADATE | 1<<ADIE | 1<<ADPS2 | 1<<ADPS1 | 1<<ADPS0	; ADC enabled, don't start conversion yet, trigger source disabled, interrupt enabled, prescaler 128
 .endm
 
 .macro InitExternalInterrupt
@@ -80,13 +98,23 @@ Load GIMSK, 1<<PCIE
 Load PCMSK, 1<<PCINT1
 .endm
 
-.macro InitPortB
-Load DDRB,  0b00010000
+.macro InitPortB							; PB0 is PWM output, PB1 is button input, PB2 is ADC input, PB4 is LED output
+Load DDRB,  0b00010001
 Load PORTB, 0b00000110
+
+; cbi DDRB, PB0								; temporary disabled PWM output
+.endm
+
+.macro ClearRegisters
+ldi DelayCounter, 0
 .endm
 
 .macro DisableComparator
 Load ACSR, 1<<ACD | 0<<ACIE
+.endm
+
+.macro InitSleep
+SetBits MCUCR, 1<<SM0						; Enable Noise Reduction mode
 .endm
 
 .macro EnableInterrupts
@@ -102,12 +130,15 @@ InitTimer0
 InitADC
 InitExternalInterrupt
 InitPortB
+ClearRegisters
 DisableComparator
+InitSleep
 EnableInterrupts
 .endm
 
 .macro Run
-Main:
+Main: 
+sleep
 rjmp Main
 .endm
 
@@ -147,86 +178,50 @@ reti
 ;=====
 
 WatchdogTimeout:
-sbi  PINB, PB4
+sbi PINB, PB4
 
 cpi  DelayCounter, DelayNumber
-breq TurnLeftOrRight
+breq IsFull
 
 cpi  DelayCounter, 0
-breq ReturnWatchdogTimeout
+breq IsEmpty
 
 dec  DelayCounter
 reti
 
-TurnLeftOrRight:
-dec  DelayCounter
-sbi DDRB, PB0
-
-CheckIsTurnedRight TurnLeft
-SetIsTurnedRight
+IsFull:
+dec DelayCounter
+CheckFlag IsFlag
+SetFlag
 Load OCR0B, MATCH_MAX
 reti
 
-TurnLeft:
-ClearIsTurnedRight
+IsFlag:
+ClearFlag
 Load OCR0B, MATCH_MIN
 reti
 
-ReturnWatchdogTimeout:
+IsEmpty:
+EnableSleepMode
 Load OCR0B, MATCH_MID
 reti
 
 ;=====
 
 ADCConversionComplete:
+DisableSleepMode
 in   R16, ADCH
 cpi  R16, ADCThreshold
-brlo IsVoltageLess
-
-cpi  ADCCounter, ADCMatchesCount
-breq ADCCounterIsFull
-inc  ADCCounter
+brsh IsLight
 reti
 
-ADCCounterIsFull:
+IsLight:
 EnableTurnIfNeeded
-reti
-
-IsVoltageLess:
-cpi  ADCCounter, 0
-breq ADCCounterIsEmpty
-dec  ADCCounter
-reti
-
-ADCCounterIsEmpty:
 reti
 
 ;=====
 
-/*
-onADCConversionComplete()
-{
-	if (ADCH >= ADCThreshold)
-	{
-		if (ADCCounter < ADCMatchesCount)
-		{
-			ADCCounter++;
-		}
-		else if (ADCCounter == ADCMatchesCount)
-		{
-			ledOn();
-		}
-	}
-	else
-	{
-		if (ADCCounter > 0)
-		{
-			ADCCounter--;
-		}
-		else if (ADCCounter == 0)
-		{
-			ledOff();
-		}
-	}
-}
-*/
+; TODO: turn the motor off after the moving
+; TODO: allow the next turn only if there was a pause in lighting
+
+
