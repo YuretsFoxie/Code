@@ -11,10 +11,11 @@
 .equ MATCH_MIN		= F_SYSTEM / (F_MIN * PRESCALER) - 1
 .equ MATCH_MID		= F_SYSTEM / (F_MID * PRESCALER) - 1
 .equ MATCH_MAX		= F_SYSTEM / (F_MAX * PRESCALER) - 1
-.equ ADCThreshold	= 0b11111100	; 0b11111000
+.equ ADCThreshold	= 0b11111100
 .equ DelayNumber	= 0b00000100
 
 .def DelayCounter	= R18
+.def Flags			= R19
 
 ;=====
 
@@ -39,16 +40,30 @@ out @0, R16
 
 ;=====
 
-.macro SetFlag
-set
+.macro SetIsTurnedMax
+sbr Flags, 1<<0
 .endm
 
-.macro ClearFlag
-clt
+.macro ClearIsTurnedMax
+cbr Flags, 1<<0
 .endm
 
-.macro CheckFlag
-brts @0
+.macro CheckIsTurnedMax
+sbrc Flags, 0 							; skip if bit 0 clear (if set, there will be a jump)
+rjmp @0
+.endm
+
+.macro SetIsTurnedMid
+sbr Flags, 1<<1
+.endm
+
+.macro ClearIsTurnedMid
+cbr Flags, 1<<1
+.endm
+
+.macro CheckIsTurnedMid
+sbrc Flags, 1 							; skip if bit 1 clear (if set, there will be a jump)
+rjmp @0
 .endm
 
 .macro EnableSleepMode
@@ -68,6 +83,14 @@ ShouldEnable:
 ldi  DelayCounter, DelayNumber
 .endm
 
+.macro EnablePWM
+sbi DDRB, PB0
+.endm
+
+.macro DisablePWM
+cbi DDRB, PB0
+.endm
+
 ;=====
 
 .macro InitStack
@@ -84,7 +107,6 @@ Load OCR0B,  MATCH_MID
 Load TCCR0A, 1<<WGM01						; CTC mode (timer clears on match OCR0A)
 Load TCCR0B, 1<<CS02 | 0<<CS01 | 1<<CS00	; prescaler 1024
 Load TIMSK0, 1<<OCIE0A | 1<<OCIE0B			; Enable the Compare Match interrupts
-Load TIFR0,  0b11111111					; Clear the interrupt flags
 .endm
 
 .macro InitADC
@@ -101,12 +123,12 @@ Load PCMSK, 1<<PCINT1
 .macro InitPortB							; PB0 is PWM output, PB1 is button input, PB2 is ADC input, PB4 is LED output
 Load DDRB,  0b00010001
 Load PORTB, 0b00000110
-
-; cbi DDRB, PB0								; temporary disabled PWM output
 .endm
 
 .macro ClearRegisters
-ldi DelayCounter, 0
+clr DelayCounter
+clr Flags
+Load TIFR0, 0b11111111
 .endm
 
 .macro DisableComparator
@@ -145,7 +167,7 @@ rjmp Main
 ;=====
 
 .org 0x0000 rjmp Reset
-.org 0x0002 rjmp ExternalInterrupt		; 1 for INT0, 2 for PCINTs
+.org 0x0002 rjmp ExternalInterrupt			; 1 for INT0, 2 for PCINTs
 .org 0x0006 rjmp TimerCompareMatchA
 .org 0x0007 rjmp TimerCompareMatchB
 .org 0x0008 rjmp WatchdogTimeout
@@ -178,7 +200,8 @@ reti
 ;=====
 
 WatchdogTimeout:
-sbi PINB, PB4
+DisablePWM
+sbi  PINB, PB4
 
 cpi  DelayCounter, DelayNumber
 breq IsFull
@@ -190,19 +213,27 @@ dec  DelayCounter
 reti
 
 IsFull:
+EnablePWM
+SetIsTurnedMid
 dec DelayCounter
-CheckFlag IsFlag
-SetFlag
+CheckIsTurnedMax IsTurnedMax
+SetIsTurnedMax
 Load OCR0B, MATCH_MAX
 reti
 
-IsFlag:
-ClearFlag
+IsTurnedMax:
+ClearIsTurnedMax
 Load OCR0B, MATCH_MIN
 reti
 
 IsEmpty:
 EnableSleepMode
+CheckIsTurnedMid IsTurnedMid
+reti
+
+IsTurnedMid:
+ClearIsTurnedMid
+EnablePWM
 Load OCR0B, MATCH_MID
 reti
 
@@ -221,7 +252,4 @@ reti
 
 ;=====
 
-; TODO: turn the motor off after the moving
 ; TODO: allow the next turn only if there was a pause in lighting
-
-
