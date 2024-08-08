@@ -4,14 +4,15 @@
 .equ F_SYSTEM		= 4800000
 .equ PRESCALER		= 1024
 .equ F_MAIN			= 50
-.equ F_MIN			= 400	; 500
-.equ F_MID			= 600	; 750
-.equ F_MAX			= 1600	; 1000
+.equ F_MIN			= 400
+.equ F_MID			= 600
+.equ F_MAX			= 1600
 .equ MATCH_MAIN		= F_SYSTEM / (F_MAIN * PRESCALER) - 1
 .equ MATCH_MIN		= F_SYSTEM / (F_MIN * PRESCALER) - 1
 .equ MATCH_MID		= F_SYSTEM / (F_MID * PRESCALER) - 1
 .equ MATCH_MAX		= F_SYSTEM / (F_MAX * PRESCALER) - 1
-.equ ADCThreshold	= 0b11111100
+
+.equ ADCThreshold	= 0b11110000
 .equ DelayNumber	= 0b00000100
 
 .def DelayCounter	= R18
@@ -66,6 +67,19 @@ sbrc Flags, 1 							; skip if bit 1 clear (if set, there will be a jump)
 rjmp @0
 .endm
 
+.macro SetIsDark
+sbr Flags, 1<<2
+.endm
+
+.macro ClearIsDark
+cbr Flags, 1<<2
+.endm
+
+.macro CheckIsDark
+sbrc Flags, 2 							; skip if bit 2 clear (if set, there will be a jump)
+rjmp @0
+.endm
+
 .macro EnableSleepMode
 SetBits MCUCR, 1<<SE
 .endm
@@ -89,6 +103,25 @@ sbi DDRB, PB0
 
 .macro DisablePWM
 cbi DDRB, PB0
+.endm
+
+.macro CheckDelayCounter
+cpi  DelayCounter, @0
+breq @1
+.endm
+
+.macro ToggleLED
+sbi PINB, PB4
+.endm
+
+.macro DecrementDelayCounter
+dec DelayCounter
+.endm
+
+.macro CheckLight
+in   R16, ADCH
+cpi  R16, ADCThreshold
+brsh @0
 .endm
 
 ;=====
@@ -200,22 +233,17 @@ reti
 ;=====
 
 WatchdogTimeout:
+ToggleLED
 DisablePWM
-sbi  PINB, PB4
-
-cpi  DelayCounter, DelayNumber
-breq IsFull
-
-cpi  DelayCounter, 0
-breq IsEmpty
-
-dec  DelayCounter
+CheckDelayCounter DelayNumber, IsFull
+CheckDelayCounter 0,           IsEmpty
+DecrementDelayCounter
 reti
 
 IsFull:
 EnablePWM
 SetIsTurnedMid
-dec DelayCounter
+DecrementDelayCounter
 CheckIsTurnedMax IsTurnedMax
 SetIsTurnedMax
 Load OCR0B, MATCH_MAX
@@ -241,15 +269,17 @@ reti
 
 ADCConversionComplete:
 DisableSleepMode
-in   R16, ADCH
-cpi  R16, ADCThreshold
-brsh IsLight
+CheckLight IsLight
+SetIsDark
 reti
 
 IsLight:
+CheckIsDark IsDark
+reti
+
+IsDark:
+ClearIsDark
 EnableTurnIfNeeded
 reti
 
 ;=====
-
-; TODO: allow the next turn only if there was a pause in lighting
