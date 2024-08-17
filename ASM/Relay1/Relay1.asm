@@ -2,16 +2,16 @@
 .include "tn13Adef.inc"
 
 .equ idle				= 0b00000001
-.equ firstPress			= 0b00000010
-.equ firstPressFailed	= 0b00000100
-.equ gap				= 0b00001000
-.equ longPress			= 0b00010000
+.equ firstPulse			= 0b00000010
+.equ gap				= 0b00000100
+.equ secondPulse		= 0b00001000
 
-.equ firstPressDelay	= 31		; 10 - 320 milliseconds
-.equ gapDelay			= 62		; 2 seconds
-.equ longPressDelay		= 94		; 3 seconds
+; the values (and Watchdog timeout) should be adjusted, they are aproximate
 
-.def Flags				= R17
+.equ firstPulseDelay	= 1
+.equ gapDelay			= 1
+.equ secondPulseDelay	= 8
+
 .def Counter			= R18
 .def State				= R19
 
@@ -22,9 +22,58 @@ ldi	 R16, @1
 out	 @0, R16
 .endm
 
+.macro SetBits
+in  R16, @0
+ori R16, @1
+out @0, R16
+.endm
+
+.macro ClearBits
+in R16, @0
+ldi R17, @1
+com R17
+and R16, R17
+out @0, R16
+.endm
+
 .macro CaseState
-cpi State, @0
+cpi  State, @0
 breq @1
+.endm
+
+.macro EnableExternalInterrupts
+Load GIMSK, 1<<INT0
+.endm
+
+.macro DisableExternalInterrupts
+Load GIMSK, 0<<INT0
+.endm
+
+.macro EnableSleepMode
+SetBits MCUCR, 1<<SE
+.endm
+
+.macro DisableSleepMode
+ClearBits MCUCR, 1<<SE
+.endm
+
+.macro SetLevelHigh
+sbi PORTB, PB0
+.endm
+
+.macro SetLevelLow
+cbi PORTB, PB0
+.endm
+
+.macro Loop
+cpi  Counter, 0
+breq @0
+dec  Counter
+.endm
+
+.macro SetState
+ldi State, @0
+ldi Counter, @1
 .endm
 
 ;=====
@@ -33,19 +82,28 @@ breq @1
 Load SPL, low(RAMEND)
 .endm
 
-.macro InitWatchdog
-Load WDTCR, 1<<WDTIE | 1<<WDP0		; Watchdog interrupt is called each 32 milliseconds (5000 / 32 = 156.25)
+.macro InitExternalInterrupt
+Load MCUCR, 0<<ISC01 | 0<<ISC00				; The low level of INT0 generates an interrupt request
+Load GIMSK, 1<<INT0							; Pin Change Interrupt Enable
 .endm
 
-.macro InitPortB					; PB0 is LED output, PB1 is button input
+.macro InitWatchdog
+Load WDTCR, 1<<WDTIE | 1<<WDP2				; Watchdog interrupt is called about each 0.25 second
+.endm
+
+.macro InitPortB							; PB0 is LED output, PB1 is button input
 Load DDRB,  0b00000001
 Load PORTB, 0b00000010
 .endm
 
+.macro InitSleepMode
+ClearBits MCUCR, 1<<SM1 | 1<<SM0			; 0 0 for Idle mode, 1 0 for Power-down mode
+.endm
+
 .macro ClearRegisters
-clr Flags
-clr Counter
+Load GIFR, 0b11111111
 ldi State, idle
+clr Counter
 .endm
 
 .macro DisableComparator
@@ -60,21 +118,26 @@ sei
 
 .macro Init
 InitStack
+InitExternalInterrupt
 InitWatchdog
 InitPortB
+InitSleepMode
 ClearRegisters
 DisableComparator
+EnableSleepMode
 EnableInterrupts
 .endm
 
 .macro Run
 Main:
+sleep
 rjmp Main
 .endm
 
 ;=====
 
 .org 0x0000 rjmp Reset
+.org 0x0001 rjmp ButtonPress
 .org 0x0008 rjmp WatchdogTimeout
 
 ;=====
@@ -85,73 +148,54 @@ Run
 
 ;=====
 
-; Stage 1: toggle the LED, if the press was shorter, than firstPressDelay
+ButtonPress:
+DisableSleepMode
+DisableExternalInterrupts
+SetState firstPulse, firstPulseDelay
+reti
 
-; if state == idle AND level == 0, start the counter, state = firstPress
-; if (state == firstPress OR state == firstPressFailed) counter != 0, decrement the counter
-
-; if state == firstPress AND counter == 0 AND level == 0, start the counter, state = firstPressFailed
-; if state == firstPress AND counter == 0 AND level == 1, state = idle, toggle LED
-; if state == firstPressFailed AND counter == 0 AND level == 0, start the counter, state = firstPressFailed
-; if state == firstPressFailed AND counter == 0 AND level == 1, state = idle
+;=====
 
 WatchdogTimeout:
-CaseState idle, OnIdle
-CaseState firstPress, OnFirstPress
-CaseState firstPressFailed, OnFirstPressFailed
+CaseState firstPulse,	OnFirstPulse
+CaseState gap,			OnGap
+CaseState secondPulse,	OnSecondPulse
 reti
 
-;-----
 
-OnIdle:
-sbis PINB, PB1
-rjmp IdleLow
+
+OnFirstPulse:
+SetLevelHigh
+Loop FirstPulseIsOver
 reti
 
-IdleLow:
-ldi Counter, firstPressDelay
-ldi State, firstPress
+FirstPulseIsOver:
+SetLevelLow
+SetState gap, gapDelay
 reti
 
-;-----
 
-OnFirstPress:
-cpi  Counter, 1
-brsh Decrement
 
-sbis PINB, PB1
-rjmp FirstPressLow
-
-ldi State, idle
-sbi PINB, PB0
+OnGap:
+Loop GapIsOver
 reti
 
-FirstPressLow:
-ldi Counter, firstPressDelay
-ldi State, firstPressFailed
+GapIsOver:
+SetLevelHigh
+SetState secondPulse, secondPulseDelay
 reti
 
-;-----
 
-OnFirstPressFailed:
-cpi  Counter, 1
-brsh Decrement
 
-sbis PINB, PB1
-rjmp FirstPressFailedLow
-
-ldi State, idle
+OnSecondPulse:
+Loop SecondPulseIsOver
 reti
 
-FirstPressFailedLow:
-ldi Counter, firstPressDelay
-ldi State, firstPressFailed
-reti
-
-;-----
-
-Decrement:
-dec Counter
+SecondPulseIsOver:
+EnableSleepMode
+SetLevelLow
+EnableExternalInterrupts
+SetState idle, 0
 reti
 
 ;=====
