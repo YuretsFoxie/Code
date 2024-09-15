@@ -10,8 +10,10 @@ public:
         return instance;
     }
 	
+	void generateTestValue();
+	
 private:
-
+	int testValue = 0;
 };
 
 #endif // GENERATOR_H_INCLUDED

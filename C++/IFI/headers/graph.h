@@ -22,40 +22,28 @@ private:
 	
 	void enableOpenGL(HWND hwnd, HDC* hdc, HGLRC* hrc);
 	void disableOpenGL(HWND hwnd, HDC hdc, HGLRC hrc);
-	GLuint compileShader(GLenum type, const char* source);
-	GLuint createShaderProgram();
 	
-	const char* vertexShaderSource = 
-	R"(
-		#version 330 core
-		layout(location = 0) in vec3 aPos;
-		void main()
-		{
-			gl_Position = vec4(aPos, 1.0);
-		}
-	)";
-	
-	const char* fragmentShaderSource = 
-	R"(
-		#version 330 core
-		out vec4 FragColor;
-		void main()
-		{
-			FragColor = vec4(0.0, 1.0, 0.0, 1.0);
-		}
-	)";
-	
-	HWND hWnd;	
+	HWND hWnd;
 	HDC hdc;
 	HGLRC hrc;
 	GLuint shaderProgram;
-	GLuint vboIDs[2];
-	GLuint vaoID;
 	
-	size_t bufferSize = 1024 * sizeof(float);
-	size_t newDataSize = sizeof(int); // or 3 * sizeof(int) ?
+	float firstTriangle[6] = {
+		-0.9f, -0.5f,
+		 0.0f, -0.5f,
+		-0.45f, 0.5f
+	};
+	
+	float secondTriangle[6] = {
+		0.2f, -0.5f,
+		0.9f, -0.5f,
+		0.45f, 0.5f
+	};
+	
+	GLuint vboIDs[2], vaoIDs[2];
+	
+	static const size_t bufferSize = 8; // 1024;
 	size_t currentOffset = 0;
-	int currentVBO = 0;
 	int numVertices = 0;
 };
 

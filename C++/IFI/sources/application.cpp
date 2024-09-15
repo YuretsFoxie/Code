@@ -1,6 +1,7 @@
 #include "application.h"
 #include "comport.h"
 #include "graph.h"
+#include "generator.h"
 
 #include <iostream>
 
@@ -26,8 +27,8 @@ void Application::onReceived(const int value)
 	std::string text = std::to_string(value);
 	showText(text);
 	
-	receivedValue = value;
 	isNewValueReceived = true;
+	receivedValue = value;
 }
 
 void Application::showText(const std::string& str)
@@ -43,6 +44,7 @@ LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 	{
 		if (wParam == VK_ESCAPE)	::PostQuitMessage(0);
 		if (wParam == VK_F1)		COMPort::shared().toggleReceiving();
+		if (wParam == VK_F2)		Generator::shared().generateTestValue();
 	}
 	
     return ::DefWindowProc(hWnd, message, wParam, lParam);
@@ -95,7 +97,14 @@ void Application::setupConsole()
 
 void Application::runMainLoop()
 {
-    while(true)
+	while(true)
+	{
+		if (isNewValueReceived)
+		{
+			Graph::shared().update(receivedValue);
+			isNewValueReceived = false;
+		}
+		
         if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
             if (msg.message == WM_QUIT)
@@ -104,11 +113,10 @@ void Application::runMainLoop()
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
         }
-		else if (isNewValueReceived)
-			Graph::shared().update(receivedValue);
+	}
 }
 
 void Application::printHint()
 {
-	showText("F1  - start/stop data receiving.\nEsc - quit.");
+	showText("F1  - start/stop data receiving\nF2  - generate test value\nEsc - quit");
 }
