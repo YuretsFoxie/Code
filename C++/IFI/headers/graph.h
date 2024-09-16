@@ -1,6 +1,7 @@
 #ifndef GRAPH_H_INCLUDED
 #define GRAPH_H_INCLUDED
 
+// #include "buffer.h"
 #include <windows.h>
 #include <GL/glew.h>
 
@@ -41,10 +42,7 @@ private:
 	};
 	
 	GLuint vboIDs[2], vaoIDs[2];
-	
-	static const size_t bufferSize = 8; // 1024;
-	size_t currentOffset = 0;
-	int numVertices = 0;
+	// Buffer buffer = Buffer(2 * 8); // 2 * 1024
 };
 
 #endif // GRAPH_H_INCLUDED

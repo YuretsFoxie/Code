@@ -19,17 +19,26 @@ void Graph::setup(HWND hwnd)
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	
+	/*
 	glBindVertexArray(vaoIDs[1]);
 	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(secondTriangle), secondTriangle, GL_STREAM_DRAW);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	*/
 }
 
 void Graph::update(const int value)
 {
-	// vertices[numVertices * 2] = (float)value / 10.0;		// x
-	// vertices[numVertices * 2 + 1] = (float)value / 10.0;	// y
+	//=====
+	
+	firstTriangle[2] += (float)value / 50.0;
+	firstTriangle[3] -= (float)value / 50.0;
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(firstTriangle), firstTriangle, GL_STREAM_DRAW);
+	
+	//=====
 	
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(shaderProgram);
@@ -37,8 +46,10 @@ void Graph::update(const int value)
 	glBindVertexArray(vaoIDs[0]);
 	glDrawArrays(GL_LINE_LOOP, 0, 3);
 	
+	/*
 	glBindVertexArray(vaoIDs[1]);
 	glDrawArrays(GL_LINE_LOOP, 0, 3);
+	*/
 	
 	::SwapBuffers(hdc);
 }
