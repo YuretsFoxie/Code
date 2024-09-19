@@ -1,72 +1,53 @@
-#include "graph.h"
+#include "graphics.h"
 #include "shaderprogram.h"
 #include <iostream>
 
 // Public Functions
 
-void Graph::setup(HWND hwnd)
+void Graphics::setup(HWND hwnd)
 {
 	hWnd = hwnd;
+	plot.setWindow(hWnd);
+	
 	enableOpenGL(hWnd, &hdc, &hrc);
 	shaderProgram = ShaderProgram().create();
 	
-	glGenVertexArrays(2, vaoIDs);
-	glGenBuffers(2, vboIDs);
-	
+	glGenVertexArrays(1, vaoIDs);
+	glGenBuffers(1, vboIDs);
 	glBindVertexArray(vaoIDs[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(firstTriangle), firstTriangle, GL_STREAM_DRAW);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
 	
-	/*
-	glBindVertexArray(vaoIDs[1]);
-	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(secondTriangle), secondTriangle, GL_STREAM_DRAW);
+	updateVBO();
+	
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	*/
 }
 
-void Graph::update(const int value)
+void Graphics::update(const int value)
 {
-	//=====
-	
-	firstTriangle[2] += (float)value / 50.0;
-	firstTriangle[3] -= (float)value / 50.0;
-	
-	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(firstTriangle), firstTriangle, GL_STREAM_DRAW);
-	
-	//=====
+	plot.push(value);
+	updateVBO();
 	
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(shaderProgram);
-	
 	glBindVertexArray(vaoIDs[0]);
-	glDrawArrays(GL_LINE_LOOP, 0, 3);
-	
-	/*
-	glBindVertexArray(vaoIDs[1]);
-	glDrawArrays(GL_LINE_LOOP, 0, 3);
-	*/
+	glDrawArrays(GL_LINE_LOOP, 0, plot.currentSize());
 	
 	::SwapBuffers(hdc);
 }
 
 // Private Functions
 
-Graph::Graph() {}
+Graphics::Graphics() {}
 
-Graph::~Graph()
+Graphics::~Graphics()
 {
-	glDeleteVertexArrays(2, vaoIDs);
-	glDeleteBuffers(2, vboIDs);
+	glDeleteVertexArrays(1, vaoIDs);
+	glDeleteBuffers(1, vboIDs);
 	glDeleteProgram(shaderProgram);
 	disableOpenGL(hWnd, hdc, hrc);
 }
 
-void Graph::enableOpenGL(HWND hwnd, HDC* hdc, HGLRC* hrc)
+void Graphics::enableOpenGL(HWND hwnd, HDC* hdc, HGLRC* hrc)
 {
 	PIXELFORMATDESCRIPTOR pfd;
 	int iFormat;
@@ -90,9 +71,19 @@ void Graph::enableOpenGL(HWND hwnd, HDC* hdc, HGLRC* hrc)
 	glewInit();
 }
 
-void Graph::disableOpenGL(HWND hwnd, HDC hdc, HGLRC hrc)
+void Graphics::disableOpenGL(HWND hwnd, HDC hdc, HGLRC hrc)
 {
 	wglMakeCurrent(NULL, NULL);
 	wglDeleteContext(hrc);
 	::ReleaseDC(hwnd, hdc);
 }
+
+void Graphics::updateVBO()
+{
+	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[0]);
+	glBufferData(GL_ARRAY_BUFFER, 2 * plot.currentSize() * sizeof(float), plot.data(), GL_STREAM_DRAW);
+}
+
+// TODO:
+// implement drawing two plots and the marking lines (add VAOs and VBOs here)
+// implement coordinate transformation to select the drawing region

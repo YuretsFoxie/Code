@@ -1,48 +1,37 @@
 #ifndef GRAPH_H_INCLUDED
 #define GRAPH_H_INCLUDED
 
-// #include "buffer.h"
+#include "plot.h"
 #include <windows.h>
 #include <GL/glew.h>
 
-class Graph
+class Graphics
 {
 public:
-    static Graph& shared()
+    static Graphics& shared()
     {
-        static Graph instance;
+        static Graphics instance;
         return instance;
     }
 	
 	void setup(HWND hwnd);
 	void update(const int value);
 	
-private:
-	Graph();
-   ~Graph();
+private:	
+	Graphics();
+   ~Graphics();
 	
 	void enableOpenGL(HWND hwnd, HDC* hdc, HGLRC* hrc);
 	void disableOpenGL(HWND hwnd, HDC hdc, HGLRC hrc);
+	void updateVBO();
 	
 	HWND hWnd;
 	HDC hdc;
 	HGLRC hrc;
 	GLuint shaderProgram;
+	GLuint vboIDs[1], vaoIDs[1];
 	
-	float firstTriangle[6] = {
-		-0.9f, -0.5f,
-		 0.0f, -0.5f,
-		-0.45f, 0.5f
-	};
-	
-	float secondTriangle[6] = {
-		0.2f, -0.5f,
-		0.9f, -0.5f,
-		0.45f, 0.5f
-	};
-	
-	GLuint vboIDs[2], vaoIDs[2];
-	// Buffer buffer = Buffer(2 * 8); // 2 * 1024
+	Plot plot = Plot(4); // 1024
 };
 
 #endif // GRAPH_H_INCLUDED

@@ -3,5 +3,6 @@
 
 void Generator::generateTestValue()
 {
-	Application::shared().onReceived(testValue++);
+	Application::shared().onReceived(testValue);
+	testValue += 10;
 }

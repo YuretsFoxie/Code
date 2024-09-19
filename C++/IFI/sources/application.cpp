@@ -1,6 +1,6 @@
 #include "application.h"
 #include "comport.h"
-#include "graph.h"
+#include "graphics.h"
 #include "generator.h"
 
 #include <iostream>
@@ -15,18 +15,14 @@ WPARAM Application::run(HINSTANCE instance)
 	createWindow();
 	setupConsole();
 	printHint();
+	Graphics::shared().setup(hWnd);
 	
-	Graph::shared().setup(hWnd);
 	runMainLoop();
-	
     return msg.wParam;
 }
 
 void Application::onReceived(const int value)
 {
-	std::string text = std::to_string(value);
-	showText(text);
-	
 	isNewValueReceived = true;
 	receivedValue = value;
 }
@@ -101,7 +97,7 @@ void Application::runMainLoop()
 	{
 		if (isNewValueReceived)
 		{
-			Graph::shared().update(receivedValue);
+			Graphics::shared().update(receivedValue);
 			isNewValueReceived = false;
 		}
 		
