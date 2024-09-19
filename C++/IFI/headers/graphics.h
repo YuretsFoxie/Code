@@ -2,6 +2,7 @@
 #define GRAPH_H_INCLUDED
 
 #include "plot.h"
+#include "range.h"
 #include <windows.h>
 #include <GL/glew.h>
 
@@ -31,7 +32,7 @@ private:
 	GLuint shaderProgram;
 	GLuint vboIDs[1], vaoIDs[1];
 	
-	Plot plot = Plot(4); // 1024
+	Plot plot = Plot(4, Range<float> (-1, 1), Range<float> (-1, 1)); // 1024
 };
 
 #endif // GRAPH_H_INCLUDED

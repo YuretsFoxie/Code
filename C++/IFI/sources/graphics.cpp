@@ -86,4 +86,3 @@ void Graphics::updateVBO()
 
 // TODO:
 // implement drawing two plots and the marking lines (add VAOs and VBOs here)
-// implement coordinate transformation to select the drawing region

@@ -9,7 +9,7 @@
 class Plot
 {
 public:
-	Plot(const int size);
+	Plot(const int size, Range<float> xScreen = Range<float>(-1, 1), Range<float> yScreen = Range<float>(-1, 1));
    ~Plot();
 	
 	void setWindow(HWND hwnd);
@@ -27,8 +27,9 @@ private:
 	
 	Range<float> xRange;
 	Range<float> yRange;
-	Range<float> screen;
-
+	Range<float> xScreen;
+	Range<float> yScreen;
+	
 	float screenWidth, screenHeight;
 	float dx;
 	
