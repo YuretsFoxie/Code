@@ -40,7 +40,7 @@ LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 	{
 		if (wParam == VK_ESCAPE)	::PostQuitMessage(0);
 		if (wParam == VK_F1)		COMPort::shared().toggleReceiving();
-		if (wParam == VK_F2)		Generator::shared().generateTestValue();
+		if (wParam == VK_F2)		Generator::shared().toggle();
 	}
 	
     return ::DefWindowProc(hWnd, message, wParam, lParam);
@@ -114,5 +114,5 @@ void Application::runMainLoop()
 
 void Application::printHint()
 {
-	showText("F1  - start/stop data receiving\nF2  - generate test value\nEsc - quit");
+	showText("F1  - start/stop data receiving\nF2  - start/stop generator\nEsc - quit");
 }

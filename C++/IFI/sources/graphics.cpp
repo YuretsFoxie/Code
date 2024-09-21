@@ -10,11 +10,11 @@ void Graphics::setup(HWND hwnd) // OpenGL screen coordinate ranges are -1...1 fo
 {
 	hWnd = hwnd;
 	
-	Range<float> xRange = Range<float>(-1, 1);
-	Range<float> yRange = Range<float>(-1, 1);
+	Range<float> xRange = Range<float>(-1, 0);
+	Range<float> yRange = Range<float>(0, 1);
 	
-	items.push_back(new Plot(4, xRange, yRange));
-	items.push_back(new Plot(8, xRange, yRange));
+	items.push_back(new Plot(1024, xRange, yRange));
+	items.push_back(new Plot(1024, xRange, yRange));
 	items.push_back(new PlotGrid(xRange, yRange));
 	
 	for (auto item: items)
@@ -107,7 +107,7 @@ void Graphics::updateObject(const int index)
 {
 	updateVBO(index);
 	glBindVertexArray(vaoIDs[index]);
-	glDrawArrays(GL_LINE_LOOP, 0, items[index]->size());
+	glDrawArrays(GL_LINE_STRIP, 0, items[index]->size());
 }
 
 void Graphics::updateVBO(const int index)
