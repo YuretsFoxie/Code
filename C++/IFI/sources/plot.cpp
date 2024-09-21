@@ -1,9 +1,10 @@
 #include "plot.h"
-#include <iostream>
 
-Plot::Plot(const int size, Range<float> xScreen, Range<float> yScreen): size(size)
+// Public Functions
+
+Plot::Plot(const int size, Range<float> xScreen, Range<float> yScreen): maxSize(size)
 {
-	array = new float[2 * size];
+	array = new float[2 * maxSize];
 	this->xScreen = xScreen;
 	this->yScreen = yScreen;
 }
@@ -24,8 +25,8 @@ void Plot::setWindow(HWND hwnd)
 	}
 	
 	xRange = Range<float>(0, screenWidth);
-	yRange = Range<float>(-127, 128);
-	dx = screenWidth / (maxSize() - 1);
+	yRange = Range<float>(minY, maxY);
+	dx = screenWidth / (maxSize - 1);
 }
 
 void Plot::push(const float value)
@@ -33,7 +34,7 @@ void Plot::push(const float value)
 	float y = yRange.convertValueToNewRange(value, yScreen);
 	deque.push_back({screenWidth, y});
 	
-	if (deque.size() > size)
+	if (deque.size() > maxSize)
 		deque.pop_front();
 	
 	for (int i = 0; i < deque.size(); i++)
@@ -51,12 +52,7 @@ float* Plot::data()
 	return array;
 }
 
-int Plot::currentSize()
+int Plot::size()
 {
 	return deque.size();
-}
-
-int Plot::maxSize()
-{
-	return size;
 }

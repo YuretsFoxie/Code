@@ -1,38 +1,55 @@
 #include "graphics.h"
 #include "shaderprogram.h"
+#include "plot.h"
+#include "plotgrid.h"
 #include <iostream>
 
 // Public Functions
 
-void Graphics::setup(HWND hwnd)
+void Graphics::setup(HWND hwnd) // OpenGL screen coordinate ranges are -1...1 for both x and y
 {
 	hWnd = hwnd;
-	plot.setWindow(hWnd);
+	
+	Range<float> xRange = Range<float>(-1, 1);
+	Range<float> yRange = Range<float>(-1, 1);
+	
+	items.push_back(new Plot(4, xRange, yRange));
+	items.push_back(new Plot(8, xRange, yRange));
+	items.push_back(new PlotGrid(xRange, yRange));
+	
+	for (auto item: items)
+		item->setWindow(hWnd);
 	
 	enableOpenGL(hWnd, &hdc, &hrc);
 	shaderProgram = ShaderProgram().create();
 	
-	glGenVertexArrays(1, vaoIDs);
-	glGenBuffers(1, vboIDs);
-	glBindVertexArray(vaoIDs[0]);
+	glGenVertexArrays(3, vaoIDs);
+	glGenBuffers(3, vboIDs);
 	
-	updateVBO();
+	for (int i = 0; i < items.size(); i++)
+		setupObject(i);
 	
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glUseProgram(shaderProgram);
+	updateObject(2);
+	::SwapBuffers(hdc);	
 }
 
 void Graphics::update(const int value)
 {
-	plot.push(value);
-	updateVBO();
+	if (currentPlot == 0)
+	{
+		glClear(GL_COLOR_BUFFER_BIT);
+		glUseProgram(shaderProgram);
+		updateObject(2);
+	}
 	
-	glClear(GL_COLOR_BUFFER_BIT);
-	glUseProgram(shaderProgram);
-	glBindVertexArray(vaoIDs[0]);
-	glDrawArrays(GL_LINE_LOOP, 0, plot.currentSize());
+	items[currentPlot]->push(value);
+	updateObject(currentPlot);
+	currentPlot = currentPlot == 1 ? 0 : 1;
 	
-	::SwapBuffers(hdc);
+	if (currentPlot == 0)
+		::SwapBuffers(hdc);
 }
 
 // Private Functions
@@ -41,8 +58,8 @@ Graphics::Graphics() {}
 
 Graphics::~Graphics()
 {
-	glDeleteVertexArrays(1, vaoIDs);
-	glDeleteBuffers(1, vboIDs);
+	glDeleteVertexArrays(3, vaoIDs);
+	glDeleteBuffers(3, vboIDs);
 	glDeleteProgram(shaderProgram);
 	disableOpenGL(hWnd, hdc, hrc);
 }
@@ -78,11 +95,23 @@ void Graphics::disableOpenGL(HWND hwnd, HDC hdc, HGLRC hrc)
 	::ReleaseDC(hwnd, hdc);
 }
 
-void Graphics::updateVBO()
+void Graphics::setupObject(const int index)
 {
-	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[0]);
-	glBufferData(GL_ARRAY_BUFFER, 2 * plot.currentSize() * sizeof(float), plot.data(), GL_STREAM_DRAW);
+	glBindVertexArray(vaoIDs[index]);
+	updateVBO(index);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 }
 
-// TODO:
-// implement drawing two plots and the marking lines (add VAOs and VBOs here)
+void Graphics::updateObject(const int index)
+{
+	updateVBO(index);
+	glBindVertexArray(vaoIDs[index]);
+	glDrawArrays(GL_LINE_LOOP, 0, items[index]->size());
+}
+
+void Graphics::updateVBO(const int index)
+{
+	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[index]);
+	glBufferData(GL_ARRAY_BUFFER, 2 * items[index]->size() * sizeof(float), items[index]->data(), GL_STREAM_DRAW);
+}

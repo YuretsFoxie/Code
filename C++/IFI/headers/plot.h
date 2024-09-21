@@ -1,12 +1,11 @@
 #ifndef PLOT_H_INCLUDED
 #define PLOT_H_INCLUDED
 
-#include "range.h"
+#include "graphicsitem.h"
 #include <deque>
 #include <algorithm>
-#include <windows.h>
 
-class Plot
+class Plot: public GraphicsItem
 {
 public:
 	Plot(const int size, Range<float> xScreen = Range<float>(-1, 1), Range<float> yScreen = Range<float>(-1, 1));
@@ -15,25 +14,21 @@ public:
 	void setWindow(HWND hwnd);
 	void push(const float value);
 	float* data();
-	int currentSize();
-	int maxSize();
+	int size();
 	
 private:
-	struct Point
-	{
-		float x;
-		float y;
-	};
-	
 	Range<float> xRange;
 	Range<float> yRange;
 	Range<float> xScreen;
 	Range<float> yScreen;
 	
+	const int maxY = 128;
+	const int minY = -127;
+	const int maxSize;
+	
 	float screenWidth, screenHeight;
 	float dx;
 	
-	const int size;
 	std::deque<Point> deque;
 	float* array;
 };
