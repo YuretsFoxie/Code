@@ -2,7 +2,6 @@
 #include "comport.h"
 #include "graphics.h"
 #include "generator.h"
-
 #include <iostream>
 
 // Public Functions
@@ -23,8 +22,14 @@ WPARAM Application::run(HINSTANCE instance)
 
 void Application::onReceived(const int value)
 {
-	isNewValueReceived = true;
 	receivedValue = value;
+	isValueReceived = true;
+}
+
+void Application::onFFTCalculated(const std::vector<float>& data)
+{
+	fftResult = data;
+	isFFTResultReceived = true;
 }
 
 void Application::showText(const std::string& str)
@@ -95,20 +100,26 @@ void Application::runMainLoop()
 {
 	while(true)
 	{
-		if (isNewValueReceived)
+		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
-			Graphics::shared().update(receivedValue);
-			isNewValueReceived = false;
+			if (msg.message == WM_QUIT)
+				break;
+			
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
 		}
 		
-        if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-        {
-            if (msg.message == WM_QUIT)
-                break;
-				
-            ::TranslateMessage(&msg);
-            ::DispatchMessage(&msg);
-        }
+		if (isValueReceived)
+		{
+			Graphics::shared().update(receivedValue);
+			isValueReceived = false;
+		}
+		
+		if (isFFTResultReceived)
+		{
+			Graphics::shared().updateWithFFT(fftResult);
+			isFFTResultReceived = false;
+		}
 	}
 }
 

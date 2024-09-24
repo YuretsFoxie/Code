@@ -2,6 +2,8 @@
 #include "shaderprogram.h"
 #include "plot.h"
 #include "plotgrid.h"
+#include "histogram.h"
+#include "spectrumanalyzer.h"
 #include <iostream>
 
 // Public Functions
@@ -13,9 +15,10 @@ void Graphics::setup(HWND hwnd) // OpenGL screen coordinate ranges are -1...1 fo
 	Range<float> xRange = Range<float>(-1, 0);
 	Range<float> yRange = Range<float>(0, 1);
 	
-	items.push_back(new Plot(1024, xRange, yRange));
-	items.push_back(new Plot(1024, xRange, yRange));
+	items.push_back(new Plot(bufferSize, xRange, yRange));
+	items.push_back(new Plot(bufferSize, xRange, yRange));
 	items.push_back(new PlotGrid(xRange, yRange));
+	items.push_back(new Histogram(Range<float>(0, 1), yRange));
 	
 	for (auto item: items)
 		item->setWindow(hWnd);
@@ -23,8 +26,8 @@ void Graphics::setup(HWND hwnd) // OpenGL screen coordinate ranges are -1...1 fo
 	enableOpenGL(hWnd, &hdc, &hrc);
 	shaderProgram = ShaderProgram().create();
 	
-	glGenVertexArrays(3, vaoIDs);
-	glGenBuffers(3, vboIDs);
+	glGenVertexArrays(4, vaoIDs);
+	glGenBuffers(4, vboIDs);
 	
 	for (int i = 0; i < items.size(); i++)
 		setupObject(i);
@@ -32,7 +35,7 @@ void Graphics::setup(HWND hwnd) // OpenGL screen coordinate ranges are -1...1 fo
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(shaderProgram);
 	updateObject(2);
-	::SwapBuffers(hdc);	
+	::SwapBuffers(hdc);
 }
 
 void Graphics::update(const int value)
@@ -42,6 +45,7 @@ void Graphics::update(const int value)
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram);
 		updateObject(2);
+		SpectrumAnalyzer::shared().push(value);
 	}
 	
 	items[currentPlot]->push(value);
@@ -52,14 +56,20 @@ void Graphics::update(const int value)
 		::SwapBuffers(hdc);
 }
 
+void Graphics::updateWithFFT(const std::vector<float>& data)
+{
+	items[3]->update(data);
+	updateObject(3);
+}
+
 // Private Functions
 
 Graphics::Graphics() {}
 
 Graphics::~Graphics()
 {
-	glDeleteVertexArrays(3, vaoIDs);
-	glDeleteBuffers(3, vboIDs);
+	glDeleteVertexArrays(4, vaoIDs);
+	glDeleteBuffers(4, vboIDs);
 	glDeleteProgram(shaderProgram);
 	disableOpenGL(hWnd, hdc, hrc);
 }

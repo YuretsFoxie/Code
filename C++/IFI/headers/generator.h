@@ -26,7 +26,7 @@ private:
 	void stop();
 	void generate();
 	
-	const double samplingRate = 512; // 128.0;
+	const double samplingRate = 128.0;
     const double timeInterval = 1000.0 / samplingRate;
 	
 	Signal* signal1;

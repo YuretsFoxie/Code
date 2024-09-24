@@ -29,6 +29,16 @@ void Plot::setWindow(HWND hwnd)
 	dx = screenWidth / (maxSize - 1);
 }
 
+float* Plot::data()
+{
+	return array;
+}
+
+int Plot::size()
+{
+	return deque.size();
+}
+
 void Plot::push(const float value)
 {
 	float y = yRange.convertValueToNewRange(value, yScreen);
@@ -45,14 +55,4 @@ void Plot::push(const float value)
 		array[2 * i] = xRange.convertValueToNewRange(deque[i].x, xScreen);
 		array[2 * i + 1] = deque[i].y;
 	}
-}
-
-float* Plot::data()
-{
-	return array;
-}
-
-int Plot::size()
-{
-	return deque.size();
 }

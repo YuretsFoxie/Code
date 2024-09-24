@@ -1,6 +1,10 @@
+Perform refactoring
+
 COM-port: consider adding the stop data sending check (send some code from the MCU after the stop command is accepted, instead of sending a fixed amount of zeros to it).
-Implement the Generator class and display its data with the Graph class.
-Implement displaying the received data with the Graph class.
-Implement the SpectrumAnalyzer class and display the Generator data with it at the Graph.
-Implement playing the sounds.
 Implement receiving and displaying the multichannel data.
+Implement playing the sounds.
+
+
+
+Sampling frequency: 128 Hz (it will be 64 Hz when two values are measured)
+df=fs/N; frequency resolution

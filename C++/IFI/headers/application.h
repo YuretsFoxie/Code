@@ -2,6 +2,7 @@
 #define APPLICATION_H_INCLUDED
 
 #include <windows.h>
+#include <vector>
 #include <string>
 
 class Application
@@ -13,12 +14,13 @@ public:
         return instance;
     }
 	
-    WPARAM run(HINSTANCE instance);
+	WPARAM run(HINSTANCE instance);
 	void onReceived(const int value);
+	void onFFTCalculated(const std::vector<float>& data);
 	void showText(const std::string& str);
 	
 private:
-    Application();
+	Application();
    ~Application();
 	
     static LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -33,8 +35,10 @@ private:
 	HWND hWnd;
 	MSG msg;
 	
-	int receivedValue = 0;
-	bool isNewValueReceived = false;
+	float receivedValue = 0;
+	std::vector<float> fftResult;
+	bool isValueReceived = false;
+	bool isFFTResultReceived = false;
 };
 
 #endif // APPLICATION_H_INCLUDED

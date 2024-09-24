@@ -12,9 +12,9 @@ public:
    ~Plot();
 	
 	void setWindow(HWND hwnd);
-	void push(const float value);
 	float* data();
 	int size();
+	void push(const float value);
 	
 private:
 	Range<float> xRange;

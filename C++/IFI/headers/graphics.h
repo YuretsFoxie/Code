@@ -2,6 +2,7 @@
 #define GRAPH_H_INCLUDED
 
 #include "graphicsitem.h"
+#include "settings.h"
 #include <windows.h>
 #include <vector>
 #include <GL/glew.h>
@@ -17,6 +18,7 @@ public:
 	
 	void setup(HWND hwnd);
 	void update(const int value);
+	void updateWithFFT(const std::vector<float>& data);
 	
 private:	
 	Graphics();
@@ -29,11 +31,13 @@ private:
 	void updateObject(const int index);
 	void updateVBO(const int index);
 	
+	const int bufferSize = Settings::shared().getData().spectrumN;
+	
 	HWND hWnd;
 	HDC hdc;
 	HGLRC hrc;
 	GLuint shaderProgram;
-	GLuint vboIDs[3], vaoIDs[3];
+	GLuint vboIDs[4], vaoIDs[4];
 	
 	std::vector<GraphicsItem*> items;
 	int currentPlot = 0;
