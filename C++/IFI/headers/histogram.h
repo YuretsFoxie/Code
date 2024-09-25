@@ -9,26 +9,25 @@
 class Histogram: public GraphicsItem
 {
 public:
-	Histogram(Range<float> xScreen = Range<float>(-1, 1), Range<float> yScreen = Range<float>(-1, 1));
+	Histogram(Range<float> xRange, Range<float> yRange);
    ~Histogram();
 	
-	void setWindow(HWND hwnd);
 	float* data();
-	int size();
-	void update(const std::vector<float>& data);
+	int pointsNumber();
+	bool isPushable();
+	bool isFFTUpdatable();
+	
+	void updateFFT(const std::vector<float>& data);
 	
 private:
-	void addItem(const int index, const float dx, const float y);
+	void addItem(const int index, const float y);
 	
-	Range<float> xRange;
-	Range<float> yRange;
-	Range<float> xScreen;
-	Range<float> yScreen;
+	const int size = 3 * Settings::shared().getData().spectrumN / 2 + 2;
+	const Range<float> xRange;
+	const Range<float> yRange;
 	
-	const int maxSize = 3 * Settings::shared().getData().spectrumN / 2 + 2;
-	
-	float screenWidth, screenHeight;
 	float* array;
+	float dx = 0;
 };
 
 #endif // HISTOGRAM_H_INCLUDED

@@ -6,24 +6,21 @@
 class PlotGrid: public GraphicsItem
 {
 public:
-	PlotGrid(Range<float> xScreen = Range<float>(-1, 1), Range<float> yScreen = Range<float>(-1, 1));
+	PlotGrid(Range<float> xRange, Range<float> yRange);
    ~PlotGrid();
 	
-	void setWindow(HWND hwnd);
 	float* data();
-	int size();
+	int pointsNumber();
+	bool isPushable();
+	bool isFFTUpdatable();
 	
 private:
 	void calculatePoints();
 	
-	Range<float> xRange;
-	Range<float> yRange;
-	Range<float> xScreen;
-	Range<float> yScreen;
+	const int size = 5;
+	const Range<float> xRange;
+	const Range<float> yRange;
 	
-	const int maxSize = 5;
-	
-	float screenWidth, screenHeight;
 	float* array;
 };
 

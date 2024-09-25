@@ -8,29 +8,25 @@
 class Plot: public GraphicsItem
 {
 public:
-	Plot(const int size, Range<float> xScreen = Range<float>(-1, 1), Range<float> yScreen = Range<float>(-1, 1));
+	Plot(Range<float> xRange, Range<float> yRange, const int size);
    ~Plot();
 	
-	void setWindow(HWND hwnd);
 	float* data();
-	int size();
+	int pointsNumber();
+	bool isPushable();
+	bool isFFTUpdatable();
+	
 	void push(const float value);
 	
 private:
-	Range<float> xRange;
-	Range<float> yRange;
-	Range<float> xScreen;
-	Range<float> yScreen;
+	const int size;
+	const Range<float> xRange;
+	const Range<float> yRange;
 	
-	const int maxY = 128;
-	const int minY = -127;
-	const int maxSize;
-	
-	float screenWidth, screenHeight;
-	float dx;
-	
+	Range<float> amplitudeRange = Range<float>(-128, 128);
 	std::deque<Point> deque;
 	float* array;
+	float dx;
 };
 
 #endif // PLOT_H_INCLUDED

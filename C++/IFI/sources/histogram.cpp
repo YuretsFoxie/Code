@@ -1,14 +1,12 @@
 #include "histogram.h"
-#include <iostream>
 #include <algorithm>
 
 // Public Functions
 
-Histogram::Histogram(Range<float> xScreen, Range<float> yScreen)
+Histogram::Histogram(Range<float> xRange, Range<float> yRange): xRange(xRange), yRange(yRange)
 {
-	array = new float[2 * maxSize];
-	this->xScreen = xScreen;
-	this->yScreen = yScreen;
+	array = new float[2 * size];
+	dx = xRange.range() / (float)(Settings::shared().getData().spectrumN / 2);
 }
 
 Histogram::~Histogram()
@@ -16,57 +14,52 @@ Histogram::~Histogram()
 	delete[] array;
 }
 
-void Histogram::setWindow(HWND hwnd)
-{
-	RECT rect;
-	
-	if(::GetWindowRect(hwnd, &rect))
-	{
-		screenWidth = rect.right - rect.left;
-		screenHeight = rect.bottom - rect.top;
-	}
-	
-	xRange = Range<float>(0, screenWidth);
-	yRange = Range<float>(0, screenHeight);
-}
-
 float* Histogram::data()
 {
 	return array;
 }
 
-int Histogram::size()
+int Histogram::pointsNumber()
 {
-	return maxSize;
+	return size;
 }
 
-void Histogram::update(const std::vector<float>& data)
+bool Histogram::isPushable()
 {
-	float dx = screenWidth / data.size();
+	return false;
+}
+
+bool Histogram::isFFTUpdatable()
+{
+	return true;
+}
+
+void Histogram::updateFFT(const std::vector<float>& data)
+{
 	float max = *std::max_element(data.begin(), data.end());
 	
-	array[0] = xRange.convertValueToNewRange(0, xScreen);
-	array[1] = yRange.convertValueToNewRange(0, yScreen);
-	
-	Range<float> f = Range<float>(0, max + 100);
+	array[0] = xRange.getMin();
+	array[1] = yRange.getMin();
+	array[2 * size - 2] = xRange.getMin();
+	array[2 * size - 1] = yRange.getMin();
 	
 	for (int i = 0; i < data.size(); i++)
-		addItem(i, dx, f.convertValueToNewRange(data[i], yScreen));
-	
-	array[2 * maxSize - 2] = xRange.convertValueToNewRange(0, xScreen);
-	array[2 * maxSize - 1] = yRange.convertValueToNewRange(0, yScreen);
+	{
+		float y = Range<float>(0, max + 100).convertValueToNewRange(data[i], yRange);
+		addItem(i, y);
+	}
 };
 
 // Private Functions
 
-void Histogram::addItem(const int index, const float dx, const float y)
+void Histogram::addItem(const int index, const float y)
 {
-	array[6 * index + 0] = xRange.convertValueToNewRange(index * dx, xScreen);
+	array[6 * index + 0] = xRange.getMin() + index * dx;
 	array[6 * index + 1] = y;
 	
-	array[6 * index + 2] = xRange.convertValueToNewRange((index + 1) * dx, xScreen);
+	array[6 * index + 2] = xRange.getMin() + (index + 1) * dx;
 	array[6 * index + 3] = y;
 	
-	array[6 * index + 4] = xRange.convertValueToNewRange((index + 1) * dx, xScreen);
-	array[6 * index + 5] = yRange.convertValueToNewRange(0, yScreen);
+	array[6 * index + 4] = xRange.getMin() + (index + 1) * dx;
+	array[6 * index + 5] = yRange.getMin();
 }

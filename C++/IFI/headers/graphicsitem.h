@@ -3,7 +3,6 @@
 
 #include "range.h"
 #include <vector>
-#include <windows.h>
 
 class GraphicsItem
 {
@@ -11,12 +10,13 @@ public:
 	GraphicsItem() {};
 	virtual ~GraphicsItem() {};
 	
-	virtual void setWindow(HWND hwnd) = 0;
 	virtual float* data() = 0;
-	virtual int size() = 0;
+	virtual int pointsNumber() = 0;
+	virtual bool isPushable() = 0;
+	virtual bool isFFTUpdatable() = 0;
 	
-	virtual void push(const float value) {};
-	virtual void update(const std::vector<float>& data) {};
+	virtual void push(const float value) {}
+	virtual void updateFFT(const std::vector<float>& data) {}
 	
 protected:
 	struct Point

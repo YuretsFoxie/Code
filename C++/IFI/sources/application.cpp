@@ -23,13 +23,13 @@ WPARAM Application::run(HINSTANCE instance)
 void Application::onReceived(const int value)
 {
 	receivedValue = value;
-	isValueReceived = true;
+	shouldUpdateGraphics = true;
 }
 
 void Application::onFFTCalculated(const std::vector<float>& data)
 {
 	fftResult = data;
-	isFFTResultReceived = true;
+	shouldUpdateGraphics = true;
 }
 
 void Application::showText(const std::string& str)
@@ -109,16 +109,11 @@ void Application::runMainLoop()
 			::DispatchMessage(&msg);
 		}
 		
-		if (isValueReceived)
+		if (shouldUpdateGraphics)
 		{
-			Graphics::shared().update(receivedValue);
-			isValueReceived = false;
-		}
-		
-		if (isFFTResultReceived)
-		{
-			Graphics::shared().updateWithFFT(fftResult);
-			isFFTResultReceived = false;
+			Graphics::shared().push(receivedValue);
+			Graphics::shared().updateFFT(fftResult);
+			shouldUpdateGraphics = false;
 		}
 	}
 }

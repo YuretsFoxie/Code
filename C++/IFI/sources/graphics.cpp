@@ -3,63 +3,63 @@
 #include "plot.h"
 #include "plotgrid.h"
 #include "histogram.h"
+#include "histogramgrid.h"
 #include "spectrumanalyzer.h"
-#include <iostream>
 
 // Public Functions
 
 void Graphics::setup(HWND hwnd) // OpenGL screen coordinate ranges are -1...1 for both x and y
 {
+	items.push_back(new Plot(left, top, bufferSize));
+	items.push_back(new Plot(left, bottom, bufferSize));
+	items.push_back(new PlotGrid(left, top));
+	items.push_back(new Histogram(right, top));
+	items.push_back(new HistogramGrid(right, top));
+	
 	hWnd = hwnd;
-	
-	Range<float> xRange = Range<float>(-1, 0);
-	Range<float> yRange = Range<float>(0, 1);
-	
-	items.push_back(new Plot(bufferSize, xRange, yRange));
-	items.push_back(new Plot(bufferSize, xRange, yRange));
-	items.push_back(new PlotGrid(xRange, yRange));
-	items.push_back(new Histogram(Range<float>(0, 1), yRange));
-	
-	for (auto item: items)
-		item->setWindow(hWnd);
-	
 	enableOpenGL(hWnd, &hdc, &hrc);
 	shaderProgram = ShaderProgram().create();
 	
-	glGenVertexArrays(4, vaoIDs);
-	glGenBuffers(4, vboIDs);
+	vaoIDs = new GLuint[items.size()];
+	vboIDs = new GLuint[items.size()];
+	
+	glGenVertexArrays(items.size(), vaoIDs);
+	glGenBuffers(items.size(), vboIDs);
 	
 	for (int i = 0; i < items.size(); i++)
 		setupObject(i);
 	
-	glClear(GL_COLOR_BUFFER_BIT);
-	glUseProgram(shaderProgram);
-	updateObject(2);
-	::SwapBuffers(hdc);
+	drawStaticObjects();
 }
 
-void Graphics::update(const int value)
+void Graphics::push(const int value)
 {
+	if (currentPlot == 1)
+		SpectrumAnalyzer::shared().push(value);
+	
 	if (currentPlot == 0)
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram);
-		updateObject(2);
-		SpectrumAnalyzer::shared().push(value);
+		updateStaticObjects();
 	}
 	
 	items[currentPlot]->push(value);
 	updateObject(currentPlot);
-	currentPlot = currentPlot == 1 ? 0 : 1;
+	switchCurrentPlot();
 	
 	if (currentPlot == 0)
 		::SwapBuffers(hdc);
 }
 
-void Graphics::updateWithFFT(const std::vector<float>& data)
+void Graphics::updateFFT(const std::vector<float>& data)
 {
-	items[3]->update(data);
-	updateObject(3);
+	for (int i = 0; i < items.size(); i++)
+		if (items[i]->isFFTUpdatable())
+		{
+			items[i]->updateFFT(data);
+			updateObject(i);
+		}
 }
 
 // Private Functions
@@ -68,10 +68,13 @@ Graphics::Graphics() {}
 
 Graphics::~Graphics()
 {
-	glDeleteVertexArrays(4, vaoIDs);
-	glDeleteBuffers(4, vboIDs);
+	glDeleteVertexArrays(items.size(), vaoIDs);
+	glDeleteBuffers(items.size(), vboIDs);
 	glDeleteProgram(shaderProgram);
 	disableOpenGL(hWnd, hdc, hrc);
+	
+	delete[] vaoIDs;
+	delete[] vboIDs;
 }
 
 void Graphics::enableOpenGL(HWND hwnd, HDC* hdc, HGLRC* hrc)
@@ -117,11 +120,31 @@ void Graphics::updateObject(const int index)
 {
 	updateVBO(index);
 	glBindVertexArray(vaoIDs[index]);
-	glDrawArrays(GL_LINE_STRIP, 0, items[index]->size());
+	glDrawArrays(GL_LINE_STRIP, 0, items[index]->pointsNumber());
 }
 
 void Graphics::updateVBO(const int index)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, vboIDs[index]);
-	glBufferData(GL_ARRAY_BUFFER, 2 * items[index]->size() * sizeof(float), items[index]->data(), GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 2 * items[index]->pointsNumber() * sizeof(float), items[index]->data(), GL_STREAM_DRAW);
+}
+
+void Graphics::drawStaticObjects()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	glUseProgram(shaderProgram);
+	updateStaticObjects();
+	::SwapBuffers(hdc);
+}
+
+void Graphics::updateStaticObjects()
+{
+	for (int i = 0; i < items.size(); i++)
+		if (!items[i]->isPushable() && !items[i]->isFFTUpdatable())
+			updateObject(i);	
+}
+
+void Graphics::switchCurrentPlot()
+{
+	currentPlot = currentPlot == 1 ? 0 : 1;
 }

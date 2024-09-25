@@ -36,9 +36,8 @@ private:
 	MSG msg;
 	
 	float receivedValue = 0;
-	std::vector<float> fftResult;
-	bool isValueReceived = false;
-	bool isFFTResultReceived = false;
+	std::vector<float> fftResult = {0};	
+	bool shouldUpdateGraphics = false;
 };
 
 #endif // APPLICATION_H_INCLUDED

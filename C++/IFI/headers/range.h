@@ -18,6 +18,16 @@ public:
 		return (((value - this->min) * newRange.range()) / this->range()) + newRange.min;
 	}
 	
+	T getMin() const
+	{
+		return min;
+	}
+	
+	T getMax() const
+	{
+		return max;
+	}
+	
 private:
 	T min;
 	T max;	

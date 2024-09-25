@@ -17,10 +17,10 @@ public:
     }
 	
 	void setup(HWND hwnd);
-	void update(const int value);
-	void updateWithFFT(const std::vector<float>& data);
+	void push(const int value);
+	void updateFFT(const std::vector<float>& data);
 	
-private:	
+private:
 	Graphics();
    ~Graphics();
 	
@@ -30,14 +30,22 @@ private:
 	void setupObject(const int index);
 	void updateObject(const int index);
 	void updateVBO(const int index);
+	void drawStaticObjects();
+	void updateStaticObjects();
+	void switchCurrentPlot();
 	
 	const int bufferSize = Settings::shared().getData().spectrumN;
+	const Range<float> left		= Range<float>(-1, 0);
+	const Range<float> top		= Range<float>(0, 1);
+	const Range<float> bottom	= Range<float>(-1, 0);
+	const Range<float> right	= Range<float>(0, 1);
 	
 	HWND hWnd;
 	HDC hdc;
 	HGLRC hrc;
 	GLuint shaderProgram;
-	GLuint vboIDs[4], vaoIDs[4];
+	GLuint* vboIDs;
+	GLuint* vaoIDs;
 	
 	std::vector<GraphicsItem*> items;
 	int currentPlot = 0;
