@@ -2,6 +2,7 @@
 #define GENERATOR_H_INCLUDED
 
 #include "testsignal.h"
+#include "settings.h"
 #include <windows.h>
 #include <thread>
 
@@ -26,7 +27,7 @@ private:
 	void stop();
 	void generate();
 	
-	const double samplingRate = 128.0;
+	const double samplingRate = Settings::shared().getData().samplingFrequency;
     const double timeInterval = 1000.0 / samplingRate;
 	
 	Signal* signal1;
