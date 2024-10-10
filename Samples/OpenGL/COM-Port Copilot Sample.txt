@@ -1,0 +1,104 @@
+#include <windows.h>
+#include <string>
+#include <iostream>
+#include <thread>
+#include <atomic>
+
+class SerialPort {
+public:
+    SerialPort(const std::string& portName) : hComm(INVALID_HANDLE_VALUE), keepReading(false) {
+        openPort(portName);
+    }
+
+    ~SerialPort() {
+        closePort();
+    }
+
+    bool configurePort(DWORD baudRate, BYTE byteSize, BYTE stopBits, BYTE parity) {
+        DCB dcbSerialParams = { 0 };
+        dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+
+        if (!GetCommState(hComm, &dcbSerialParams)) {
+            std::cerr << "Error getting COM state\n";
+            return false;
+        }
+
+        dcbSerialParams.BaudRate = baudRate;
+        dcbSerialParams.ByteSize = byteSize;
+        dcbSerialParams.StopBits = stopBits;
+        dcbSerialParams.Parity = parity;
+
+        if (!SetCommState(hComm, &dcbSerialParams)) {
+            std::cerr << "Error setting COM state\n";
+            return false;
+        }
+
+        return true;
+    }
+
+    bool readData(char* buffer, DWORD bufferSize, DWORD& bytesRead) {
+        if (!ReadFile(hComm, buffer, bufferSize, &bytesRead, NULL)) {
+            std::cerr << "Error reading from COM port\n";
+            return false;
+        }
+        return true;
+    }
+
+    bool writeData(const char* buffer, DWORD bufferSize, DWORD& bytesWritten) {
+        if (!WriteFile(hComm, buffer, bufferSize, &bytesWritten, NULL)) {
+            std::cerr << "Error writing to COM port\n";
+            return false;
+        }
+        return true;
+    }
+
+    void startReading() {
+        keepReading = true;
+        readThread = std::thread(&SerialPort::readStream, this);
+    }
+
+    void stopReading() {
+        keepReading = false;
+        if (readThread.joinable()) {
+            readThread.join();
+        }
+    }
+
+private:
+    HANDLE hComm;
+    std::atomic<bool> keepReading;
+    std::thread readThread;
+
+    void openPort(const std::string& portName) {
+        hComm = CreateFile(portName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+        if (hComm == INVALID_HANDLE_VALUE) {
+            std::cerr << "Error opening COM port\n";
+        }
+    }
+
+    void closePort() {
+        if (hComm != INVALID_HANDLE_VALUE) {
+            CloseHandle(hComm);
+            hComm = INVALID_HANDLE_VALUE;
+        }
+    }
+
+    void readStream() {
+        char buffer[256];
+        DWORD bytesRead;
+        while (keepReading) {
+            if (readData(buffer, sizeof(buffer), bytesRead)) {
+                std::cout.write(buffer, bytesRead);
+            }
+        }
+    }
+};
+
+// Resource Management: The class uses RAII (Resource Acquisition Is Initialization) to manage the COM port handle, ensuring it is properly closed when the object is destroyed.
+// Error Handling: The class checks the return values of API calls and prints error messages if something goes wrong.
+// Configuration: The configurePort method sets the baud rate, byte size, stop bits, and parity for the COM port.
+// Read/Write Operations: The readData and writeData methods handle reading from and writing to the COM port.
+
+// Continuous Reading: The startReading method starts a new thread that continuously reads data from the COM port.
+// Thread Management: The stopReading method stops the reading thread safely.
+// Atomic Flag: The keepReading flag ensures thread-safe control over the reading loop.

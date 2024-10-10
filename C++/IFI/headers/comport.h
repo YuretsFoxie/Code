@@ -5,6 +5,7 @@
 #include <string>
 #include <thread>
 #include <bitset>
+#include <atomic>
 
 class COMPort
 {
@@ -15,7 +16,7 @@ public:
 		return instance;
 	}
 	
-	void toggleReceiving();
+	void toggle();
 	
 private:	
 	COMPort();
@@ -33,7 +34,7 @@ private:
 	HANDLE hComm = INVALID_HANDLE_VALUE;
 	std::string portName = "COM3";
 	std::thread workerThread;
-	bool isReceiving = false;
+	std::atomic<bool> isReceiving;
 };
 
 #endif // COMPORT_H_INCLUDED

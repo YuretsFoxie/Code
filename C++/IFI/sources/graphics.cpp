@@ -11,7 +11,7 @@
 void Graphics::setup(HWND hwnd) // OpenGL screen coordinate ranges are -1...1 for both x and y
 {
 	items.push_back(new Plot(left, top, bufferSize));
-	items.push_back(new Plot(left, bottom, bufferSize));
+	// items.push_back(new Plot(left, bottom, bufferSize));
 	items.push_back(new PlotGrid(left, top));
 	items.push_back(new Histogram(right, top));
 	items.push_back(new HistogramGrid(right, top));
@@ -32,12 +32,35 @@ void Graphics::setup(HWND hwnd) // OpenGL screen coordinate ranges are -1...1 fo
 	drawStaticObjects();
 }
 
+//=====
+
+/*
 void Graphics::push(const int value)
 {
-	if (currentPlot == 1)
-		SpectrumAnalyzer::shared().push(value);
+	// if (currentPlot == 1)
+		// SpectrumAnalyzer::shared().push(value);
 	
-	if (currentPlot == 0)
+	// if (currentPlot == 0)
+	// {
+		glClear(GL_COLOR_BUFFER_BIT);
+		glUseProgram(shaderProgram);
+		updateStaticObjects();
+	// }
+	
+	items[currentPlot]->push(value);
+	updateObject(currentPlot);
+	// switchCurrentPlot();
+	
+	// if (currentPlot == 0)
+		::SwapBuffers(hdc);
+}
+*/
+
+void Graphics::push(const int value)
+{
+	bool shouldUpdate = (updateCounter % 2 == 0);
+	
+	if (shouldUpdate)
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram);
@@ -45,12 +68,17 @@ void Graphics::push(const int value)
 	}
 	
 	items[currentPlot]->push(value);
-	updateObject(currentPlot);
-	switchCurrentPlot();
 	
-	if (currentPlot == 0)
+	if (shouldUpdate)
+	{
+		updateObject(currentPlot);
 		::SwapBuffers(hdc);
+	}
+	
+	updateCounter++;
 }
+
+//=====
 
 void Graphics::updateFFT(const std::vector<float>& data)
 {

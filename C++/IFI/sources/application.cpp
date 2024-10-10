@@ -23,14 +23,21 @@ WPARAM Application::run(HINSTANCE instance)
 
 void Application::onReceived(const int value)
 {
+	//=====
+	// this print affects rendering for some reason
+	
+	// std::cout << testCount << " " << value << std::endl;
+	// testCount++;
+	//=====
+	
 	receivedValue = value;
 	shouldUpdateGraphics = true;
 }
 
 void Application::onFFTCalculated(const std::vector<float>& data)
 {
-	fftResult = data;
-	shouldUpdateGraphics = true;
+	// fftResult = data;
+	// shouldUpdateGraphics = true;
 }
 
 void Application::showText(const std::string& str)
@@ -42,15 +49,15 @@ void Application::showText(const std::string& str)
 
 LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    if (message == WM_KEYDOWN)
+	if (message == WM_KEYDOWN)
 	{
 		if (wParam == VK_ESCAPE)	::PostQuitMessage(0);
-		if (wParam == VK_F1)		COMPort::shared().toggleReceiving();
+		if (wParam == VK_F1)		COMPort::shared().toggle();
 		if (wParam == VK_F2)		Generator::shared().toggle();
 		if (wParam == VK_F3)		Sound::shared().playTest();
 	}
 	
-    return ::DefWindowProc(hWnd, message, wParam, lParam);
+	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 // Private Functions
@@ -102,6 +109,13 @@ void Application::runMainLoop()
 {
 	while(true)
 	{
+		if (shouldUpdateGraphics)
+		{
+			Graphics::shared().push(receivedValue);
+			// Graphics::shared().updateFFT(fftResult);
+			shouldUpdateGraphics = false;
+		}
+		
 		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
@@ -110,17 +124,10 @@ void Application::runMainLoop()
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
 		}
-		
-		if (shouldUpdateGraphics)
-		{
-			Graphics::shared().push(receivedValue);
-			Graphics::shared().updateFFT(fftResult);
-			shouldUpdateGraphics = false;
-		}
 	}
 }
 
 void Application::printHint()
 {
-	showText("F1  - start/stop data receiving\nF2  - start/stop generator\nF3  - play test sound\nEsc - quit");
+	showText("F1  - start/stop data receiving\nF2  - start/stop test signal generator\nF3  - play test sound\nEsc - quit");
 }

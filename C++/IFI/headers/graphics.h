@@ -49,6 +49,8 @@ private:
 	
 	std::vector<GraphicsItem*> items;
 	int currentPlot = 0;
+	
+	int updateCounter = 0;
 };
 
 #endif // GRAPH_H_INCLUDED

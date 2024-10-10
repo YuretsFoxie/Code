@@ -31,6 +31,11 @@ private:
 	void runMainLoop();
 	void printHint();
 	
+	void onPressESC();
+	void onPressF1();
+	void onPressF2();
+	void onPressF3();
+	
 	HINSTANCE hInstance;
 	HWND hWnd;
 	MSG msg;
@@ -38,6 +43,8 @@ private:
 	float receivedValue = 0;
 	std::vector<float> fftResult = {0};	
 	bool shouldUpdateGraphics = false;
+	
+	int testCount = 0;
 };
 
 #endif // APPLICATION_H_INCLUDED

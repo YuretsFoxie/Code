@@ -1,7 +1,8 @@
-COM-port: consider adding the stop data sending check (send some code from the MCU after the stop command is accepted, instead of sending a fixed amount of zeros to it).
-Implement receiving and displaying the multichannel data.
+FIX reading the ADC data. Implement one channel data displaying first.
+	Make the single file test MVP, which combines UART and Graphics functionality.
+	The measured FPS is about 64. It means, that renderer can't update each 1/128 of second. Possible solution: redraw for each N values (N > 1) instaed of redrawing for each new value.
 
+COM-port: add the settings, consider adding the stop data sending check (send some code from the MCU after the stop command is accepted, instead of sending a fixed amount of zeros to it).
 
-
-Sampling frequency: 128 Hz (it will be 64 Hz when two values are measured)
-df=fs/N; frequency resolution
+frequency resolution = sampling_frequency / spectrum_n
+df=fs/N

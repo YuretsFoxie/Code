@@ -3,7 +3,7 @@
 
 // Public Functions
 
-void COMPort::toggleReceiving()
+void COMPort::toggle()
 {	
 	isReceiving ? stop() : start();	
 }
@@ -81,7 +81,9 @@ void COMPort::setup()
 
 void COMPort::receice()
 {
-	char buffer[64];
+	// char buffer[64]; // we wait, until the buffer is filled, this causes a delay
+	char buffer[1];
+	
 	DWORD bytesRead;
 	
 	while (isReceiving)
