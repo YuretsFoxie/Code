@@ -1,18 +1,19 @@
 #include <Wire.h>                   // Wire library - used for I2C communication
 #include <TimerOne.h>
 
-const int xOffset = -5;             // Use Serial Plotter to adjust the values!
-const int yOffset = -2;
-const int zOffset = 0;
+const int xOffset = -3;             // Use Serial Plotter to adjust the values!
+const int yOffset = 0;
+const int zOffset = 1;
 
 const int ADXL345 = 0x53;           // The ADXL345 sensor I2C address
 const int movementStopLED = 2;
 const int armedLED = 3;
 const int explodePin = 4;
+const int explodeToResistorPin = 5;
 const unsigned long oneTenthOfSecond = 100000;
-const unsigned long movementDelay = 50;  // There must be at least movementDelay / 10 seconds of the constant movement...
-const unsigned long idleDelay = 50;      // And at least idleDelay / 10 seconds to arm the bomb
-const float movementDelta = 0.03;
+const unsigned long movementDelay = 50;   // There must be at least movementDelay / 10 seconds of the constant movement...
+const unsigned long idleDelay = 600;      // And at least idleDelay / 10 seconds to arm the bomb
+const float movementDelta = 0.03;         // Sensitivity threshold
 
 float x, y, z;
 unsigned long secondsCount = 0;
@@ -26,8 +27,9 @@ void setup()
   pinMode(movementStopLED, OUTPUT);
   pinMode(armedLED, OUTPUT);
   pinMode(explodePin, OUTPUT);
+  pinMode(explodeToResistorPin, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-
+  
   digitalWrite(movementStopLED, LOW);
   digitalWrite(armedLED, LOW);
   digitalWrite(explodePin, LOW);

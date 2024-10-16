@@ -57,7 +57,7 @@
  * timer16_Sequence_t enumerates the sequence that the timers should be allocated
  * _Nbr_16timers indicates how many 16 bit timers are available.
  */
-
+ 
 // Architecture specific include
 #if defined(ARDUINO_ARCH_AVR)
 #include "avr/ServoTimers.h"

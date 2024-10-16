@@ -23,15 +23,13 @@ WPARAM Application::run(HINSTANCE instance)
 
 void Application::onReceived(const int value)
 {
-	//=====
-	// this print affects rendering for some reason
+	if (testCount % 2 == 0)
+	{
+		receivedValue = value;
+		shouldUpdateGraphics = true;
+	}
 	
-	// std::cout << testCount << " " << value << std::endl;
-	// testCount++;
-	//=====
-	
-	receivedValue = value;
-	shouldUpdateGraphics = true;
+	testCount++;
 }
 
 void Application::onFFTCalculated(const std::vector<float>& data)
@@ -73,7 +71,7 @@ void Application::registerWindowClass()
 {
     WNDCLASS wc = {0};
 	wc.lpfnWndProc = wndProc;
-	wc.style = CS_OWNDC; // CS_HREDRAW | CS_VREDRAW;
+	wc.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = hInstance;
@@ -124,6 +122,8 @@ void Application::runMainLoop()
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
 		}
+		
+		::Sleep(1);
 	}
 }
 

@@ -1,9 +1,9 @@
 #include <Wire.h>                   // Wire library - used for I2C communication
 
 const int ADXL345 = 0x53;           // The ADXL345 sensor I2C address
-const int xOffset = -5;             // Use Serial Plotter to adjust the values!
-const int yOffset = -2;
-const int zOffset = 0;
+const int xOffset = -3;             // Use Serial Plotter to adjust the values!
+const int yOffset = 0;
+const int zOffset = 1;
 
 float x, y, z;
 
@@ -59,15 +59,14 @@ void loop()
   z = ( Wire.read()| Wire.read() << 8);     // Z-axis value
 
   // For a range of +-2g, we need to divide the raw values by 256, according to the datasheet
-/*
+
   Serial.print("x = ");
   Serial.print(x / 256);
   Serial.print("y = ");
   Serial.print(y / 256);
   Serial.print("z = ");
   Serial.println(z / 256);
-*/
 
-  float a = sqrt(x * x + y * y + z * z) / 256;
-  Serial.println(a);
+  // float a = sqrt(x * x + y * y + z * z) / 256;
+  // Serial.println(a);
 }
