@@ -59,7 +59,7 @@ public:
 		{
 			auto delimiterPos = line.find(": ");
 			auto name = line.substr(0, delimiterPos);
-			auto value = line.substr(delimiterPos + 1);
+			auto value = line.substr(delimiterPos + 2);
 			
 			if (name == "serialPort")
 				serialPort = value;
@@ -160,8 +160,8 @@ public:
 	
    ~Shaders()
 	{
-		if (shaderProgram)
-			glDeleteProgram(shaderProgram);
+		if (program)
+			glDeleteProgram(program);
 	}
 	
 	void initialize()
@@ -204,7 +204,7 @@ public:
 	}
 	
 private:
-	GLuint CompileShader(GLenum type, const char* source)
+	GLuint compileShader(GLenum type, const char* source)
 	{
 		GLuint shader = glCreateShader(type);
 		glShaderSource(shader, 1, &source, NULL);
@@ -244,7 +244,7 @@ public:
 			glDeleteVertexArrays(1, &VAO);
 	}
 	
-	void prepareBuffers(int maxPoints)
+	void prepare(int maxPoints)
 	{
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
@@ -257,7 +257,7 @@ public:
 		glBindVertexArray(0);
 	}
 	
-	void drawVertices(const std::vector<float>& vertices)
+	void draw(const std::vector<float>& vertices)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
@@ -403,7 +403,7 @@ public:
 	void run()
 	{
 		try
-		{
+		{			
 			port.setup(settings.getSerialPort(), settings.getBaudRate());
 		}
 		catch (const SerialException& e)
@@ -435,12 +435,12 @@ private:
 	
 	void runUARTThread()
 	{
-		char buffer[1];
+		char array[1];
 		DWORD bytesRead;
 		
 		while (isRunning)
-			if (::ReadFile(port.getHandle(), buffer, 1, &bytesRead, NULL) && bytesRead > 0)
-				dataBuffer.push(static_cast<float>(buffer[0]));
+			if (::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL) && bytesRead > 0)
+				buffer.push(static_cast<float>(array[0]));
 	}
 	
 	void render(HDC hdc, int& updateCounter)
@@ -450,10 +450,10 @@ private:
 			glClear(GL_COLOR_BUFFER_BIT);
 			
 			std::vector<float> vertices;
-			dataBuffer.PrepareVertices(vertices);
+			buffer.prepare(vertices);
 			
 			if (!vertices.empty())
-				glGraphics.DrawVertices(vertices);
+				glGraphics.drawVertices(vertices);
 			
 			::SwapBuffers(hdc);
 			updateCounter = 0;
@@ -482,7 +482,7 @@ private:
 		::ReleaseDC(hwnd, hdc);
 	}
 	
-	static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 		if (msg == WM_CLOSE)
 			PostQuitMessage(0);
@@ -498,7 +498,7 @@ private:
 	HWND hwnd;
 	
 	COMPort port;
-	OpenGLGraphics glGraphics;
+	Graphics glGraphics;
 	DataBuffer buffer;
 };
 
