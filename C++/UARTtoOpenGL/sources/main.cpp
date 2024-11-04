@@ -49,14 +49,14 @@ public:
     }
 
     std::string getSerialPort() const 
-	{
-		return serialPort;
-	}
-	
+    {
+        return serialPort;
+    }
+    
     int getBaudRate() const
-	{
-		return baudRate;
-	}
+    {
+        return baudRate;
+    }
 
 private:
     bool readConfigFile(const std::string& filePath) 
@@ -103,12 +103,13 @@ private:
 class COMPort 
 {
 public:
-    COMPort(): handle(INVALID_HANDLE_VALUE) {}
+    COMPort(): handle(INVALID_HANDLE_VALUE) 
+    {}
     
    ~COMPort()
     {
-		closePort();
-	}
+        closePort();
+    }
 
     void setup(const std::string& portName, int baudRate) 
     {
@@ -119,9 +120,9 @@ public:
     }
 
     HANDLE getHandle() const
-	{
-		return handle;
-	}
+    {
+        return handle;
+    }
 
 private:
     void openPort(const std::string& portName) 
@@ -194,12 +195,13 @@ private:
 class Shaders 
 {
 public:
-    Shaders(): program(0) {}
-	
+    Shaders(): program(0) 
+    {}
+    
    ~Shaders()
     {
-		if (program) glDeleteProgram(program);
-	}
+        if (program) glDeleteProgram(program);
+    }
 
     void initialize() 
     {
@@ -212,9 +214,9 @@ public:
     }
 
     GLuint getProgram() const
-	{
-		return program;
-	}
+    {
+        return program;
+    }
 
 private:
     GLuint createVertexShader() 
@@ -284,12 +286,13 @@ private:
 class OpenGLBuffer 
 {
 public:
-    OpenGLBuffer(): VBO(0), VAO(0) {}
-	
+    OpenGLBuffer(): VBO(0), VAO(0) 
+    {}
+    
    ~OpenGLBuffer()
     {
-		cleanup();
-	}
+        cleanup();
+    }
 
     void prepare(int maxPoints) 
     {
@@ -336,10 +339,10 @@ private:
     void cleanup() 
     {
         if (VBO)
-			glDeleteBuffers(1, &VBO);
-		
+            glDeleteBuffers(1, &VBO);
+        
         if (VAO)
-			glDeleteVertexArrays(1, &VAO);
+            glDeleteVertexArrays(1, &VAO);
     }
 
     GLuint VBO, VAO;
@@ -363,27 +366,27 @@ private:
     bool setupPixelFormat(HWND hwnd) 
     {
         HDC hdc = ::GetDC(hwnd);
-		PIXELFORMATDESCRIPTOR pfd = 
+        PIXELFORMATDESCRIPTOR pfd = 
         {
             sizeof(PIXELFORMATDESCRIPTOR), 1,
             PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA,
             32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 8, 0, PFD_MAIN_PLANE, 0, 0, 0, 0
         };
         
-		int pf = ::ChoosePixelFormat(hdc, &pfd);
+        int pf = ::ChoosePixelFormat(hdc, &pfd);
         if (pf == 0 || !SetPixelFormat(hdc, pf, &pfd)) 
         {
             ::ReleaseDC(hwnd, hdc);
             throw OpenGLException("failed to set pixel format");
         }
         
-		HGLRC hglrc = wglCreateContext(hdc);
+        HGLRC hglrc = wglCreateContext(hdc);
         if (!hglrc || !wglMakeCurrent(hdc, hglrc)) 
         {
             ::ReleaseDC(hwnd, hdc);
             throw OpenGLException("failed to create or activate OpenGL context");
         }
-		
+        
         return true;
     }
 };
@@ -400,9 +403,9 @@ public:
     }
 
     void prepareBuffers(int maxPoints)
-	{
-		buffer.prepare(maxPoints);
-	}
+    {
+        buffer.prepare(maxPoints);
+    }
 
     void drawVertices(const std::vector<float>& vertices) 
     {
@@ -422,9 +425,9 @@ class DataBuffer
 {
 public:
     DataBuffer()
-	{
-		dataBuffer.reserve(MAX_POINTS);
-	}
+    {
+        dataBuffer.reserve(MAX_POINTS);
+    }
 
     void push(float newData) 
     {
@@ -494,7 +497,7 @@ public:
         {
             if (msg.message == WM_QUIT)
                 isRunning = false;
-			
+            
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
         }
@@ -518,7 +521,7 @@ private:
     {
         if (msg == WM_CLOSE)
             PostQuitMessage(0);
-		
+        
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
 };
@@ -528,7 +531,8 @@ private:
 class Renderer
 {
 public:
-    Renderer(Graphics& graphics, DataBuffer& buffer) : graphics(graphics), buffer(buffer) {}
+    Renderer(Graphics& graphics, DataBuffer& buffer) : graphics(graphics), buffer(buffer) 
+    {}
 
     void renderFrame(HDC hdc, int& updateCounter, std::atomic<bool>& isRunning)
     {
@@ -547,6 +551,7 @@ private:
         glClear(GL_COLOR_BUFFER_BIT);
         std::vector<float> vertices;
         buffer.prepare(vertices);
+		
         if (!vertices.empty())
             graphics.drawVertices(vertices);
     }
@@ -573,7 +578,7 @@ public:
             std::cin.get();
             return false;
         }
-		
+        
         return true;
     }
 
