@@ -39,37 +39,37 @@ public:
             std::ofstream newConfigFile(filePath);
             if (!newConfigFile.is_open())
                 throw std::runtime_error("unable to create configuration file");
-                
+
             newConfigFile << "serialPort: COM3\n";
             newConfigFile << "baudRate: 57600\n";
             newConfigFile.close();
             configFile.open(filePath);
         }
-        
+
         std::string line;
         while (std::getline(configFile, line))
         {
             auto delimiterPos = line.find(": ");
             auto name = line.substr(0, delimiterPos);
             auto value = line.substr(delimiterPos + 2);
-            
+
             if (name == "serialPort")
                 serialPort = value;
             else if (name == "baudRate")
                 baudRate = std::stoi(value);
         }
     }
-    
+
     std::string getSerialPort() const
     {
         return serialPort;
     }
-    
+
     int getBaudRate() const
     {
         return baudRate;
     }
-    
+
 private:
     std::string serialPort;
     int baudRate;
@@ -79,13 +79,13 @@ class COMPort
 {
 public:
     COMPort(): handle(INVALID_HANDLE_VALUE) {}
-    
-   ~COMPort()
+
+    ~COMPort()
     {
         if (handle != INVALID_HANDLE_VALUE)
             ::CloseHandle(handle);
     }
-    
+
     void setup(const std::string& portName, int baudRate)
     {
         openPort(portName);
@@ -97,7 +97,7 @@ public:
     void openPort(const std::string& portName)
     {
         handle = ::CreateFile(portName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-        
+
         if (handle == INVALID_HANDLE_VALUE)
             throw SerialException("error opening serial port");
     }
@@ -105,18 +105,18 @@ public:
     void configurePort(int baudRate)
     {
         dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-        
+
         if (!::GetCommState(handle, &dcbSerialParams))
         {
             ::CloseHandle(handle);
             throw SerialException("error getting serial port state");
         }
-        
+
         dcbSerialParams.BaudRate = baudRate;
         dcbSerialParams.ByteSize = 8;
         dcbSerialParams.StopBits = ONESTOPBIT;
         dcbSerialParams.Parity = NOPARITY;
-        
+
         if (!::SetCommState(handle, &dcbSerialParams))
         {
             ::CloseHandle(handle);
@@ -127,7 +127,7 @@ public:
     void setPortTimeouts()
     {
         timeouts.ReadIntervalTimeout = 50;
-        
+
         if (!::SetCommTimeouts(handle, &timeouts))
         {
             ::CloseHandle(handle);
@@ -139,19 +139,19 @@ public:
     {
         char startCmd = '1';
         DWORD bytesWritten;
-        
+
         if (!::WriteFile(handle, &startCmd, 1, &bytesWritten, NULL))
         {
             ::CloseHandle(handle);
             throw SerialException("error writing to serial port");
         }
     }
-    
+
     HANDLE getHandle() const
     {
         return handle;
     }
-    
+
 private:
     HANDLE handle;
     DCB dcbSerialParams = { 0 };
@@ -162,23 +162,23 @@ class Shaders
 {
 public:
     Shaders(): program(0) {}
-    
-   ~Shaders()
+
+    ~Shaders()
     {
         if (program)
             glDeleteProgram(program);
     }
-    
+
     void initialize()
     {
         GLuint vertexShader = createVertexShader();
         GLuint fragmentShader = createFragmentShader();
-        
+
         createProgram(vertexShader, fragmentShader);
-        
+
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
-        
+
         checkProgramLinking();
     }
 
@@ -212,7 +212,7 @@ public:
     {
         GLint success;
         glGetProgramiv(program, GL_LINK_STATUS, &success);
-        
+
         if (!success)
         {
             GLint logLength;
@@ -222,22 +222,22 @@ public:
             throw ShaderException("program linking failed: " + std::string(log.data()));
         }
     }
-    
+
     GLuint getProgram() const
     {
         return program;
     }
-    
+
 private:
     GLuint compileShader(GLenum type, const char* source)
     {
         GLuint shader = glCreateShader(type);
         glShaderSource(shader, 1, &source, NULL);
         glCompileShader(shader);
-        
+
         GLint success;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-        
+
         if (!success)
         {
             GLint logLength;
@@ -246,10 +246,10 @@ private:
             glGetShaderInfoLog(shader, logLength, NULL, log.data());
             throw ShaderException("shader compilation failed: " + std::string(log.data()));
         }
-        
+
         return shader;
     }
-    
+
     GLuint program;
 };
 
@@ -257,16 +257,16 @@ class OpenGLBuffer
 {
 public:
     OpenGLBuffer(): VBO(0), VAO(0) {}
-    
-   ~OpenGLBuffer()
+
+    ~OpenGLBuffer()
     {
         if (VBO)
             glDeleteBuffers(1, &VBO);
-        
+
         if (VAO)
             glDeleteVertexArrays(1, &VAO);
     }
-    
+
     void prepare(int maxPoints)
     {
         generateBuffers();
@@ -299,7 +299,7 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
-    
+
     void draw(const std::vector<float>& vertices)
     {
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -307,7 +307,7 @@ public:
         glBindVertexArray(VAO);
         glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(vertices.size() / 2));
     }
-    
+
 private:
     GLuint VBO, VAO;
 };
@@ -402,16 +402,16 @@ public:
     {
         dataBuffer.reserve(MAX_POINTS);
     }
-    
+
     void push(float newData)
     {
         std::lock_guard<std::mutex> lock(bufferMutex);
         dataBuffer.push_back(newData);
-        
+
         if (dataBuffer.size() > MAX_POINTS)
             dataBuffer.erase(dataBuffer.begin());
     }
-    
+
     void prepare(std::vector<float>& vertices)
     {
         std::lock_guard<std::mutex> lock(bufferMutex);
@@ -434,13 +434,13 @@ public:
             vertices.push_back(y);
         }
     }
-    
+
 private:
     int convertTwosComplementToInt(const std::bitset<8>& byte)
     {
         return byte[7] ? -std::bitset<8>(byte.to_ulong() - 1).flip().to_ulong() : byte.to_ulong();
     }
-    
+
     static const int MAX_POINTS = 256;
     std::vector<float> dataBuffer;
     std::mutex bufferMutex;
@@ -487,7 +487,7 @@ public:
             return;
         }
     }
-    
+
     void run()
     {
         if (!setupSerialPort())
@@ -502,7 +502,7 @@ public:
     bool setupSerialPort()
     {
         try
-        {            
+        {
             port.setup(settings.getSerialPort(), settings.getBaudRate());
         }
         catch (const SerialException& e)
@@ -513,7 +513,7 @@ public:
         }
         return true;
     }
-    
+
 private:
     HWND setupWindow(HINSTANCE hInstance, int nCmdShow)
     {
@@ -530,47 +530,46 @@ private:
 
     HWND createWindowInstance(HINSTANCE hInstance, int nCmdShow)
     {
-        HWND hwnd = CreateWindowEx(0, "OpenGL", "Foxie Window", 
-            WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 
+        HWND hwnd = CreateWindowEx(0, "OpenGL", "Foxie Window",
+            WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
             800, 600, NULL, NULL, hInstance, NULL);
-        
+
         ::ShowWindow(hwnd, nCmdShow);
         return hwnd;
     }
-    
-    void render(HDC hdc, int& updateCounter)
+
+    void renderFrame(HDC hdc, int& updateCounter)
     {
-        if (++updateCounter >= BATCH_SIZE)
+        updateCounter++;
+        if (updateCounter >= BATCH_SIZE)
         {
-            clearScreen();
-            
-            std::vector<float> vertices;
-            buffer.prepare(vertices);
-            
-            if (!vertices.empty())
-                glGraphics.drawVertices(vertices);
-            
+            drawVertices();
             ::SwapBuffers(hdc);
             updateCounter = 0;
         }
     }
 
-    void clearScreen()
+    void drawVertices()
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
+        std::vector<float> vertices;
+        buffer.prepare(vertices);
+
+        if (!vertices.empty())
+            glGraphics.drawVertices(vertices);
     }
-    
+
     void runLoop()
     {
         HDC hdc = ::GetDC(hwnd);
         int updateCounter = 0;
-        
+
         while (isRunning)
         {
             processMessages();
-            render(hdc, updateCounter);
+            renderFrame(hdc, updateCounter);
         }
-        
+
         ::ReleaseDC(hwnd, hdc);
     }
 
@@ -581,27 +580,27 @@ private:
         {
             if (msg.message == WM_QUIT)
                 isRunning = false;
-            
+
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
         }
     }
-    
+
     static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         if (msg == WM_CLOSE)
             PostQuitMessage(0);
-        
+
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
-    
+
     static const int MAX_POINTS = 256;
     static const int BATCH_SIZE = 100;
     const Settings& settings;
-    
+
     std::atomic<bool> isRunning;
     HWND hwnd;
-    
+
     COMPort port;
     Graphics glGraphics;
     DataBuffer buffer;
@@ -615,13 +614,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         Settings settings("settings.ini");
         Application app(hInstance, nCmdShow, settings);
         app.run();
-    } 
-    catch (const std::exception& e) 
+    }
+    catch (const std::exception& e)
     {
         std::cout << "application initialization failed: " << e.what() << std::endl;
         std::cin.get();
         return EXIT_FAILURE;
     }
-    
+
     return EXIT_SUCCESS;
 }
