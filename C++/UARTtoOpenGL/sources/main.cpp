@@ -255,68 +255,77 @@ private:
     GLuint VBO, VAO;
 };
 
-class Graphics
+class OpenGLContext
 {
 public:
-    Graphics() {}
-    
+    OpenGLContext() {}
+
     void initialize(HWND hwnd)
     {
         if (!setupPixelFormat(hwnd))
             throw OpenGLException("failed to setup pixel format");
-        
-        shaders.initialize();
+
+        if (glewInit() != GLEW_OK)
+            throw OpenGLException("failed to initialize GLEW");
     }
-    
-    void prepareBuffers(int maxPoints)
-    {
-        buffer.prepare(maxPoints);
-    }
-    
-    void drawVertices(const std::vector<float>& vertices)
-    {
-        glUseProgram(shaders.getProgram());
-        buffer.draw(vertices);
-    }
-    
+
 private:
     bool setupPixelFormat(HWND hwnd)
     {
         HDC hdc = ::GetDC(hwnd);
-        
+
         PIXELFORMATDESCRIPTOR pfd = {
-            sizeof(PIXELFORMATDESCRIPTOR), 1, 
-            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA, 
+            sizeof(PIXELFORMATDESCRIPTOR), 1,
+            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA,
             32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 8, 0, PFD_MAIN_PLANE, 0, 0, 0, 0
         };
-        
+
         int pf = ::ChoosePixelFormat(hdc, &pfd);
-        
+
         if (pf == 0 || !SetPixelFormat(hdc, pf, &pfd))
         {
             ::ReleaseDC(hwnd, hdc);
             throw OpenGLException("failed to set pixel format");
         }
-        
+
         HGLRC hglrc = wglCreateContext(hdc);
-        
+
         if (!hglrc || !wglMakeCurrent(hdc, hglrc))
         {
             ::ReleaseDC(hwnd, hdc);
             throw OpenGLException("failed to create or activate OpenGL context");
         }
-        
-        if (glewInit() != GLEW_OK)
-        {
-            ::ReleaseDC(hwnd, hdc);
-            throw OpenGLException("failed to initialize GLEW");
-        }
-        
+
         return true;
     }
-    
+};
+
+class Graphics
+{
+public:
+    Graphics() {}
+
+    void initialize(HWND hwnd)
+    {
+        context.initialize(hwnd);
+        shaders.initialize();
+    }
+
+    void prepareBuffers(int maxPoints)
+    {
+        buffer.prepare(maxPoints);
+    }
+
+    void drawVertices(const std::vector<float>& vertices)
+    {
+        glUseProgram(shaders.getProgram());
+        buffer.draw(vertices);
+    }
+
+private:
     Shaders shaders;
     OpenGLBuffer buffer;
+    OpenGLContext context;
 };
 
 class DataBuffer
@@ -361,6 +370,23 @@ private:
     std::mutex bufferMutex;
 };
 
+class UARTHandler
+{
+public:
+    void runUARTThread(COMPort &port, DataBuffer &buffer, std::atomic<bool> &isRunning)
+    {
+        char array[1];
+        DWORD bytesRead;
+        while (isRunning)
+        {
+            if (::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL) && bytesRead > 0)
+            {
+                buffer.push(static_cast<float>(array[0]));
+            }
+        }
+    }
+};
+
 class Application
 {
 public:
@@ -392,8 +418,8 @@ public:
             std::cin.get();
             return;
         }
-        
-        std::thread uartThread(&Application::runUARTThread, this);
+
+        std::thread uartThread(&UARTHandler::runUARTThread, &uartHandler, std::ref(port), std::ref(buffer), std::ref(isRunning));
         runLoop();
         isRunning = false;
         uartThread.join();
@@ -411,16 +437,6 @@ private:
         
         ::ShowWindow(hwnd, nCmdShow);
         return hwnd;
-    }
-    
-    void runUARTThread()
-    {
-        char array[1];
-        DWORD bytesRead;
-        
-        while (isRunning)
-            if (::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL) && bytesRead > 0)
-                buffer.push(static_cast<float>(array[0]));
     }
     
     void render(HDC hdc, int& updateCounter)
@@ -480,6 +496,7 @@ private:
     COMPort port;
     Graphics glGraphics;
     DataBuffer buffer;
+    UARTHandler uartHandler;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
