@@ -551,7 +551,7 @@ private:
         glClear(GL_COLOR_BUFFER_BIT);
         std::vector<float> vertices;
         buffer.prepare(vertices);
-		
+        
         if (!vertices.empty())
             graphics.drawVertices(vertices);
     }
