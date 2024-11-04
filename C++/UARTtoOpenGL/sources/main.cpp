@@ -88,11 +88,22 @@ public:
     
     void setup(const std::string& portName, int baudRate)
     {
+        openPort(portName);
+        configurePort(baudRate);
+        setPortTimeouts();
+        sendStartCommand();
+    }
+
+    void openPort(const std::string& portName)
+    {
         handle = ::CreateFile(portName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         
         if (handle == INVALID_HANDLE_VALUE)
             throw SerialException("error opening serial port");
-        
+    }
+
+    void configurePort(int baudRate)
+    {
         dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
         
         if (!::GetCommState(handle, &dcbSerialParams))
@@ -111,7 +122,10 @@ public:
             ::CloseHandle(handle);
             throw SerialException("error setting serial port state");
         }
-        
+    }
+
+    void setPortTimeouts()
+    {
         timeouts.ReadIntervalTimeout = 50;
         
         if (!::SetCommTimeouts(handle, &timeouts))
@@ -119,7 +133,10 @@ public:
             ::CloseHandle(handle);
             throw SerialException("error setting timeouts");
         }
-        
+    }
+
+    void sendStartCommand()
+    {
         char startCmd = '1';
         DWORD bytesWritten;
         
@@ -154,25 +171,45 @@ public:
     
     void initialize()
     {
-        GLuint vertexShader = compileShader(GL_VERTEX_SHADER, R"(
+        GLuint vertexShader = createVertexShader();
+        GLuint fragmentShader = createFragmentShader();
+        
+        createProgram(vertexShader, fragmentShader);
+        
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+        
+        checkProgramLinking();
+    }
+
+    GLuint createVertexShader()
+    {
+        return compileShader(GL_VERTEX_SHADER, R"(
             #version 330 core
             layout (location = 0) in vec2 aPos;
             void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
         )");
-        
-        GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, R"(
+    }
+
+    GLuint createFragmentShader()
+    {
+        return compileShader(GL_FRAGMENT_SHADER, R"(
             #version 330 core
             out vec4 FragColor;
             void main() { FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f); }
         )");
-        
+    }
+
+    void createProgram(GLuint vertexShader, GLuint fragmentShader)
+    {
         program = glCreateProgram();
         glAttachShader(program, vertexShader);
         glAttachShader(program, fragmentShader);
         glLinkProgram(program);
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        
+    }
+
+    void checkProgramLinking()
+    {
         GLint success;
         glGetProgramiv(program, GL_LINK_STATUS, &success);
         
@@ -232,13 +269,33 @@ public:
     
     void prepare(int maxPoints)
     {
+        generateBuffers();
+        bindBuffers(maxPoints);
+        configureVertexAttribPointer();
+        unbindBuffers();
+    }
+
+    void generateBuffers()
+    {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
+    }
+
+    void bindBuffers(int maxPoints)
+    {
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, maxPoints * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
+    }
+
+    void configureVertexAttribPointer()
+    {
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
+    }
+
+    void unbindBuffers()
+    {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
@@ -307,7 +364,17 @@ public:
 
     void initialize(HWND hwnd)
     {
+        initializeContext(hwnd);
+        initializeShaders();
+    }
+
+    void initializeContext(HWND hwnd)
+    {
         context.initialize(hwnd);
+    }
+
+    void initializeShaders()
+    {
         shaders.initialize();
     }
 
@@ -348,8 +415,17 @@ public:
     void prepare(std::vector<float>& vertices)
     {
         std::lock_guard<std::mutex> lock(bufferMutex);
+        reserveVertices(vertices);
+        fillVertices(vertices);
+    }
+
+    void reserveVertices(std::vector<float>& vertices)
+    {
         vertices.reserve(dataBuffer.size() * 2);
-        
+    }
+
+    void fillVertices(std::vector<float>& vertices)
+    {
         for (size_t i = 0; i < dataBuffer.size(); ++i)
         {
             float x = (2.0f * i / MAX_POINTS) - 1.0f;
@@ -379,11 +455,17 @@ public:
         DWORD bytesRead;
         while (isRunning)
         {
-            if (::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL) && bytesRead > 0)
+            readDataFromPort(port, array, bytesRead);
+            if (bytesRead > 0)
             {
                 buffer.push(static_cast<float>(array[0]));
             }
         }
+    }
+
+    void readDataFromPort(COMPort &port, char* array, DWORD &bytesRead)
+    {
+        ::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
     }
 };
 
@@ -408,6 +490,17 @@ public:
     
     void run()
     {
+        if (!setupSerialPort())
+            return;
+
+        std::thread uartThread(&UARTHandler::runUARTThread, &uartHandler, std::ref(port), std::ref(buffer), std::ref(isRunning));
+        runLoop();
+        isRunning = false;
+        uartThread.join();
+    }
+
+    bool setupSerialPort()
+    {
         try
         {            
             port.setup(settings.getSerialPort(), settings.getBaudRate());
@@ -416,24 +509,30 @@ public:
         {
             std::cout << "serial port setup failed: " << e.what() << std::endl;
             std::cin.get();
-            return;
+            return false;
         }
-
-        std::thread uartThread(&UARTHandler::runUARTThread, &uartHandler, std::ref(port), std::ref(buffer), std::ref(isRunning));
-        runLoop();
-        isRunning = false;
-        uartThread.join();
+        return true;
     }
     
 private:
     HWND setupWindow(HINSTANCE hInstance, int nCmdShow)
     {
+        registerWindowClass(hInstance);
+        HWND hwnd = createWindowInstance(hInstance, nCmdShow);
+        return hwnd;
+    }
+
+    void registerWindowClass(HINSTANCE hInstance)
+    {
         WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_OWNDC, wndProc, 0, 0, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, "OpenGL", NULL};
         ::RegisterClassEx(&wc);
-        
-        HWND hwnd = CreateWindowEx(0, wc.lpszClassName, "Foxie Window", 
+    }
+
+    HWND createWindowInstance(HINSTANCE hInstance, int nCmdShow)
+    {
+        HWND hwnd = CreateWindowEx(0, "OpenGL", "Foxie Window", 
             WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 
-            800, 600, NULL, NULL, wc.hInstance, NULL);
+            800, 600, NULL, NULL, hInstance, NULL);
         
         ::ShowWindow(hwnd, nCmdShow);
         return hwnd;
@@ -443,7 +542,7 @@ private:
     {
         if (++updateCounter >= BATCH_SIZE)
         {
-            glClear(GL_COLOR_BUFFER_BIT);
+            clearScreen();
             
             std::vector<float> vertices;
             buffer.prepare(vertices);
@@ -455,6 +554,11 @@ private:
             updateCounter = 0;
         }
     }
+
+    void clearScreen()
+    {
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
     
     void runLoop()
     {
@@ -463,19 +567,24 @@ private:
         
         while (isRunning)
         {
-            MSG msg;
-            while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-            {
-                if (msg.message == WM_QUIT)
-                    isRunning = false;
-                
-                ::TranslateMessage(&msg);
-                ::DispatchMessage(&msg);
-            }
+            processMessages();
             render(hdc, updateCounter);
         }
         
         ::ReleaseDC(hwnd, hdc);
+    }
+
+    void processMessages()
+    {
+        MSG msg;
+        while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            if (msg.message == WM_QUIT)
+                isRunning = false;
+            
+            ::TranslateMessage(&msg);
+            ::DispatchMessage(&msg);
+        }
     }
     
     static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
