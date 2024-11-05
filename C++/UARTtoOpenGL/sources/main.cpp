@@ -10,8 +10,6 @@
 #include <fstream>
 #include <string>
 
-
-
 class OpenGLException: public std::runtime_error 
 {
 public:
@@ -103,8 +101,7 @@ private:
 class COMPort 
 {
 public:
-    COMPort(): handle(INVALID_HANDLE_VALUE) 
-    {}
+    COMPort(): handle(INVALID_HANDLE_VALUE) {}
     
    ~COMPort()
     {
@@ -195,8 +192,7 @@ private:
 class Shaders 
 {
 public:
-    Shaders(): program(0) 
-    {}
+    Shaders(): program(0) {}
     
    ~Shaders()
     {
@@ -286,8 +282,7 @@ private:
 class OpenGLBuffer 
 {
 public:
-    OpenGLBuffer(): VBO(0), VAO(0) 
-    {}
+    OpenGLBuffer(): VBO(0), VAO(0) {}
     
    ~OpenGLBuffer()
     {
@@ -484,10 +479,10 @@ public:
 class WindowManager
 {
 public:
-    HWND setupWindow(HINSTANCE hInstance, int nCmdShow)
+    WindowManager(HINSTANCE hInstance, int nCmdShow)
     {
         registerWindowClass(hInstance);
-        return createWindowInstance(hInstance, nCmdShow);
+        hwnd = createWindowInstance(hInstance, nCmdShow);
     }
 
     void processMessages(std::atomic<bool>& isRunning)
@@ -501,6 +496,11 @@ public:
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
         }
+    }
+
+    HWND getHwnd() const
+    {
+        return hwnd;
     }
 
 private:
@@ -524,6 +524,8 @@ private:
         
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
+
+    HWND hwnd;
 };
 
 
@@ -531,8 +533,7 @@ private:
 class Renderer
 {
 public:
-    Renderer(Graphics& graphics, DataBuffer& buffer) : graphics(graphics), buffer(buffer) 
-    {}
+    Renderer(Graphics& graphics, DataBuffer& buffer) : graphics(graphics), buffer(buffer) {}
 
     void renderFrame(HDC hdc, int& updateCounter, std::atomic<bool>& isRunning)
     {
@@ -598,9 +599,9 @@ class Application
 {
 public:
     Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings)
-        : isRunning(true), hwnd(NULL), settings(settings), windowManager(), graphics(), renderer(graphics, buffer), serialPortManager()
+        : isRunning(true), hwnd(NULL), settings(settings), windowManager(hInstance, nCmdShow), graphics(), renderer(graphics, buffer), serialPortManager()
     {
-        hwnd = windowManager.setupWindow(hInstance, nCmdShow);
+        hwnd = windowManager.getHwnd();
         try
         {
             graphics.initialize(hwnd);
@@ -669,3 +670,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
     return EXIT_SUCCESS;
 }
+
+// TODO: move the "magic numbers" to the settings.ini file
+// TODO: handle the button press events: ESC to quit the application, F1 to toggle the COM-Port data receiving.
+
+// TODO: try adding the OpenGL text printing.
+// TODO: implement the fullscreen mode and adjusting the graph to the part of the window.
