@@ -436,16 +436,22 @@ public:
 	{
 		std::lock_guard<std::mutex> lock(bufferMutex);
 		vertices.reserve(dataBuffer.size() * 2);
+		preComputeVertices(vertices);
+	}
+
+private:
+	void preComputeVertices(std::vector<float>& vertices)
+	{
+		const float scaleFactor = 2.0f / MAX_POINTS;
 		for (size_t i = 0; i < dataBuffer.size(); ++i) 
 		{
-			float x = (2.0f * i / MAX_POINTS) - 1.0f;
+			float x = (scaleFactor * i) - 1.0f;
 			float y = convertTwosComplementToInt(std::bitset<8>(dataBuffer[i])) / 128.0f;
 			vertices.push_back(x);
 			vertices.push_back(y);
 		}
 	}
 
-private:
 	int convertTwosComplementToInt(const std::bitset<8>& byte) 
 	{
 		return byte[7] ? -std::bitset<8>(byte.to_ulong() - 1).flip().to_ulong() : byte.to_ulong();
