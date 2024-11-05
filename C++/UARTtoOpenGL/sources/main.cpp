@@ -458,24 +458,6 @@ private:
 
 
 
-class UARTHandler 
-{
-public:
-	void runUARTThread(COMPort &port, DataBuffer &buffer, std::atomic<bool> &isRunning) 
-	{
-		char array[1];
-		DWORD bytesRead;
-		while (isRunning) 
-		{
-			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
-			if (bytesRead > 0) 
-				buffer.push(static_cast<float>(array[0]));
-		}
-	}
-};
-
-
-
 class WindowManager
 {
 public:
@@ -585,12 +567,22 @@ public:
 
 	void runUARTThread(COMPort& port, DataBuffer& buffer, std::atomic<bool>& isRunning)
 	{
-		std::thread uartThread(&UARTHandler::runUARTThread, &uartHandler, std::ref(port), std::ref(buffer), std::ref(isRunning));
+		std::thread uartThread(&SerialPortManager::runUART, this, std::ref(port), std::ref(buffer), std::ref(isRunning));
 		uartThread.detach();
 	}
 
 private:
-	UARTHandler uartHandler;
+	void runUART(COMPort &port, DataBuffer &buffer, std::atomic<bool> &isRunning) 
+	{
+		char array[1];
+		DWORD bytesRead;
+		while (isRunning) 
+		{
+			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
+			if (bytesRead > 0) 
+				buffer.push(static_cast<float>(array[0]));
+		}
+	}
 };
 
 
