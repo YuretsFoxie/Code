@@ -56,6 +56,21 @@ public:
 		return baudRate;
 	}
 
+	int getBatchSize() const
+	{
+		return batchSize;
+	}
+
+	int getScaleFactor() const
+	{
+		return scaleFactor;
+	}
+
+	int getMaxPoints() const
+	{
+		return maxPoints;
+	}
+
 private:
 	bool readConfigFile(const std::string& filePath) 
 	{
@@ -78,6 +93,9 @@ private:
 
 		newConfigFile << "serialPort: COM3\n";
 		newConfigFile << "baudRate: 57600\n";
+		newConfigFile << "batchSize: 100\n";
+		newConfigFile << "scaleFactor: 128\n";
+		newConfigFile << "maxPoints: 256\n";
 	}
 
 	void parseConfigLine(const std::string& line) 
@@ -90,10 +108,19 @@ private:
 			serialPort = value;
 		else if (name == "baudRate")
 			baudRate = std::stoi(value);
+		else if (name == "batchSize")
+			batchSize = std::stoi(value);
+		else if (name == "scaleFactor")
+			scaleFactor = std::stoi(value);
+		else if (name == "maxPoints")
+			maxPoints = std::stoi(value);
 	}
 
 	std::string serialPort;
 	int baudRate;
+	int batchSize;
+	int scaleFactor;
+	int maxPoints;
 };
 
 
@@ -419,7 +446,7 @@ private:
 class DataBuffer 
 {
 public:
-	DataBuffer()
+	DataBuffer(int maxPoints, int scaleFactor) : MAX_POINTS(maxPoints), SCALE_FACTOR(scaleFactor)
 	{
 		dataBuffer.reserve(MAX_POINTS);
 	}
@@ -446,7 +473,7 @@ private:
 		for (size_t i = 0; i < dataBuffer.size(); ++i) 
 		{
 			float x = (scaleFactor * i) - 1.0f;
-			float y = convertTwosComplementToInt(std::bitset<8>(dataBuffer[i])) / 128.0f;
+			float y = convertTwosComplementToInt(std::bitset<8>(dataBuffer[i])) / static_cast<float>(SCALE_FACTOR);
 			vertices.push_back(x);
 			vertices.push_back(y);
 		}
@@ -457,7 +484,8 @@ private:
 		return byte[7] ? -std::bitset<8>(byte.to_ulong() - 1).flip().to_ulong() : byte.to_ulong();
 	}
 
-	static const int MAX_POINTS = 256;
+	const int MAX_POINTS;
+	const int SCALE_FACTOR;
 	std::vector<float> dataBuffer;
 	std::mutex bufferMutex;
 };
@@ -521,7 +549,7 @@ private:
 class Renderer
 {
 public:
-	Renderer(Graphics& graphics, DataBuffer& buffer) : graphics(graphics), buffer(buffer) {}
+	Renderer(Graphics& graphics, DataBuffer& buffer, int batchSize) : graphics(graphics), buffer(buffer), BATCH_SIZE(batchSize) {}
 
 	void renderFrame(HDC hdc, int& updateCounter, std::atomic<bool>& isRunning)
 	{
@@ -547,7 +575,7 @@ private:
 
 	Graphics& graphics;
 	DataBuffer& buffer;
-	static const int BATCH_SIZE = 100;
+	const int BATCH_SIZE;
 };
 
 
@@ -597,13 +625,13 @@ class Application
 {
 public:
 	Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings)
-		: isRunning(true), hwnd(NULL), settings(settings), windowManager(hInstance, nCmdShow), graphics(), renderer(graphics, buffer), serialPortManager()
+		: isRunning(true), hwnd(NULL), settings(settings), windowManager(hInstance, nCmdShow), graphics(), buffer(settings.getMaxPoints(), settings.getScaleFactor()), renderer(graphics, buffer, settings.getBatchSize()), serialPortManager()
 	{
 		hwnd = windowManager.getHwnd();
 		try
 		{
 			graphics.initialize(hwnd);
-			graphics.prepareBuffers(MAX_POINTS);
+			graphics.prepareBuffers(settings.getMaxPoints());
 		}
 		catch (const OpenGLException& e)
 		{
@@ -635,7 +663,6 @@ private:
 		::ReleaseDC(hwnd, hdc);
 	}
 
-	static const int MAX_POINTS = 256;
 	const Settings& settings;
 
 	std::atomic<bool> isRunning;
@@ -668,9 +695,3 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	return EXIT_SUCCESS;
 }
-
-// TODO: move the "magic numbers" to the settings.ini file
-// TODO: handle the button press events: ESC to quit the application, F1 to toggle the COM-Port data receiving.
-
-// TODO: try adding the OpenGL text printing.
-// TODO: implement the fullscreen mode and adjusting the graph to the part of the window.
