@@ -140,7 +140,15 @@ public:
 		openPort(portName);
 		configurePort(baudRate);
 		setPortTimeouts();
-		sendStartCommand();
+	}
+
+	void toggleDataTransmission(bool enable)
+	{
+		char cmd = enable ? '1' : '0';
+		DWORD bytesWritten;
+		
+		if (!::WriteFile(handle, &cmd, 1, &bytesWritten, NULL))
+			throw SerialException("error writing to serial port");
 	}
 
 	HANDLE getHandle() const
@@ -188,17 +196,6 @@ private:
 		{
 			closePort();
 			throw SerialException("error setting timeouts");
-		}
-	}
-
-	void sendStartCommand() 
-	{
-		char startCmd = '1';
-		DWORD bytesWritten;
-		if (!::WriteFile(handle, &startCmd, 1, &bytesWritten, NULL)) 
-		{
-			closePort();
-			throw SerialException("error writing to serial port");
 		}
 	}
 
@@ -492,22 +489,34 @@ private:
 
 
 
-class WindowManager
+class Window
 {
 public:
-	WindowManager(HINSTANCE hInstance, int nCmdShow)
+	Window(HINSTANCE hInstance, int nCmdShow)
 	{
 		registerWindowClass(hInstance);
 		hwnd = createWindowInstance(hInstance, nCmdShow);
 	}
 
-	void processMessages(std::atomic<bool>& isRunning)
+	void processMessages(std::atomic<bool>& isRunning, COMPort& port, std::atomic<bool>& isReceiving)
 	{
 		MSG msg;
 		while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT)
 				isRunning = false;
+			
+			if (msg.message == WM_KEYDOWN)
+			{
+				if (msg.wParam == VK_ESCAPE)
+					isRunning = false;
+				
+				if (msg.wParam == VK_F1)
+				{
+					isReceiving = !isReceiving;
+					port.toggleDataTransmission(isReceiving);
+				}
+			}
 			
 			::TranslateMessage(&msg);
 			::DispatchMessage(&msg);
@@ -580,7 +589,7 @@ private:
 
 
 
-class SerialPortManager
+class COMPortManager
 {
 public:
 	bool setupSerialPort(COMPort& port, const Settings& settings)
@@ -599,23 +608,25 @@ public:
 		return true;
 	}
 
-	void runUARTThread(COMPort& port, DataBuffer& buffer, std::atomic<bool>& isRunning)
+	void runUARTThread(COMPort& port, DataBuffer& buffer, std::atomic<bool>& isRunning, std::atomic<bool>& isReceiving)
 	{
-		std::thread uartThread(&SerialPortManager::runUART, this, std::ref(port), std::ref(buffer), std::ref(isRunning));
+		std::thread uartThread(&COMPortManager::runUART, this, std::ref(port), std::ref(buffer), std::ref(isRunning), std::ref(isReceiving));
 		uartThread.detach();
 	}
 
 private:
-	void runUART(COMPort &port, DataBuffer &buffer, std::atomic<bool> &isRunning) 
+	void runUART(COMPort &port, DataBuffer &buffer, std::atomic<bool> &isRunning, std::atomic<bool> &isReceiving) 
 	{
 		char array[1];
 		DWORD bytesRead;
-		while (isRunning) 
-		{
-			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
-			if (bytesRead > 0) 
-				buffer.push(static_cast<float>(array[0]));
-		}
+		
+		while (isRunning)
+			if (isReceiving)
+			{
+				::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
+				if (bytesRead > 0) 
+					buffer.push(static_cast<float>(array[0]));
+			}
 	}
 };
 
@@ -625,9 +636,9 @@ class Application
 {
 public:
 	Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings)
-		: isRunning(true), hwnd(NULL), settings(settings), windowManager(hInstance, nCmdShow), graphics(), buffer(settings.getMaxPoints(), settings.getScaleFactor()), renderer(graphics, buffer, settings.getBatchSize()), serialPortManager()
+		: isRunning(true), isReceiving(false), hwnd(NULL), settings(settings), window(hInstance, nCmdShow), graphics(), buffer(settings.getMaxPoints(), settings.getScaleFactor()), renderer(graphics, buffer, settings.getBatchSize()), portManager()
 	{
-		hwnd = windowManager.getHwnd();
+		hwnd = window.getHwnd();
 		try
 		{
 			graphics.initialize(hwnd);
@@ -643,10 +654,10 @@ public:
 
 	void run()
 	{
-		if (!serialPortManager.setupSerialPort(port, settings))
+		if (!portManager.setupSerialPort(port, settings))
 			return;
 
-		serialPortManager.runUARTThread(port, buffer, isRunning);
+		portManager.runUARTThread(port, buffer, isRunning, isReceiving);
 		runLoop();
 	}
 
@@ -657,7 +668,7 @@ private:
 		int updateCounter = 0;
 		while (isRunning)
 		{
-			windowManager.processMessages(isRunning);
+			window.processMessages(isRunning, port, isReceiving);
 			renderer.renderFrame(hdc, updateCounter, isRunning);
 		}
 		::ReleaseDC(hwnd, hdc);
@@ -666,15 +677,16 @@ private:
 	const Settings& settings;
 
 	std::atomic<bool> isRunning;
+	std::atomic<bool> isReceiving;
 	HWND hwnd;
 
 	COMPort port;
 	Graphics graphics;
 	DataBuffer buffer;
 
-	WindowManager windowManager;
+	Window window;
 	Renderer renderer;
-	SerialPortManager serialPortManager;
+	COMPortManager portManager;
 };
 
 
