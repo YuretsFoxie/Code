@@ -1,4 +1,4 @@
-// TODO: try adding the OpenGL text printing.
+// TODO: Add the OpenGL text printing.
 // TODO: implement the fullscreen mode and adjusting the graph to the part of the window.
 
 Please, implement handling the key press events: 

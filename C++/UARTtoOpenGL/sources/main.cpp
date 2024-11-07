@@ -1,5 +1,4 @@
 #include <windows.h>
-#include <GL/glew.h>
 #include <thread>
 #include <vector>
 #include <mutex>
@@ -9,6 +8,11 @@
 #include <stdexcept>
 #include <fstream>
 #include <string>
+#include <GL/glew.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+
 
 class OpenGLException: public std::runtime_error 
 {
@@ -16,17 +20,23 @@ public:
     OpenGLException(const std::string& message): std::runtime_error(message) {}
 };
 
+
+
 class SerialException: public std::runtime_error 
 {
 public:
     SerialException(const std::string& message): std::runtime_error(message) {}
 };
 
+
+
 class ShaderException: public std::runtime_error 
 {
 public:
     ShaderException(const std::string& message): std::runtime_error(message) {}
 };
+
+
 
 class Settings 
 {
@@ -117,6 +127,8 @@ private:
     int maxPoints;
 };
 
+
+
 class COMPort 
 {
 public:
@@ -203,6 +215,8 @@ private:
     HANDLE handle;
 };
 
+
+
 class COMPortAdapter
 {
 public:
@@ -226,6 +240,8 @@ public:
 private:
     COMPort comPort;
 };
+
+
 
 class Shaders 
 {
@@ -315,6 +331,8 @@ private:
     GLuint program;
 };
 
+
+
 class OpenGLBuffer 
 {
 public:
@@ -379,6 +397,8 @@ private:
     GLuint VBO, VAO;
 };
 
+
+
 class OpenGLContext 
 {
 public:
@@ -420,6 +440,8 @@ private:
     }
 };
 
+
+
 class Graphics 
 {
 public:
@@ -445,6 +467,8 @@ private:
     OpenGLBuffer buffer;
     OpenGLContext context;
 };
+
+
 
 class DataBuffer 
 {
@@ -492,6 +516,8 @@ private:
     std::vector<float> dataBuffer;
     std::mutex bufferMutex;
 };
+
+
 
 class Window
 {
@@ -557,6 +583,8 @@ private:
     HWND hwnd;
 };
 
+
+
 class Renderer
 {
 public:
@@ -588,6 +616,8 @@ private:
     DataBuffer& buffer;
     const int BATCH_SIZE;
 };
+
+
 
 class Application
 {
