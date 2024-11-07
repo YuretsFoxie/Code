@@ -409,6 +409,68 @@ public:
 
         if (glewInit() != GLEW_OK)
             throw OpenGLException("failed to initialize GLEW");
+
+        if (FT_Init_FreeType(&ft))
+            throw OpenGLException("could not init freetype library");
+
+        if (FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face))
+            throw OpenGLException("could not open font");
+
+        FT_Set_Pixel_Sizes(face, 0, 48);
+    }
+
+    void renderText(const std::string& text, float x, float y, float scale, float color[3])
+    {
+        glUseProgram(textShader);
+        glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindVertexArray(VAO);
+
+        for (const char& c : text)
+        {
+            if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+            {
+                std::cerr << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+                continue;
+            }
+
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RED,
+                face->glyph->bitmap.width,
+                face->glyph->bitmap.rows,
+                0,
+                GL_RED,
+                GL_UNSIGNED_BYTE,
+                face->glyph->bitmap.buffer
+            );
+
+            float xpos = x + face->glyph->bitmap_left * scale;
+            float ypos = y - (face->glyph->bitmap.rows - face->glyph->bitmap_top) * scale;
+
+            float w = face->glyph->bitmap.width * scale;
+            float h = face->glyph->bitmap.rows * scale;
+            float vertices[6][4] = {
+                {xpos, ypos + h, 0.0f, 0.0f},
+                {xpos, ypos, 0.0f, 1.0f},
+                {xpos + w, ypos, 1.0f, 1.0f},
+
+                {xpos, ypos + h, 0.0f, 0.0f},
+                {xpos + w, ypos, 1.0f, 1.0f},
+                {xpos + w, ypos + h, 1.0f, 0.0f}
+            };
+
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            x += (face->glyph->advance.x >> 6) * scale;
+        }
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
 private:
@@ -438,6 +500,11 @@ private:
         
         return true;
     }
+
+    FT_Library ft;
+    FT_Face face;
+    GLuint textShader;
+    GLuint VAO, VBO;
 };
 
 
@@ -449,6 +516,7 @@ public:
     {
         context.initialize(hwnd);
         shaders.initialize();
+        prepareTextRendering();
     }
 
     void prepareBuffers(int maxPoints)
@@ -462,10 +530,30 @@ public:
         buffer.draw(vertices);
     }
 
+    void renderErrorText(const std::string& text)
+    {
+        float color[3] = {1.0f, 0.0f, 0.0f};
+        context.renderText(text, 10.0f, 10.0f, 1.0f, color);
+    }
+
 private:
+    void prepareTextRendering()
+    {
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
     Shaders shaders;
     OpenGLBuffer buffer;
     OpenGLContext context;
+    GLuint VAO, VBO;
 };
 
 
@@ -633,7 +721,7 @@ public:
         }
         catch (const OpenGLException& e)
         {
-            std::cerr << "graphics initialization failed: " << e.what() << std::endl;
+            graphics.renderErrorText("graphics initialization failed: " + std::string(e.what()));
             std::cin.get();
             return;
         }
@@ -647,7 +735,7 @@ public:
         }
         catch (const SerialException& e)
         {
-            std::cerr << "serial port setup failed: " << e.what() << std::endl;
+            graphics.renderErrorText("serial port setup failed: " + std::string(e.what()));
             std::cin.get();
             return;
         }
@@ -711,17 +799,17 @@ private:
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	try
-	{
-		Settings settings("settings.ini");
-		Application app(hInstance, nCmdShow, settings);
-		app.run();
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << "application initialization failed: " << e.what() << std::endl;
-		std::cin.get();
-		return EXIT_FAILURE;
-	}
-	return EXIT_SUCCESS;
+    try
+    {
+        Settings settings("settings.ini");
+        Application app(hInstance, nCmdShow, settings);
+        app.run();
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "application initialization failed: " << e.what() << std::endl;
+        std::cin.get();
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }
