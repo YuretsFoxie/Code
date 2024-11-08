@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <atomic> // Include this header for std::atomic
+#include <atomic>
 
 class OpenGLException: public std::runtime_error 
 {
@@ -31,11 +31,52 @@ public:
             throw OpenGLException("could not open font");
 
         FT_Set_Pixel_Sizes(face, 0, 48);
+
+        // Compile and link shaders
+        GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+        glCompileShader(vertexShader);
+        checkCompileErrors(vertexShader, "VERTEX");
+
+        GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+        glCompileShader(fragmentShader);
+        checkCompileErrors(fragmentShader, "FRAGMENT");
+
+        textShader = glCreateProgram();
+        glAttachShader(textShader, vertexShader);
+        glAttachShader(textShader, fragmentShader);
+        glLinkProgram(textShader);
+        checkCompileErrors(textShader, "PROGRAM");
+
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        // Set up OpenGL state for text rendering
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
 
     void renderText(const std::string& text, float x, float y, float scale, float color[3])
     {
         glUseProgram(textShader);
+
+        // Set orthographic projection matrix
+        float ortho[16] = {
+            2.0f / 800, 0, 0, 0,
+            0, 2.0f / 600, 0, 0,
+            0, 0, -1.0f, 0,
+            -1.0f, -1.0f, 0, 1.0f
+        };
+        glUniformMatrix4fv(glGetUniformLocation(textShader, "projection"), 1, GL_FALSE, ortho);
+
         glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
         glActiveTexture(GL_TEXTURE0);
         glBindVertexArray(VAO);
@@ -115,10 +156,60 @@ private:
         return true;
     }
 
+    void checkCompileErrors(GLuint shader, std::string type)
+    {
+        GLint success;
+        GLchar infoLog[1024];
+        if (type != "PROGRAM")
+        {
+            glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+            if (!success)
+            {
+                glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+                std::cerr << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+            }
+        }
+        else
+        {
+            glGetProgramiv(shader, GL_LINK_STATUS, &success);
+            if (!success)
+            {
+                glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+                std::cerr << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+            }
+        }
+    }
+
     FT_Library ft;
     FT_Face face;
     GLuint textShader;
     GLuint VAO, VBO;
+
+    const char* vertexShaderSource = R"(
+        #version 330 core
+        layout (location = 0) in vec4 vertex;
+        uniform mat4 projection;
+        out vec2 TexCoords;
+
+        void main() {
+            gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+            TexCoords = vertex.zw;
+        }
+    )";
+
+    const char* fragmentShaderSource = R"(
+        #version 330 core
+        in vec2 TexCoords;
+        out vec4 color;
+
+        uniform sampler2D text;
+        uniform vec3 textColor;
+
+        void main() {    
+            vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
+            color = vec4(textColor, 1.0) * sampled;
+        }
+    )";
 };
 
 class Window
