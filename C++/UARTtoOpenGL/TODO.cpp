@@ -7,6 +7,6 @@ Please, implement handling the key press events:
 Preserve the original code formatting, do not replace the tabs with the spaces and keep 3 lines between the classes. 
 Please, provide two halves of the updated code in two different messages.
 
-Please, provide the second half of the updated code, which matches the first one.
+Please, provide the second half of the complete updated code, which matches the first one.
 
 https://github.com/YuretsFoxie/Code
