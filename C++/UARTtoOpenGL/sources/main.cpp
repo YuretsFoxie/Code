@@ -1,279 +1,331 @@
 #include <windows.h>
 #include <iostream>
-#include <map>
+#include <stdexcept>
 #include <string>
 #include <GL/glew.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <atomic>
 
-// settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
-
-/// Holds all state information relevant to a character as loaded using FreeType
-struct Character {
-    unsigned int TextureID; // ID handle of the glyph texture
-    int Size[2];            // Size of glyph
-    int Bearing[2];         // Offset from baseline to left/top of glyph
-    unsigned int Advance;   // Horizontal offset to advance to next glyph
+class OpenGLException: public std::runtime_error 
+{
+public:
+    OpenGLException(const std::string& message): std::runtime_error(message) {}
 };
 
-std::map<GLchar, Character> Characters;
-unsigned int VAO, VBO;
+class OpenGLContext 
+{
+public:
+    void initialize(HWND hwnd) 
+    {
+        if (!setupPixelFormat(hwnd))
+            throw OpenGLException("failed to setup pixel format");
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-void RenderText(GLuint shaderProgram, std::string text, float x, float y, float scale, float color[3]);
+        if (glewInit() != GLEW_OK)
+            throw OpenGLException("failed to initialize GLEW");
 
-void InitOpenGL(HWND hwnd);
-void LoadShaders(GLuint &shaderProgram);
-void LoadCharacters();
-void ProcessInput(MSG msg);
+        if (FT_Init_FreeType(&ft))
+            throw OpenGLException("could not init freetype library");
 
-const char* vertexShaderSource = R"(
-#version 330 core
-layout (location = 0) in vec4 vertex;
-out vec2 TexCoords;
-uniform mat4 projection;
-void main() {
-    gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
-    TexCoords = vertex.zw;
-}
-)";
-const char* fragmentShaderSource = R"(
-#version 330 core
-in vec2 TexCoords;
-out vec4 color;
-uniform sampler2D text;
-uniform vec3 textColor;
-void main() {    
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
-    color = vec4(textColor, 1.0) * sampled;
-}
-)";
+        if (FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face))
+            throw OpenGLException("could not open font");
 
-int main() {
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-    WNDCLASS wc = {0};
-    wc.lpfnWndProc = WindowProc;
-    wc.hInstance = hInstance;
-    wc.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
-    wc.lpszClassName = "OpenGLWindow";
-    wc.style = CS_OWNDC;
-    RegisterClass(&wc);
+        FT_Set_Pixel_Sizes(face, 0, 48);
 
-    HWND hwnd = CreateWindow(wc.lpszClassName, "OpenGL FreeType Text Rendering", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, SCR_WIDTH, SCR_HEIGHT, NULL, NULL, hInstance, NULL);
+        // Compile and link shaders
+        GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+        glCompileShader(vertexShader);
+        checkCompileErrors(vertexShader, "VERTEX");
 
-    InitOpenGL(hwnd);
-    
-    GLuint shaderProgram;
-    LoadShaders(shaderProgram);
-    LoadCharacters();
+        GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+        glCompileShader(fragmentShader);
+        checkCompileErrors(fragmentShader, "FRAGMENT");
 
-    MSG msg;
-    while (true) {
-        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-            if (msg.message == WM_QUIT)
-                return 0;
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+        textShader = glCreateProgram();
+        glAttachShader(textShader, vertexShader);
+        glAttachShader(textShader, fragmentShader);
+        glLinkProgram(textShader);
+        checkCompileErrors(textShader, "PROGRAM");
+
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        // Set up OpenGL state for text rendering
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
+    void renderText(const std::string& text, float x, float y, float scale, float color[3])
+    {
+        glUseProgram(textShader);
+
+        // Set orthographic projection matrix
+        float ortho[16] = {
+            2.0f / 800, 0, 0, 0,
+            0, 2.0f / 600, 0, 0,
+            0, 0, -1.0f, 0,
+            -1.0f, -1.0f, 0, 1.0f
+        };
+        glUniformMatrix4fv(glGetUniformLocation(textShader, "projection"), 1, GL_FALSE, ortho);
+
+        glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindVertexArray(VAO);
+
+        for (const char& c : text)
+        {
+            if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+            {
+                std::cerr << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+                continue;
+            }
+
+            glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RED,
+                face->glyph->bitmap.width,
+                face->glyph->bitmap.rows,
+                0,
+                GL_RED,
+                GL_UNSIGNED_BYTE,
+                face->glyph->bitmap.buffer
+            );
+
+            float xpos = x + face->glyph->bitmap_left * scale;
+            float ypos = y - (face->glyph->bitmap.rows - face->glyph->bitmap_top) * scale;
+
+            float w = face->glyph->bitmap.width * scale;
+            float h = face->glyph->bitmap.rows * scale;
+            float vertices[6][4] = {
+                {xpos, ypos + h, 0.0f, 0.0f},
+                {xpos, ypos, 0.0f, 1.0f},
+                {xpos + w, ypos, 1.0f, 1.0f},
+
+                {xpos, ypos + h, 0.0f, 0.0f},
+                {xpos + w, ypos, 1.0f, 1.0f},
+                {xpos + w, ypos + h, 1.0f, 0.0f}
+            };
+
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            x += (face->glyph->advance.x >> 6) * scale;
         }
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
-        ProcessInput(msg);
+private:
+    bool setupPixelFormat(HWND hwnd) 
+    {
+        HDC hdc = ::GetDC(hwnd);
+        PIXELFORMATDESCRIPTOR pfd = 
+        {
+            sizeof(PIXELFORMATDESCRIPTOR), 1,
+            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA,
+            32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 8, 0, PFD_MAIN_PLANE, 0, 0, 0, 0
+        };
+        
+        int pf = ::ChoosePixelFormat(hdc, &pfd);
+        if (pf == 0 || !SetPixelFormat(hdc, pf, &pfd)) 
+        {
+            ::ReleaseDC(hwnd, hdc);
+            throw OpenGLException("failed to set pixel format");
+        }
+        
+        HGLRC hglrc = wglCreateContext(hdc);
+        if (!hglrc || !wglMakeCurrent(hdc, hglrc)) 
+        {
+            ::ReleaseDC(hwnd, hdc);
+            throw OpenGLException("failed to create or activate OpenGL context");
+        }
+        
+        return true;
+    }
 
-        // Render
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    void checkCompileErrors(GLuint shader, std::string type)
+    {
+        GLint success;
+        GLchar infoLog[1024];
+        if (type != "PROGRAM")
+        {
+            glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+            if (!success)
+            {
+                glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+                std::cerr << "ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+            }
+        }
+        else
+        {
+            glGetProgramiv(shader, GL_LINK_STATUS, &success);
+            if (!success)
+            {
+                glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+                std::cerr << "ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+            }
+        }
+    }
+
+    FT_Library ft;
+    FT_Face face;
+    GLuint textShader;
+    GLuint VAO, VBO;
+
+    const char* vertexShaderSource = R"(
+        #version 330 core
+        layout (location = 0) in vec4 vertex;
+        uniform mat4 projection;
+        out vec2 TexCoords;
+
+        void main() {
+            gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+            TexCoords = vertex.zw;
+        }
+    )";
+
+    const char* fragmentShaderSource = R"(
+        #version 330 core
+        in vec2 TexCoords;
+        out vec4 color;
+
+        uniform sampler2D text;
+        uniform vec3 textColor;
+
+        void main() {    
+            vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
+            color = vec4(textColor, 1.0) * sampled;
+        }
+    )";
+};
+
+class Window
+{
+public:
+    Window(HINSTANCE hInstance, int nCmdShow)
+    {
+        registerWindowClass(hInstance);
+        hwnd = createWindowInstance(hInstance, nCmdShow);
+    }
+
+    void processMessages(std::atomic<bool>& isRunning)
+    {
+        MSG msg;
+        while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            if (msg.message == WM_QUIT)
+                isRunning = false;
+
+            if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE)
+                isRunning = false;
+
+            ::TranslateMessage(&msg);
+            ::DispatchMessage(&msg);
+        }
+    }
+
+    HWND getHwnd() const
+    {
+        return hwnd;
+    }
+
+private:
+    void registerWindowClass(HINSTANCE hInstance)
+    {
+        WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_OWNDC, wndProc, 0, 0, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, "OpenGL", NULL};
+        ::RegisterClassEx(&wc);
+    }
+
+    HWND createWindowInstance(HINSTANCE hInstance, int nCmdShow)
+    {
+        HWND hwnd = CreateWindowEx(0, "OpenGL", "OpenGL Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, hInstance, NULL);
+        ::ShowWindow(hwnd, nCmdShow);
+        return hwnd;
+    }
+
+    static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    {
+        if (msg == WM_CLOSE)
+            PostQuitMessage(0);
+        
+        return DefWindowProc(hwnd, msg, wParam, lParam);
+    }
+
+    HWND hwnd;
+};
+
+class Application
+{
+public:
+    Application(HINSTANCE hInstance, int nCmdShow)
+        : isRunning(true), hwnd(NULL), window(hInstance, nCmdShow), context()
+    {
+        hwnd = window.getHwnd();
+        try
+        {
+            context.initialize(hwnd);
+        }
+        catch (const OpenGLException& e)
+        {
+            std::cerr << "OpenGL initialization failed: " << e.what() << std::endl;
+            std::cin.get();
+            return;
+        }
+    }
+
+    void run()
+    {
+        HDC hdc = ::GetDC(hwnd);
+        while (isRunning)
+        {
+            window.processMessages(isRunning);
+            renderScene(hdc);
+        }
+        ::ReleaseDC(hwnd, hdc);
+    }
+
+private:
+    void renderScene(HDC hdc)
+    {
         glClear(GL_COLOR_BUFFER_BIT);
 
-        float color[3] = {0.5f, 0.8f, 0.2f};
-        RenderText(shaderProgram, "This is sample text", 25.0f, 25.0f, 1.0f, color);
-        float color2[3] = {0.3f, 0.7f, 0.9f};
-        RenderText(shaderProgram, "(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, color2);
+        float color[3] = {0.0f, 1.0f, 0.0f};
+        context.renderText("Hello, OpenGL!", 25.0f, 25.0f, 1.0f, color);
 
-        SwapBuffers(GetDC(hwnd));
+        ::SwapBuffers(hdc);
     }
 
-    return 0;
-}
+    std::atomic<bool> isRunning;
+    HWND hwnd;
+    Window window;
+    OpenGLContext context;
+};
 
-void InitOpenGL(HWND hwnd) {
-    PIXELFORMATDESCRIPTOR pfd = {
-        sizeof(PIXELFORMATDESCRIPTOR),
-        1,
-        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-        PFD_TYPE_RGBA,
-        32,
-        0, 0, 0, 0, 0, 0,
-        0,
-        0,
-        0,
-        0, 0, 0, 0,
-        24,
-        8,
-        0,
-        PFD_MAIN_PLANE,
-        0, 0, 0, 0
-    };
-
-    HDC hdc = GetDC(hwnd);
-    int pixelFormat = ChoosePixelFormat(hdc, &pfd);
-    SetPixelFormat(hdc, pixelFormat, &pfd);
-
-    HGLRC hglrc = wglCreateContext(hdc);
-    wglMakeCurrent(hdc, hglrc);
-
-    glewInit();
-
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-}
-
-void LoadShaders(GLuint &shaderProgram) {
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    glUseProgram(shaderProgram);
-    float projection[16] = {
-        2.0f / SCR_WIDTH, 0, 0, -1,
-        0, 2.0f / SCR_HEIGHT, 0, -1,
-        0, 0, -1, 0,
-        0, 0, 0, 1
-    };
-    GLuint projectionLocation = glGetUniformLocation(shaderProgram, "projection");
-    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projection);
-}
-
-void LoadCharacters() {
-    FT_Library ft;
-    if (FT_Init_FreeType(&ft)) {
-        std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-        exit(EXIT_FAILURE);
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+    try
+    {
+        Application app(hInstance, nCmdShow);
+        app.run();
     }
-
-    FT_Face face;
-    if (FT_New_Face(ft, "C:\\Windows\\Fonts\\arial.ttf", 0, &face)) {
-        std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
-        exit(EXIT_FAILURE);
+    catch (const std::exception& e)
+    {
+        std::cerr << "Application initialization failed: " << e.what() << std::endl;
+        std::cin.get();
+        return EXIT_FAILURE;
     }
-    FT_Set_Pixel_Sizes(face, 0, 48);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    for (unsigned char c = 0; c < 128; c++) {
-        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-            std::cerr << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
-            continue;
-        }
-
-        GLuint texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RED,
-            face->glyph->bitmap.width,
-            face->glyph->bitmap.rows,
-            0,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            face->glyph->bitmap.buffer
-        );
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        Character character = {
-            texture,
-            {static_cast<int>(face->glyph->bitmap.width), static_cast<int>(face->glyph->bitmap.rows)},
-            {face->glyph->bitmap_left, face->glyph->bitmap_top},
-            static_cast<unsigned int>(face->glyph->advance.x)
-        };
-        Characters.insert(std::pair<char, Character>(c, character));
-    }
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    FT_Done_Face(face);
-    FT_Done_FreeType(ft);
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void RenderText(GLuint shaderProgram, std::string text, float x, float y, float scale, float color[3]) {
-    glUseProgram(shaderProgram);
-    glUniform3f(glGetUniformLocation(shaderProgram, "textColor"), color[0], color[1], color[2]);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(VAO);
-
-    std::string::const_iterator c;
-    for (c = text.begin(); c != text.end(); c++) {
-        Character ch = Characters[*c];
-
-        float xpos = x + ch.Bearing[0] * scale;
-        float ypos = y - (ch.Size[1] - ch.Bearing[1]) * scale;
-
-        float w = ch.Size[0] * scale;
-        float h = ch.Size[1] * scale;
-        float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos,     ypos,       0.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-
-            { xpos,     ypos + h,   0.0f, 0.0f },
-            { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }
-        };
-
-        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        x += (ch.Advance >> 6) * scale;
-    }
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void ProcessInput(MSG msg) {
-    if (msg.message == WM_KEYDOWN) {
-        if (msg.wParam == VK_ESCAPE) {
-            PostQuitMessage(0);
-        }
-    }
-}
-
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    switch (uMsg) {
-        case WM_CLOSE:
-            PostQuitMessage(0);
-            return 0;
-        case WM_DESTROY:
-            return 0;
-        default:
-            return DefWindowProc(hwnd, uMsg, wParam, lParam);
-    }
+    return EXIT_SUCCESS;
 }
