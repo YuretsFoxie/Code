@@ -62,6 +62,20 @@ public:
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+
+        // Set up blending options
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // Create and bind the texture for text rendering
+        glGenTextures(1, &textTexture);
+        glBindTexture(GL_TEXTURE_2D, textTexture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     void renderText(const std::string& text, float x, float y, float scale, float color[3])
@@ -80,6 +94,7 @@ public:
         glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
         glActiveTexture(GL_TEXTURE0);
         glBindVertexArray(VAO);
+        glBindTexture(GL_TEXTURE_2D, textTexture);
 
         for (const char& c : text)
         {
@@ -183,7 +198,7 @@ private:
     FT_Library ft;
     FT_Face face;
     GLuint textShader;
-    GLuint VAO, VBO;
+    GLuint VAO, VBO, textTexture;
 
     const char* vertexShaderSource = R"(
         #version 330 core
