@@ -143,9 +143,12 @@ private:
 			// Load character glyph
 			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
 			{
-				std::cerr << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
+				std::cerr << "ERROR::FREETYPE: Failed to load Glyph for character: " << static_cast<int>(c) << std::endl;
 				continue;
 			}
+
+			// Set pixel storage mode to avoid alignment issues
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 			// Generate texture
 			GLuint texture;
