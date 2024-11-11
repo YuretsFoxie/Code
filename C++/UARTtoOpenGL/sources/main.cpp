@@ -5,12 +5,23 @@
 #include <GL/glew.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <map>
+#include <vector>
 #include <atomic>
 
 class OpenGLException: public std::runtime_error 
 {
 public:
     OpenGLException(const std::string& message): std::runtime_error(message) {}
+};
+
+struct Character {
+    GLuint TextureID;   // ID handle of the glyph texture
+    int Width;          // Width of the glyph
+    int Height;         // Height of the glyph
+    int BearingX;       // Offset from baseline to left/top of glyph
+    int BearingY;       // Offset from baseline to left/top of glyph
+    long Advance;       // Offset to advance to next glyph
 };
 
 class OpenGLContext 
@@ -68,14 +79,7 @@ public:
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // Create and bind the texture for text rendering
-        glGenTextures(1, &textTexture);
-        glBindTexture(GL_TEXTURE_2D, textTexture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        loadCharacters();
     }
 
     void renderText(const std::string& text, float x, float y, float scale, float color[3])
@@ -94,33 +98,17 @@ public:
         glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
         glActiveTexture(GL_TEXTURE0);
         glBindVertexArray(VAO);
-        glBindTexture(GL_TEXTURE_2D, textTexture);
 
+        // Iterate through all characters
         for (const char& c : text)
         {
-            if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-            {
-                std::cerr << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-                continue;
-            }
+            Character ch = Characters[c];
 
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_RED,
-                face->glyph->bitmap.width,
-                face->glyph->bitmap.rows,
-                0,
-                GL_RED,
-                GL_UNSIGNED_BYTE,
-                face->glyph->bitmap.buffer
-            );
+            float xpos = x + ch.BearingX * scale;
+            float ypos = y - (ch.Height - ch.BearingY) * scale;
 
-            float xpos = x + face->glyph->bitmap_left * scale;
-            float ypos = y - (face->glyph->bitmap.rows - face->glyph->bitmap_top) * scale;
-
-            float w = face->glyph->bitmap.width * scale;
-            float h = face->glyph->bitmap.rows * scale;
+            float w = ch.Width * scale;
+            float h = ch.Height * scale;
             float vertices[6][4] = {
                 {xpos, ypos + h, 0.0f, 0.0f},
                 {xpos, ypos, 0.0f, 1.0f},
@@ -131,19 +119,68 @@ public:
                 {xpos + w, ypos + h, 1.0f, 0.0f}
             };
 
+            glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
-            x += (face->glyph->advance.x >> 6) * scale;
+            x += (ch.Advance >> 6) * scale;  // Advance cursor to next glyph
         }
+
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
 private:
+	void loadCharacters()
+	{
+		// Load the first 128 ASCII characters
+		for (unsigned char c = 0; c < 128; c++)
+		{
+			// Load character glyph
+			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+			{
+				std::cerr << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
+				continue;
+			}
+
+			// Generate texture
+			GLuint texture;
+			glGenTextures(1, &texture);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				GL_RED,
+				face->glyph->bitmap.width,
+				face->glyph->bitmap.rows,
+				0,
+				GL_RED,
+				GL_UNSIGNED_BYTE,
+				face->glyph->bitmap.buffer
+			);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			// Store character in map
+			Character character = {
+				texture,
+				static_cast<int>(face->glyph->bitmap.width),  // Explicit cast to int
+				static_cast<int>(face->glyph->bitmap.rows),   // Explicit cast to int
+				face->glyph->bitmap_left,
+				face->glyph->bitmap_top,
+				face->glyph->advance.x
+			};
+			Characters.insert(std::pair<char, Character>(c, character));
+		}
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
     bool setupPixelFormat(HWND hwnd) 
     {
         HDC hdc = ::GetDC(hwnd);
@@ -198,7 +235,8 @@ private:
     FT_Library ft;
     FT_Face face;
     GLuint textShader;
-    GLuint VAO, VBO, textTexture;
+    GLuint VAO, VBO;
+    std::map<char, Character> Characters;
 
     const char* vertexShaderSource = R"(
         #version 330 core
