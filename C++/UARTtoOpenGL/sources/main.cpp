@@ -12,6 +12,16 @@
 #include FT_FREETYPE_H
 #include <map>
 
+struct Origin {
+    float x;
+    float y;
+};
+
+struct Size {
+    float width;
+    float height;
+};
+
 class Settings {
 public:
     Settings(const std::string& filePath) {
@@ -126,6 +136,45 @@ struct Character {
     int BearingX;
     int BearingY;
     long Advance;
+};
+
+class Subwindow {
+public:
+    Subwindow(const Origin& origin, const Size& size) : origin(origin), size(size) {}
+    virtual ~Subwindow() = default;
+    virtual void render() = 0;
+
+protected:
+    Origin origin;
+    Size size;
+};
+
+class TextSubwindow : public Subwindow {
+public:
+    TextSubwindow(const Origin& origin, const Size& size, const std::string& text, float scale, float color[3])
+        : Subwindow(origin, size), text(text), scale(scale) {
+            std::copy(color, color + 3, this->color);
+        }
+    void render() override {
+        // Implement text rendering here
+    }
+
+private:
+    std::string text;
+    float scale;
+    float color[3];
+};
+
+class GraphSubwindow : public Subwindow {
+public:
+    GraphSubwindow(const Origin& origin, const Size& size, const std::vector<float>& data)
+        : Subwindow(origin, size), data(data) {}
+    void render() override {
+        // Implement UART data rendering here
+    }
+
+private:
+    std::vector<float> data;
 };
 
 class Shaders {
@@ -560,7 +609,6 @@ public:
         : isRunning(true), isReceiving(false), hwnd(NULL), settings(settings), window(hInstance, nCmdShow), graphics(), buffer(settings.getMaxPoints(), settings.getScaleFactor()), renderer(graphics, buffer, settings.getBatchSize()) {
         hwnd = window.getHwnd();
         graphics.initialize(hwnd, settings);
-        graphics.prepareBuffers(settings.getMaxPoints());
     }
 
     void run() {
