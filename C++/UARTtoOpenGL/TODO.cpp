@@ -1,5 +1,8 @@
-// TODO: Add the OpenGL text printing.
-// TODO: implement the fullscreen mode and adjusting the graph to the part of the window.
+// TODO: Merge the data displaying and the text displaying.
+// TODO: Implement the graphic console.
+// TODO: Implement the fullscreen mode and adjusting the graph to the part of the window.
+// TODO: Add the Spectrum analyzer.
+// TODO: Implement showing all graphics components independently at the window.
 
 Please, implement handling the key press events: 
 1. If ESC is pressed, the application quits.
