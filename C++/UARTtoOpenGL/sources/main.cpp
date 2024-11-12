@@ -9,8 +9,6 @@
 #include <fstream>
 #include <string>
 #include <GL/glew.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
 
 
 
@@ -409,70 +407,8 @@ public:
 
         if (glewInit() != GLEW_OK)
             throw OpenGLException("failed to initialize GLEW");
-
-        if (FT_Init_FreeType(&ft))
-            throw OpenGLException("could not init freetype library");
-
-        if (FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face))
-            throw OpenGLException("could not open font");
-
-        FT_Set_Pixel_Sizes(face, 0, 48);
     }
-
-    void renderText(const std::string& text, float x, float y, float scale, float color[3])
-    {
-        glUseProgram(textShader);
-        glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
-        glActiveTexture(GL_TEXTURE0);
-        glBindVertexArray(VAO);
-
-        for (const char& c : text)
-        {
-            if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-            {
-                std::cerr << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-                continue;
-            }
-
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_RED,
-                face->glyph->bitmap.width,
-                face->glyph->bitmap.rows,
-                0,
-                GL_RED,
-                GL_UNSIGNED_BYTE,
-                face->glyph->bitmap.buffer
-            );
-
-            float xpos = x + face->glyph->bitmap_left * scale;
-            float ypos = y - (face->glyph->bitmap.rows - face->glyph->bitmap_top) * scale;
-
-            float w = face->glyph->bitmap.width * scale;
-            float h = face->glyph->bitmap.rows * scale;
-            float vertices[6][4] = {
-                {xpos, ypos + h, 0.0f, 0.0f},
-                {xpos, ypos, 0.0f, 1.0f},
-                {xpos + w, ypos, 1.0f, 1.0f},
-
-                {xpos, ypos + h, 0.0f, 0.0f},
-                {xpos + w, ypos, 1.0f, 1.0f},
-                {xpos + w, ypos + h, 1.0f, 0.0f}
-            };
-
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-
-            x += (face->glyph->advance.x >> 6) * scale;
-        }
-        glBindVertexArray(0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
+	
 private:
     bool setupPixelFormat(HWND hwnd) 
     {
@@ -500,9 +436,7 @@ private:
         
         return true;
     }
-
-    FT_Library ft;
-    FT_Face face;
+	
     GLuint textShader;
     GLuint VAO, VBO;
 };
@@ -529,13 +463,7 @@ public:
         glUseProgram(shaders.getProgram());
         buffer.draw(vertices);
     }
-
-    void renderErrorText(const std::string& text)
-    {
-        float color[3] = {1.0f, 0.0f, 0.0f};
-        context.renderText(text, 10.0f, 10.0f, 1.0f, color);
-    }
-
+	
 private:
     void prepareTextRendering()
     {
@@ -721,7 +649,7 @@ public:
         }
         catch (const OpenGLException& e)
         {
-            graphics.renderErrorText("graphics initialization failed: " + std::string(e.what()));
+			std::cout << "graphics initialization failed: " << std::string(e.what()) << std::endl;
             std::cin.get();
             return;
         }
@@ -735,7 +663,7 @@ public:
         }
         catch (const SerialException& e)
         {
-            graphics.renderErrorText("serial port setup failed: " + std::string(e.what()));
+			std::cout << "serial port setup failed: " << std::string(e.what()) << std::endl;
             std::cin.get();
             return;
         }
@@ -757,16 +685,12 @@ private:
         DWORD bytesRead;
         
         while (isRunning)
-        {
             if (isReceiving)
             {
                 ::ReadFile(portAdapter.getHandle(), array, 1, &bytesRead, NULL);
                 if (bytesRead > 0) 
-                {
                     buffer.push(static_cast<float>(array[0]));
-                }
             }
-        }
     }
 
     void runLoop()
