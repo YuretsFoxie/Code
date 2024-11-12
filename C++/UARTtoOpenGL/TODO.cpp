@@ -1,5 +1,6 @@
-// TODO: Add the OpenGL text printing.
-// TODO: implement the fullscreen mode and adjusting the graph to the part of the window.
+// TODO: Implement the Subwindow functionality.
+// TODO: Implement the fullscreen mode.
+// TODO: Implement the spectrum analyzer functionality.
 
 Please, implement handling the key press events: 
 1. If ESC is pressed, the application quits.

@@ -281,27 +281,53 @@ class OpenGLContext {
 public:
     void initialize(HWND hwnd) {
         setupPixelFormat(hwnd);
+        initializeGLEW();
+        initializeFreeType();
+        setupShaders();
+        setupTextRendering();
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        loadCharacters();
+    }
+
+    void renderText(const std::string& text, float x, float y, float scale, float color[3]) {
+        glUseProgram(textShader);
+        setOrthographicProjection();
+        setTextColor(color);
+        glActiveTexture(GL_TEXTURE0);
+        glBindVertexArray(textVAO);
+
+        for (const char& c : text) {
+            Character ch = Characters[c];
+            renderCharacter(ch, x, y, scale);
+            x += (ch.Advance >> 6) * scale;
+        }
+
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+private:
+    void initializeGLEW() {
         glewInit();
+    }
+
+    void initializeFreeType() {
         FT_Init_FreeType(&ft);
         FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face);
         FT_Set_Pixel_Sizes(face, 0, 24);
+    }
 
-        GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-        glCompileShader(vertexShader);
-
-        GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-        glCompileShader(fragmentShader);
-
-        textShader = glCreateProgram();
-        glAttachShader(textShader, vertexShader);
-        glAttachShader(textShader, fragmentShader);
-        glLinkProgram(textShader);
-
+    void setupShaders() {
+        GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
+        GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
+        textShader = createShaderProgram(vertexShader, fragmentShader);
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
+    }
 
+    void setupTextRendering() {
         glGenVertexArrays(1, &textVAO);
         glGenBuffers(1, &textVBO);
         glBindVertexArray(textVAO);
@@ -311,17 +337,61 @@ public:
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
-
-        glEnable(GL_CULL_FACE);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        loadCharacters();
     }
 
-    void renderText(const std::string& text, float x, float y, float scale, float color[3]) {
-        glUseProgram(textShader);
+    void loadCharacters() {
+        for (unsigned char c = 0; c < 128; c++) {
+            loadCharacter(c);
+        }
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
+    void loadCharacter(unsigned char c) {
+        FT_Load_Char(face, c, FT_LOAD_RENDER);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        GLuint texture = createTexture(face->glyph->bitmap);
+        Character character = createCharacter(texture, face->glyph);
+        Characters.insert(std::pair<char, Character>(c, character));
+    }
+
+    GLuint createTexture(const FT_Bitmap& bitmap) {
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RED,
+            bitmap.width,
+            bitmap.rows,
+            0,
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            bitmap.buffer
+        );
+        setTextureParameters();
+        return texture;
+    }
+
+    void setTextureParameters() {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+
+    Character createCharacter(GLuint texture, FT_GlyphSlot glyph) {
+        return {
+            texture,
+            static_cast<int>(glyph->bitmap.width),
+            static_cast<int>(glyph->bitmap.rows),
+            glyph->bitmap_left,
+            glyph->bitmap_top,
+            glyph->advance.x
+        };
+    }
+
+    void setOrthographicProjection() {
         float ortho[16] = {
             2.0f / 800, 0, 0, 0,
             0, 2.0f / 600, 0, 0,
@@ -329,81 +399,31 @@ public:
             -1.0f, -1.0f, 0, 1.0f
         };
         glUniformMatrix4fv(glGetUniformLocation(textShader, "projection"), 1, GL_FALSE, ortho);
-
-        glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
-        glActiveTexture(GL_TEXTURE0);
-        glBindVertexArray(textVAO);
-
-        for (const char& c : text) {
-            Character ch = Characters[c];
-
-            float xpos = x + ch.BearingX * scale;
-            float ypos = y - (ch.Height - ch.BearingY) * scale;
-
-            float w = ch.Width * scale;
-            float h = ch.Height * scale;
-            float vertices[6][4] = {
-                {xpos, ypos + h, 0.0f, 0.0f},
-                {xpos, ypos, 0.0f, 1.0f},
-                {xpos + w, ypos, 1.0f, 1.0f},
-
-                {xpos, ypos + h, 0.0f, 0.0f},
-                {xpos + w, ypos, 1.0f, 1.0f},
-                {xpos + w, ypos + h, 1.0f, 0.0f}
-            };
-
-            glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-
-            glBindBuffer(GL_ARRAY_BUFFER, textVBO);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-
-            x += (ch.Advance >> 6) * scale;
-        }
-
-        glBindVertexArray(0);
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-private:
-    void loadCharacters() {
-        for (unsigned char c = 0; c < 128; c++) {
-            FT_Load_Char(face, c, FT_LOAD_RENDER);
+    void setTextColor(float color[3]) {
+        glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
+    }
 
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    void renderCharacter(const Character& ch, float x, float y, float scale) {
+        float xpos = x + ch.BearingX * scale;
+        float ypos = y - (ch.Height - ch.BearingY) * scale;
+        float w = ch.Width * scale;
+        float h = ch.Height * scale;
+        float vertices[6][4] = {
+            {xpos, ypos + h, 0.0f, 0.0f},
+            {xpos, ypos, 0.0f, 1.0f},
+            {xpos + w, ypos, 1.0f, 1.0f},
 
-            GLuint texture;
-            glGenTextures(1, &texture);
-            glBindTexture(GL_TEXTURE_2D, texture);
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_RED,
-                face->glyph->bitmap.width,
-                face->glyph->bitmap.rows,
-                0,
-                GL_RED,
-                GL_UNSIGNED_BYTE,
-                face->glyph->bitmap.buffer
-            );
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            Character character = {
-                texture,
-                static_cast<int>(face->glyph->bitmap.width),
-                static_cast<int>(face->glyph->bitmap.rows),
-                face->glyph->bitmap_left,
-                face->glyph->bitmap_top,
-                face->glyph->advance.x
-            };
-            Characters.insert(std::pair<char, Character>(c, character));
-        }
-        glBindTexture(GL_TEXTURE_2D, 0);
+            {xpos, ypos + h, 0.0f, 0.0f},
+            {xpos + w, ypos, 1.0f, 1.0f},
+            {xpos + w, ypos + h, 1.0f, 0.0f}
+        };
+        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+        glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 
     void setupPixelFormat(HWND hwnd) {
@@ -419,6 +439,21 @@ private:
 
         HGLRC hglrc = wglCreateContext(hdc);
         wglMakeCurrent(hdc, hglrc);
+    }
+
+    GLuint compileShader(GLenum type, const char* source) {
+        GLuint shader = glCreateShader(type);
+        glShaderSource(shader, 1, &source, NULL);
+        glCompileShader(shader);
+        return shader;
+    }
+
+    GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader) {
+        GLuint program = glCreateProgram();
+        glAttachShader(program, vertexShader);
+        glAttachShader(program, fragmentShader);
+        glLinkProgram(program);
+        return program;
     }
 
     FT_Library ft;
