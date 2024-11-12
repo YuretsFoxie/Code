@@ -304,9 +304,11 @@ public:
             };
 
             glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+
             glBindBuffer(GL_ARRAY_BUFFER, textVBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
+
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
             x += (ch.Advance >> 6) * scale;
@@ -320,6 +322,7 @@ private:
     void loadCharacters() {
         for (unsigned char c = 0; c < 128; c++) {
             FT_Load_Char(face, c, FT_LOAD_RENDER);
+
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
             GLuint texture;
@@ -364,6 +367,7 @@ private:
 
         int pf = ::ChoosePixelFormat(hdc, &pfd);
         SetPixelFormat(hdc, pf, &pfd);
+
         HGLRC hglrc = wglCreateContext(hdc);
         wglMakeCurrent(hdc, hglrc);
     }
@@ -406,11 +410,7 @@ public:
     void initialize(HWND hwnd, const Settings& settings) {
         context.initialize(hwnd);
         shaders.initialize();
-        prepareBuffers(settings.getMaxPoints());
-    }
-
-    void prepareBuffers(int maxPoints) {
-        buffer.prepare(maxPoints);
+        buffer.prepare(settings.getMaxPoints());
     }
 
     void drawVertices(const std::vector<float>& vertices) {
@@ -557,7 +557,7 @@ private:
 class Application {
 public:
     Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings)
-        : isRunning(true), isReceiving(false), hwnd(NULL), settings(settings), window(hInstance, nCmdShow), graphics(), buffer(settings.getMaxPoints(), settings.getScaleFactor()), renderer(graphics, buffer, settings.getBatchSize()), portAdapter() {
+        : isRunning(true), isReceiving(false), hwnd(NULL), settings(settings), window(hInstance, nCmdShow), graphics(), buffer(settings.getMaxPoints(), settings.getScaleFactor()), renderer(graphics, buffer, settings.getBatchSize()) {
         hwnd = window.getHwnd();
         graphics.initialize(hwnd, settings);
         graphics.prepareBuffers(settings.getMaxPoints());
