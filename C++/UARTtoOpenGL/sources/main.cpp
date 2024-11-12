@@ -5,7 +5,6 @@
 #include <atomic>
 #include <iostream>
 #include <bitset>
-#include <stdexcept>
 #include <fstream>
 #include <string>
 #include <GL/glew.h>
@@ -13,28 +12,10 @@
 #include FT_FREETYPE_H
 #include <map>
 
-class OpenGLException: public std::runtime_error {
-public:
-    OpenGLException(const std::string& message): std::runtime_error(message) {}
-};
-
-class SerialException: public std::runtime_error {
-public:
-    SerialException(const std::string& message): std::runtime_error(message) {}
-};
-
-class ShaderException: public std::runtime_error {
-public:
-    ShaderException(const std::string& message): std::runtime_error(message) {}
-};
-
 class Settings {
 public:
     Settings(const std::string& filePath) {
-        if (!readConfigFile(filePath)) {
-            createDefaultConfigFile(filePath);
-            readConfigFile(filePath);
-        }
+        readConfigFile(filePath);
     }
 
     std::string getSerialPort() const { return serialPort; }
@@ -44,25 +25,10 @@ public:
     int getMaxPoints() const { return maxPoints; }
 
 private:
-    bool readConfigFile(const std::string& filePath) {
+    void readConfigFile(const std::string& filePath) {
         std::ifstream configFile(filePath);
-        if (!configFile.is_open()) return false;
-
         std::string line;
         while (std::getline(configFile, line)) parseConfigLine(line);
-        return true;
-    }
-
-    void createDefaultConfigFile(const std::string& filePath) {
-        std::ofstream newConfigFile(filePath);
-        if (!newConfigFile.is_open())
-            throw std::runtime_error("unable to create configuration file");
-
-        newConfigFile << "serialPort: COM3\n";
-        newConfigFile << "baudRate: 57600\n";
-        newConfigFile << "batchSize: 100\n";
-        newConfigFile << "scaleFactor: 128\n";
-        newConfigFile << "maxPoints: 256\n";
     }
 
     void parseConfigLine(const std::string& line) {
@@ -98,9 +64,7 @@ public:
     void toggleDataTransmission(bool enable) {
         char cmd = enable ? '1' : '0';
         DWORD bytesWritten;
-
-        if (!::WriteFile(handle, &cmd, 1, &bytesWritten, NULL))
-            throw SerialException("error writing to serial port");
+        ::WriteFile(handle, &cmd, 1, &bytesWritten, NULL);
     }
 
     HANDLE getHandle() const { return handle; }
@@ -108,38 +72,23 @@ public:
 private:
     void openPort(const std::string& portName) {
         handle = ::CreateFile(portName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-        if (handle == INVALID_HANDLE_VALUE)
-            throw SerialException("error opening serial port");
     }
 
     void configurePort(int baudRate) {
         DCB dcbSerialParams = { 0 };
         dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-
-        if (!::GetCommState(handle, &dcbSerialParams)) {
-            closePort();
-            throw SerialException("error getting serial port state");
-        }
-
+        ::GetCommState(handle, &dcbSerialParams);
         dcbSerialParams.BaudRate = baudRate;
         dcbSerialParams.ByteSize = 8;
         dcbSerialParams.StopBits = ONESTOPBIT;
         dcbSerialParams.Parity = NOPARITY;
-
-        if (!::SetCommState(handle, &dcbSerialParams)) {
-            closePort();
-            throw SerialException("error setting serial port state");
-        }
+        ::SetCommState(handle, &dcbSerialParams);
     }
 
     void setPortTimeouts() {
         COMMTIMEOUTS timeouts = { 0 };
         timeouts.ReadIntervalTimeout = 50;
-
-        if (!::SetCommTimeouts(handle, &timeouts)) {
-            closePort();
-            throw SerialException("error setting timeouts");
-        }
+        ::SetCommTimeouts(handle, &timeouts);
     }
 
     void closePort() {
@@ -192,7 +141,6 @@ public:
         createProgram(vertexShader, fragmentShader);
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
-        checkProgramLinking();
     }
 
     GLuint getProgram() const { return program; }
@@ -221,32 +169,10 @@ private:
         glLinkProgram(program);
     }
 
-    void checkProgramLinking() {
-        GLint success;
-        glGetProgramiv(program, GL_LINK_STATUS, &success);
-        if (!success) {
-            GLint logLength;
-            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
-            std::vector<char> log(logLength);
-            glGetProgramInfoLog(program, logLength, NULL, log.data());
-            throw ShaderException("program linking failed: " + std::string(log.data()));
-        }
-    }
-
     GLuint compileShader(GLenum type, const char* source) {
         GLuint shader = glCreateShader(type);
         glShaderSource(shader, 1, &source, NULL);
         glCompileShader(shader);
-
-        GLint success;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-        if (!success) {
-            GLint logLength;
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
-            std::vector<char> log(logLength);
-            glGetShaderInfoLog(shader, logLength, NULL, log.data());
-            throw ShaderException("shader compilation failed: " + std::string(log.data()));
-        }
         return shader;
     }
 
@@ -305,12 +231,8 @@ private:
 class OpenGLContext {
 public:
     void initialize(HWND hwnd) {
-        if (!setupPixelFormat(hwnd))
-            throw OpenGLException("failed to setup pixel format");
-
-        if (glewInit() != GLEW_OK)
-            throw OpenGLException("failed to initialize GLEW");
-
+        setupPixelFormat(hwnd);
+        glewInit();
         FT_Init_FreeType(&ft);
         FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face);
         FT_Set_Pixel_Sizes(face, 0, 24);
@@ -382,11 +304,9 @@ public:
             };
 
             glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-
             glBindBuffer(GL_ARRAY_BUFFER, textVBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
             x += (ch.Advance >> 6) * scale;
@@ -400,7 +320,6 @@ private:
     void loadCharacters() {
         for (unsigned char c = 0; c < 128; c++) {
             FT_Load_Char(face, c, FT_LOAD_RENDER);
-
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
             GLuint texture;
@@ -435,7 +354,7 @@ private:
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    bool setupPixelFormat(HWND hwnd) {
+    void setupPixelFormat(HWND hwnd) {
         HDC hdc = ::GetDC(hwnd);
         PIXELFORMATDESCRIPTOR pfd = {
             sizeof(PIXELFORMATDESCRIPTOR), 1,
@@ -445,11 +364,8 @@ private:
 
         int pf = ::ChoosePixelFormat(hdc, &pfd);
         SetPixelFormat(hdc, pf, &pfd);
-
         HGLRC hglrc = wglCreateContext(hdc);
         wglMakeCurrent(hdc, hglrc);
-
-        return true;
     }
 
     FT_Library ft;
@@ -643,27 +559,12 @@ public:
     Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings)
         : isRunning(true), isReceiving(false), hwnd(NULL), settings(settings), window(hInstance, nCmdShow), graphics(), buffer(settings.getMaxPoints(), settings.getScaleFactor()), renderer(graphics, buffer, settings.getBatchSize()), portAdapter() {
         hwnd = window.getHwnd();
-        try {
-            graphics.initialize(hwnd, settings);
-            graphics.prepareBuffers(settings.getMaxPoints());
-        }
-        catch (const OpenGLException& e) {
-            std::cout << "graphics initialization failed: " << std::string(e.what()) << std::endl;
-            std::cin.get();
-            return;
-        }
+        graphics.initialize(hwnd, settings);
+        graphics.prepareBuffers(settings.getMaxPoints());
     }
 
     void run() {
-        try {
-            portAdapter.setup(settings.getSerialPort(), settings.getBaudRate());
-        }
-        catch (const SerialException& e) {
-            std::cout << "serial port setup failed: " << std::string(e.what()) << std::endl;
-            std::cin.get();
-            return;
-        }
-
+        portAdapter.setup(settings.getSerialPort(), settings.getBaudRate());
         runCOMPortThread();
         runLoop();
     }
@@ -708,15 +609,8 @@ private:
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    try {
-        Settings settings("settings.ini");
-        Application app(hInstance, nCmdShow, settings);
-        app.run();
-    }
-    catch (const std::exception& e) {
-        std::cerr << "application initialization failed: " << e.what() << std::endl;
-        std::cin.get();
-        return EXIT_FAILURE;
-    }
+    Settings settings("settings.ini");
+    Application app(hInstance, nCmdShow, settings);
+    app.run();
     return EXIT_SUCCESS;
 }
