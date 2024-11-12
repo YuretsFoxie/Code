@@ -1,5 +1,3 @@
-// UART data rendering
-
 #include <windows.h>
 #include <thread>
 #include <vector>
@@ -11,86 +9,51 @@
 #include <fstream>
 #include <string>
 #include <GL/glew.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include <map>
 
-
-
-class OpenGLException: public std::runtime_error 
-{
+class OpenGLException: public std::runtime_error {
 public:
     OpenGLException(const std::string& message): std::runtime_error(message) {}
 };
 
-
-
-class SerialException: public std::runtime_error 
-{
+class SerialException: public std::runtime_error {
 public:
     SerialException(const std::string& message): std::runtime_error(message) {}
 };
 
-
-
-class ShaderException: public std::runtime_error 
-{
+class ShaderException: public std::runtime_error {
 public:
     ShaderException(const std::string& message): std::runtime_error(message) {}
 };
 
-
-
-class Settings 
-{
+class Settings {
 public:
-    Settings(const std::string& filePath) 
-    {
-        if (!readConfigFile(filePath)) 
-        {
+    Settings(const std::string& filePath) {
+        if (!readConfigFile(filePath)) {
             createDefaultConfigFile(filePath);
             readConfigFile(filePath);
         }
     }
 
-    std::string getSerialPort() const 
-    {
-        return serialPort;
-    }
-    
-    int getBaudRate() const
-    {
-        return baudRate;
-    }
-
-    int getBatchSize() const
-    {
-        return batchSize;
-    }
-
-    int getScaleFactor() const
-    {
-        return scaleFactor;
-    }
-
-    int getMaxPoints() const
-    {
-        return maxPoints;
-    }
+    std::string getSerialPort() const { return serialPort; }
+    int getBaudRate() const { return baudRate; }
+    int getBatchSize() const { return batchSize; }
+    int getScaleFactor() const { return scaleFactor; }
+    int getMaxPoints() const { return maxPoints; }
 
 private:
-    bool readConfigFile(const std::string& filePath) 
-    {
+    bool readConfigFile(const std::string& filePath) {
         std::ifstream configFile(filePath);
-        if (!configFile.is_open())
-            return false;
+        if (!configFile.is_open()) return false;
 
         std::string line;
-        while (std::getline(configFile, line))
-            parseConfigLine(line);
-        
+        while (std::getline(configFile, line)) parseConfigLine(line);
         return true;
     }
 
-    void createDefaultConfigFile(const std::string& filePath) 
-    {
+    void createDefaultConfigFile(const std::string& filePath) {
         std::ofstream newConfigFile(filePath);
         if (!newConfigFile.is_open())
             throw std::runtime_error("unable to create configuration file");
@@ -102,22 +65,16 @@ private:
         newConfigFile << "maxPoints: 256\n";
     }
 
-    void parseConfigLine(const std::string& line) 
-    {
+    void parseConfigLine(const std::string& line) {
         auto delimiterPos = line.find(": ");
         auto name = line.substr(0, delimiterPos);
         auto value = line.substr(delimiterPos + 2);
 
-        if (name == "serialPort")
-            serialPort = value;
-        else if (name == "baudRate")
-            baudRate = std::stoi(value);
-        else if (name == "batchSize")
-            batchSize = std::stoi(value);
-        else if (name == "scaleFactor")
-            scaleFactor = std::stoi(value);
-        else if (name == "maxPoints")
-            maxPoints = std::stoi(value);
+        if (name == "serialPort") serialPort = value;
+        else if (name == "baudRate") baudRate = std::stoi(value);
+        else if (name == "batchSize") batchSize = std::stoi(value);
+        else if (name == "scaleFactor") scaleFactor = std::stoi(value);
+        else if (name == "maxPoints") maxPoints = std::stoi(value);
     }
 
     std::string serialPort;
@@ -127,54 +84,39 @@ private:
     int maxPoints;
 };
 
-
-
-class COMPort 
-{
+class COMPort {
 public:
     COMPort(): handle(INVALID_HANDLE_VALUE) {}
-    
-   ~COMPort()
-    {
-        closePort();
-    }
+    ~COMPort() { closePort(); }
 
-    void setup(const std::string& portName, int baudRate) 
-    {
+    void setup(const std::string& portName, int baudRate) {
         openPort(portName);
         configurePort(baudRate);
         setPortTimeouts();
     }
 
-    void toggleDataTransmission(bool enable)
-    {
+    void toggleDataTransmission(bool enable) {
         char cmd = enable ? '1' : '0';
         DWORD bytesWritten;
-        
+
         if (!::WriteFile(handle, &cmd, 1, &bytesWritten, NULL))
             throw SerialException("error writing to serial port");
     }
 
-    HANDLE getHandle() const
-    {
-        return handle;
-    }
+    HANDLE getHandle() const { return handle; }
 
 private:
-    void openPort(const std::string& portName) 
-    {
+    void openPort(const std::string& portName) {
         handle = ::CreateFile(portName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
         if (handle == INVALID_HANDLE_VALUE)
             throw SerialException("error opening serial port");
     }
 
-    void configurePort(int baudRate) 
-    {
+    void configurePort(int baudRate) {
         DCB dcbSerialParams = { 0 };
         dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
 
-        if (!::GetCommState(handle, &dcbSerialParams)) 
-        {
+        if (!::GetCommState(handle, &dcbSerialParams)) {
             closePort();
             throw SerialException("error getting serial port state");
         }
@@ -184,29 +126,24 @@ private:
         dcbSerialParams.StopBits = ONESTOPBIT;
         dcbSerialParams.Parity = NOPARITY;
 
-        if (!::SetCommState(handle, &dcbSerialParams)) 
-        {
+        if (!::SetCommState(handle, &dcbSerialParams)) {
             closePort();
             throw SerialException("error setting serial port state");
         }
     }
 
-    void setPortTimeouts() 
-    {
+    void setPortTimeouts() {
         COMMTIMEOUTS timeouts = { 0 };
         timeouts.ReadIntervalTimeout = 50;
 
-        if (!::SetCommTimeouts(handle, &timeouts)) 
-        {
+        if (!::SetCommTimeouts(handle, &timeouts)) {
             closePort();
             throw SerialException("error setting timeouts");
         }
     }
 
-    void closePort() 
-    {
-        if (handle != INVALID_HANDLE_VALUE) 
-        {
+    void closePort() {
+        if (handle != INVALID_HANDLE_VALUE) {
             ::CloseHandle(handle);
             handle = INVALID_HANDLE_VALUE;
         }
@@ -215,46 +152,41 @@ private:
     HANDLE handle;
 };
 
-
-
-class COMPortAdapter
-{
+class COMPortAdapter {
 public:
     COMPortAdapter(): comPort() {}
 
-    void setup(const std::string& portName, int baudRate)
-    {
+    void setup(const std::string& portName, int baudRate) {
         comPort.setup(portName, baudRate);
     }
 
-    void toggleDataTransmission(bool enable)
-    {
+    void toggleDataTransmission(bool enable) {
         comPort.toggleDataTransmission(enable);
     }
 
-    HANDLE getHandle() const
-    {
-        return comPort.getHandle();
-    }
+    HANDLE getHandle() const { return comPort.getHandle(); }
 
 private:
     COMPort comPort;
 };
 
+struct Character {
+    GLuint TextureID;
+    int Width;
+    int Height;
+    int BearingX;
+    int BearingY;
+    long Advance;
+};
 
-
-class Shaders 
-{
+class Shaders {
 public:
     Shaders(): program(0) {}
-    
-   ~Shaders()
-    {
+    ~Shaders() {
         if (program) glDeleteProgram(program);
     }
 
-    void initialize() 
-    {
+    void initialize() {
         GLuint vertexShader = createVertexShader();
         GLuint fragmentShader = createFragmentShader();
         createProgram(vertexShader, fragmentShader);
@@ -263,14 +195,10 @@ public:
         checkProgramLinking();
     }
 
-    GLuint getProgram() const
-    {
-        return program;
-    }
+    GLuint getProgram() const { return program; }
 
 private:
-    GLuint createVertexShader() 
-    {
+    GLuint createVertexShader() {
         return compileShader(GL_VERTEX_SHADER, R"(
             #version 330 core
             layout (location = 0) in vec2 aPos;
@@ -278,8 +206,7 @@ private:
         )");
     }
 
-    GLuint createFragmentShader() 
-    {
+    GLuint createFragmentShader() {
         return compileShader(GL_FRAGMENT_SHADER, R"(
             #version 330 core
             out vec4 FragColor;
@@ -287,20 +214,17 @@ private:
         )");
     }
 
-    void createProgram(GLuint vertexShader, GLuint fragmentShader) 
-    {
+    void createProgram(GLuint vertexShader, GLuint fragmentShader) {
         program = glCreateProgram();
         glAttachShader(program, vertexShader);
         glAttachShader(program, fragmentShader);
         glLinkProgram(program);
     }
 
-    void checkProgramLinking() 
-    {
+    void checkProgramLinking() {
         GLint success;
         glGetProgramiv(program, GL_LINK_STATUS, &success);
-        if (!success) 
-        {
+        if (!success) {
             GLint logLength;
             glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
             std::vector<char> log(logLength);
@@ -309,16 +233,14 @@ private:
         }
     }
 
-    GLuint compileShader(GLenum type, const char* source) 
-    {
+    GLuint compileShader(GLenum type, const char* source) {
         GLuint shader = glCreateShader(type);
         glShaderSource(shader, 1, &source, NULL);
         glCompileShader(shader);
 
         GLint success;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-        if (!success) 
-        {
+        if (!success) {
             GLint logLength;
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
             std::vector<char> log(logLength);
@@ -331,28 +253,19 @@ private:
     GLuint program;
 };
 
-
-
-class OpenGLBuffer 
-{
+class OpenGLBuffer {
 public:
     OpenGLBuffer(): VBO(0), VAO(0) {}
-    
-   ~OpenGLBuffer()
-    {
-        cleanup();
-    }
+    ~OpenGLBuffer() { cleanup(); }
 
-    void prepare(int maxPoints) 
-    {
+    void prepare(int maxPoints) {
         generateBuffers();
         bindBuffers(maxPoints);
         configureVertexAttribPointer();
         unbindBuffers();
     }
 
-    void draw(const std::vector<float>& vertices) 
-    {
+    void draw(const std::vector<float>& vertices) {
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
         glBindVertexArray(VAO);
@@ -360,420 +273,44 @@ public:
     }
 
 private:
-    void generateBuffers() 
-    {
+    void generateBuffers() {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
     }
 
-    void bindBuffers(int maxPoints) 
-    {
+    void bindBuffers(int maxPoints) {
         glBindVertexArray(VAO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, maxPoints * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
     }
 
-    void configureVertexAttribPointer() 
-    {
+    void configureVertexAttribPointer() {
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
     }
 
-    void unbindBuffers() 
-    {
+    void unbindBuffers() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     }
 
-    void cleanup() 
-    {
-        if (VBO)
-            glDeleteBuffers(1, &VBO);
-        
-        if (VAO)
-            glDeleteVertexArrays(1, &VAO);
+    void cleanup() {
+        if (VBO) glDeleteBuffers(1, &VBO);
+        if (VAO) glDeleteVertexArrays(1, &VAO);
     }
 
     GLuint VBO, VAO;
 };
 
-
-
-class OpenGLContext 
-{
+class OpenGLContext {
 public:
-    void initialize(HWND hwnd) 
-    {
+    void initialize(HWND hwnd) {
         if (!setupPixelFormat(hwnd))
             throw OpenGLException("failed to setup pixel format");
 
         if (glewInit() != GLEW_OK)
             throw OpenGLException("failed to initialize GLEW");
-    }
-	
-private:
-    bool setupPixelFormat(HWND hwnd) 
-    {
-        HDC hdc = ::GetDC(hwnd);
-        PIXELFORMATDESCRIPTOR pfd = 
-        {
-            sizeof(PIXELFORMATDESCRIPTOR), 1,
-            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA,
-            32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 8, 0, PFD_MAIN_PLANE, 0, 0, 0, 0
-        };
-        
-        int pf = ::ChoosePixelFormat(hdc, &pfd);
-        if (pf == 0 || !SetPixelFormat(hdc, pf, &pfd)) 
-        {
-            ::ReleaseDC(hwnd, hdc);
-            throw OpenGLException("failed to set pixel format");
-        }
-        
-        HGLRC hglrc = wglCreateContext(hdc);
-        if (!hglrc || !wglMakeCurrent(hdc, hglrc)) 
-        {
-            ::ReleaseDC(hwnd, hdc);
-            throw OpenGLException("failed to create or activate OpenGL context");
-        }
-        
-        return true;
-    }
-	
-    GLuint textShader;
-    GLuint VAO, VBO;
-};
 
-
-
-class Graphics 
-{
-public:
-    void initialize(HWND hwnd) 
-    {
-        context.initialize(hwnd);
-        shaders.initialize();
-        prepareTextRendering();
-    }
-
-    void prepareBuffers(int maxPoints)
-    {
-        buffer.prepare(maxPoints);
-    }
-
-    void drawVertices(const std::vector<float>& vertices) 
-    {
-        glUseProgram(shaders.getProgram());
-        buffer.draw(vertices);
-    }
-	
-private:
-    void prepareTextRendering()
-    {
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-    }
-
-    Shaders shaders;
-    OpenGLBuffer buffer;
-    OpenGLContext context;
-    GLuint VAO, VBO;
-};
-
-
-
-class DataBuffer 
-{
-public:
-    DataBuffer(int maxPoints, int scaleFactor) : MAX_POINTS(maxPoints), SCALE_FACTOR(scaleFactor)
-    {
-        dataBuffer.reserve(MAX_POINTS);
-    }
-
-    void push(float newData) 
-    {
-        std::lock_guard<std::mutex> lock(bufferMutex);
-        dataBuffer.push_back(newData);
-        if (dataBuffer.size() > MAX_POINTS)
-            dataBuffer.erase(dataBuffer.begin());
-    }
-
-    void prepare(std::vector<float>& vertices) 
-    {
-        std::lock_guard<std::mutex> lock(bufferMutex);
-        vertices.reserve(dataBuffer.size() * 2);
-        preComputeVertices(vertices);
-    }
-
-private:
-    void preComputeVertices(std::vector<float>& vertices)
-    {
-        const float scaleFactor = 2.0f / MAX_POINTS;
-        for (size_t i = 0; i < dataBuffer.size(); ++i) 
-        {
-            float x = (scaleFactor * i) - 1.0f;
-            float y = convertTwosComplementToInt(std::bitset<8>(dataBuffer[i])) / static_cast<float>(SCALE_FACTOR);
-            vertices.push_back(x);
-            vertices.push_back(y);
-        }
-    }
-
-    int convertTwosComplementToInt(const std::bitset<8>& byte) 
-    {
-        return byte[7] ? -std::bitset<8>(byte.to_ulong() - 1).flip().to_ulong() : byte.to_ulong();
-    }
-
-    const int MAX_POINTS;
-    const int SCALE_FACTOR;
-    std::vector<float> dataBuffer;
-    std::mutex bufferMutex;
-};
-
-
-
-class Window
-{
-public:
-    Window(HINSTANCE hInstance, int nCmdShow)
-    {
-        registerWindowClass(hInstance);
-        hwnd = createWindowInstance(hInstance, nCmdShow);
-    }
-
-    void processMessages(std::atomic<bool>& isRunning, COMPortAdapter& port, std::atomic<bool>& isReceiving)
-    {
-        MSG msg;
-        while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-        {
-            if (msg.message == WM_QUIT)
-                isRunning = false;
-            
-            if (msg.message == WM_KEYDOWN)
-            {
-                if (msg.wParam == VK_ESCAPE)
-                    isRunning = false;
-                
-                if (msg.wParam == VK_F1)
-                {
-                    isReceiving = !isReceiving;
-                    port.toggleDataTransmission(isReceiving);
-                }
-            }
-            
-            ::TranslateMessage(&msg);
-            ::DispatchMessage(&msg);
-        }
-    }
-
-    HWND getHwnd() const
-    {
-        return hwnd;
-    }
-
-private:
-    void registerWindowClass(HINSTANCE hInstance)
-    {
-        WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_OWNDC, wndProc, 0, 0, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, "OpenGL", NULL};
-        ::RegisterClassEx(&wc);
-    }
-
-    HWND createWindowInstance(HINSTANCE hInstance, int nCmdShow)
-    {
-        HWND hwnd = CreateWindowEx(0, "OpenGL", "Foxie Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, hInstance, NULL);
-        ::ShowWindow(hwnd, nCmdShow);
-        return hwnd;
-    }
-
-    static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-    {
-        if (msg == WM_CLOSE)
-            PostQuitMessage(0);
-        
-        return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
-
-    HWND hwnd;
-};
-
-
-
-class Renderer
-{
-public:
-    Renderer(Graphics& graphics, DataBuffer& buffer, int batchSize) : graphics(graphics), buffer(buffer), BATCH_SIZE(batchSize) {}
-
-    void renderFrame(HDC hdc, int& updateCounter, std::atomic<bool>& isRunning)
-    {
-        updateCounter++;
-        if (updateCounter >= BATCH_SIZE)
-        {
-            drawVertices();
-            ::SwapBuffers(hdc);
-            updateCounter = 0;
-        }
-    }
-
-private:
-    void drawVertices()
-    {
-        glClear(GL_COLOR_BUFFER_BIT);
-        std::vector<float> vertices;
-        buffer.prepare(vertices);
-        
-        if (!vertices.empty())
-            graphics.drawVertices(vertices);
-    }
-
-    Graphics& graphics;
-    DataBuffer& buffer;
-    const int BATCH_SIZE;
-};
-
-
-
-class Application
-{
-public:
-    Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings)
-        : isRunning(true), isReceiving(false), hwnd(NULL), settings(settings), window(hInstance, nCmdShow), graphics(), buffer(settings.getMaxPoints(), settings.getScaleFactor()), renderer(graphics, buffer, settings.getBatchSize()), portAdapter()
-    {
-        hwnd = window.getHwnd();
-        try
-        {
-            graphics.initialize(hwnd);
-            graphics.prepareBuffers(settings.getMaxPoints());
-        }
-        catch (const OpenGLException& e)
-        {
-			std::cout << "graphics initialization failed: " << std::string(e.what()) << std::endl;
-            std::cin.get();
-            return;
-        }
-    }
-
-    void run()
-    {
-        try
-        {
-            portAdapter.setup(settings.getSerialPort(), settings.getBaudRate());
-        }
-        catch (const SerialException& e)
-        {
-			std::cout << "serial port setup failed: " << std::string(e.what()) << std::endl;
-            std::cin.get();
-            return;
-        }
-
-        runCOMPortThread();
-        runLoop();
-    }
-
-private:
-    void runCOMPortThread()
-    {
-        std::thread portThread(&Application::runCOMPort, this);
-        portThread.detach();
-    }
-
-    void runCOMPort()
-    {
-        char array[1];
-        DWORD bytesRead;
-        
-        while (isRunning)
-            if (isReceiving)
-            {
-                ::ReadFile(portAdapter.getHandle(), array, 1, &bytesRead, NULL);
-                if (bytesRead > 0) 
-                    buffer.push(static_cast<float>(array[0]));
-            }
-    }
-
-    void runLoop()
-    {
-        HDC hdc = ::GetDC(hwnd);
-        int updateCounter = 0;
-        while (isRunning)
-        {
-            window.processMessages(isRunning, portAdapter, isReceiving);
-            renderer.renderFrame(hdc, updateCounter, isRunning);
-        }
-        ::ReleaseDC(hwnd, hdc);
-    }
-
-    const Settings& settings;
-
-    std::atomic<bool> isRunning;
-    std::atomic<bool> isReceiving;
-    HWND hwnd;
-
-    COMPortAdapter portAdapter;
-    Graphics graphics;
-    DataBuffer buffer;
-
-    Window window;
-    Renderer renderer;
-};
-
-
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-    try
-    {
-        Settings settings("settings.ini");
-        Application app(hInstance, nCmdShow, settings);
-        app.run();
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "application initialization failed: " << e.what() << std::endl;
-        std::cin.get();
-        return EXIT_FAILURE;
-    }
-    return EXIT_SUCCESS;
-}
-
-
-
-// Text rendering
-
-#include <windows.h>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <GL/glew.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include <map>
-#include <vector>
-#include <atomic>
-
-class OpenGLException: public std::runtime_error {
-public:
-    OpenGLException(const std::string& message): std::runtime_error(message) {}
-};
-
-struct Character {
-    GLuint TextureID;
-    int Width;
-    int Height;
-    int BearingX;
-    int BearingY;
-    long Advance;
-};
-
-class OpenGLContext {
-public:
-    void initialize(HWND hwnd) {
-        setupPixelFormat(hwnd);
-        glewInit();
         FT_Init_FreeType(&ft);
         FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face);
         FT_Set_Pixel_Sizes(face, 0, 24);
@@ -794,10 +331,10 @@ public:
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
 
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glGenVertexArrays(1, &textVAO);
+        glGenBuffers(1, &textVBO);
+        glBindVertexArray(textVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, textVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
@@ -824,7 +361,7 @@ public:
 
         glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
         glActiveTexture(GL_TEXTURE0);
-        glBindVertexArray(VAO);
+        glBindVertexArray(textVAO);
 
         for (const char& c : text) {
             Character ch = Characters[c];
@@ -846,7 +383,7 @@ public:
 
             glBindTexture(GL_TEXTURE_2D, ch.TextureID);
 
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBindBuffer(GL_ARRAY_BUFFER, textVBO);
             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -918,7 +455,7 @@ private:
     FT_Library ft;
     FT_Face face;
     GLuint textShader;
-    GLuint VAO, VBO;
+    GLuint textVAO, textVBO;
     std::map<char, Character> Characters;
 
     const char* vertexShaderSource = R"(
@@ -948,6 +485,73 @@ private:
     )";
 };
 
+class Graphics {
+public:
+    void initialize(HWND hwnd, const Settings& settings) {
+        context.initialize(hwnd);
+        shaders.initialize();
+        prepareBuffers(settings.getMaxPoints());
+    }
+
+    void prepareBuffers(int maxPoints) {
+        buffer.prepare(maxPoints);
+    }
+
+    void drawVertices(const std::vector<float>& vertices) {
+        glUseProgram(shaders.getProgram());
+        buffer.draw(vertices);
+    }
+
+    void drawText(const std::string& text, float x, float y, float scale, float color[3]) {
+        context.renderText(text, x, y, scale, color);
+    }
+
+private:
+    Shaders shaders;
+    OpenGLBuffer buffer;
+    OpenGLContext context;
+};
+
+class DataBuffer {
+public:
+    DataBuffer(int maxPoints, int scaleFactor) : MAX_POINTS(maxPoints), SCALE_FACTOR(scaleFactor) {
+        dataBuffer.reserve(MAX_POINTS);
+    }
+
+    void push(float newData) {
+        std::lock_guard<std::mutex> lock(bufferMutex);
+        dataBuffer.push_back(newData);
+        if (dataBuffer.size() > MAX_POINTS)
+            dataBuffer.erase(dataBuffer.begin());
+    }
+
+    void prepare(std::vector<float>& vertices) {
+        std::lock_guard<std::mutex> lock(bufferMutex);
+        vertices.reserve(dataBuffer.size() * 2);
+        preComputeVertices(vertices);
+    }
+
+private:
+    void preComputeVertices(std::vector<float>& vertices) {
+        const float scaleFactor = 2.0f / MAX_POINTS;
+        for (size_t i = 0; i < dataBuffer.size(); ++i) {
+            float x = (scaleFactor * i) - 1.0f;
+            float y = convertTwosComplementToInt(std::bitset<8>(dataBuffer[i])) / static_cast<float>(SCALE_FACTOR);
+            vertices.push_back(x);
+            vertices.push_back(y);
+        }
+    }
+
+    int convertTwosComplementToInt(const std::bitset<8>& byte) {
+        return byte[7] ? -std::bitset<8>(byte.to_ulong() - 1).flip().to_ulong() : byte.to_ulong();
+    }
+
+    const int MAX_POINTS;
+    const int SCALE_FACTOR;
+    std::vector<float> dataBuffer;
+    std::mutex bufferMutex;
+};
+
 class Window {
 public:
     Window(HINSTANCE hInstance, int nCmdShow) {
@@ -955,23 +559,28 @@ public:
         hwnd = createWindowInstance(hInstance, nCmdShow);
     }
 
-    void processMessages(std::atomic<bool>& isRunning) {
+    void processMessages(std::atomic<bool>& isRunning, COMPortAdapter& port, std::atomic<bool>& isReceiving) {
         MSG msg;
         while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT)
                 isRunning = false;
 
-            if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE)
-                isRunning = false;
+            if (msg.message == WM_KEYDOWN) {
+                if (msg.wParam == VK_ESCAPE)
+                    isRunning = false;
+
+                if (msg.wParam == VK_F1) {
+                    isReceiving = !isReceiving;
+                    port.toggleDataTransmission(isReceiving);
+                }
+            }
 
             ::TranslateMessage(&msg);
             ::DispatchMessage(&msg);
         }
     }
 
-    HWND getHwnd() const {
-        return hwnd;
-    }
+    HWND getHwnd() const { return hwnd; }
 
 private:
     void registerWindowClass(HINSTANCE hInstance) {
@@ -980,7 +589,7 @@ private:
     }
 
     HWND createWindowInstance(HINSTANCE hInstance, int nCmdShow) {
-        HWND hwnd = CreateWindowEx(0, "OpenGL", "OpenGL Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, hInstance, NULL);
+        HWND hwnd = CreateWindowEx(0, "OpenGL", "Foxie Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, hInstance, NULL);
         ::ShowWindow(hwnd, nCmdShow);
         return hwnd;
     }
@@ -995,41 +604,119 @@ private:
     HWND hwnd;
 };
 
+class Renderer {
+public:
+    Renderer(Graphics& graphics, DataBuffer& buffer, int batchSize) : graphics(graphics), buffer(buffer), BATCH_SIZE(batchSize) {}
+
+    void renderFrame(HDC hdc, int& updateCounter, std::atomic<bool>& isRunning) {
+        updateCounter++;
+        if (updateCounter >= BATCH_SIZE) {
+            drawVertices();
+            drawText();
+            ::SwapBuffers(hdc);
+            updateCounter = 0;
+        }
+    }
+
+private:
+    void drawVertices() {
+        glClear(GL_COLOR_BUFFER_BIT);
+        std::vector<float> vertices;
+        buffer.prepare(vertices);
+
+        if (!vertices.empty())
+            graphics.drawVertices(vertices);
+    }
+
+    void drawText() {
+        float color[3] = {0.0f, 1.0f, 0.0f};
+        graphics.drawText("UART Data Visualization", 25.0f, 25.0f, 1.0f, color);
+    }
+
+    Graphics& graphics;
+    DataBuffer& buffer;
+    const int BATCH_SIZE;
+};
+
 class Application {
 public:
-    Application(HINSTANCE hInstance, int nCmdShow)
-        : isRunning(true), hwnd(NULL), window(hInstance, nCmdShow), context() {
+    Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings)
+        : isRunning(true), isReceiving(false), hwnd(NULL), settings(settings), window(hInstance, nCmdShow), graphics(), buffer(settings.getMaxPoints(), settings.getScaleFactor()), renderer(graphics, buffer, settings.getBatchSize()), portAdapter() {
         hwnd = window.getHwnd();
-        context.initialize(hwnd);
+        try {
+            graphics.initialize(hwnd, settings);
+            graphics.prepareBuffers(settings.getMaxPoints());
+        }
+        catch (const OpenGLException& e) {
+            std::cout << "graphics initialization failed: " << std::string(e.what()) << std::endl;
+            std::cin.get();
+            return;
+        }
     }
 
     void run() {
+        try {
+            portAdapter.setup(settings.getSerialPort(), settings.getBaudRate());
+        }
+        catch (const SerialException& e) {
+            std::cout << "serial port setup failed: " << std::string(e.what()) << std::endl;
+            std::cin.get();
+            return;
+        }
+
+        runCOMPortThread();
+        runLoop();
+    }
+
+private:
+    void runCOMPortThread() {
+        std::thread portThread(&Application::runCOMPort, this);
+        portThread.detach();
+    }
+
+    void runCOMPort() {
+        char array[1];
+        DWORD bytesRead;
+
+        while (isRunning)
+            if (isReceiving) {
+                ::ReadFile(portAdapter.getHandle(), array, 1, &bytesRead, NULL);
+                if (bytesRead > 0)
+                    buffer.push(static_cast<float>(array[0]));
+            }
+    }
+
+    void runLoop() {
         HDC hdc = ::GetDC(hwnd);
+        int updateCounter = 0;
         while (isRunning) {
-            window.processMessages(isRunning);
-            renderScene(hdc);
+            window.processMessages(isRunning, portAdapter, isReceiving);
+            renderer.renderFrame(hdc, updateCounter, isRunning);
         }
         ::ReleaseDC(hwnd, hdc);
     }
 
-private:
-    void renderScene(HDC hdc) {
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        float color[3] = {0.0f, 1.0f, 0.0f};
-        context.renderText("Hello, OpenGL!", 25.0f, 25.0f, 1.0f, color);
-
-        ::SwapBuffers(hdc);
-    }
-
+    const Settings& settings;
     std::atomic<bool> isRunning;
+    std::atomic<bool> isReceiving;
     HWND hwnd;
+    COMPortAdapter portAdapter;
+    Graphics graphics;
+    DataBuffer buffer;
     Window window;
-    OpenGLContext context;
+    Renderer renderer;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    Application app(hInstance, nCmdShow);
-    app.run();
+    try {
+        Settings settings("settings.ini");
+        Application app(hInstance, nCmdShow, settings);
+        app.run();
+    }
+    catch (const std::exception& e) {
+        std::cerr << "application initialization failed: " << e.what() << std::endl;
+        std::cin.get();
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
