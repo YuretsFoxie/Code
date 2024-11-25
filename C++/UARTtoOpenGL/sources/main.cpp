@@ -199,8 +199,8 @@ private:
 
     void setOrthographicProjection() {
         float ortho[16] = {
-            2.0f / 800, 0, 0, 0,
-            0, 2.0f / 600, 0, 0,
+            2.0f / 1024, 0, 0, 0,
+            0, 2.0f / 768, 0, 0,
             0, 0, -1.0f, 0,
             -1.0f, -1.0f, 0, 1.0f
         };
@@ -361,6 +361,7 @@ public:
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         loadCharacters();
+		((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(1); // enable vsync
     }
 
     void renderText(const std::string& text, float x, float y, float scale, float color[3]) {
@@ -465,8 +466,8 @@ private:
 
     void setOrthographicProjection() {
         float ortho[16] = {
-            2.0f / 800, 0, 0, 0,
-            0, 2.0f / 600, 0, 0,
+            2.0f / 1024, 0, 0, 0,
+            0, 2.0f / 768, 0, 0,
             0, 0, -1.0f, 0,
             -1.0f, -1.0f, 0, 1.0f
         };
@@ -629,6 +630,8 @@ public:
     Window(HINSTANCE hInstance, int nCmdShow) {
         registerWindowClass(hInstance);
         hwnd = createWindowInstance(hInstance, nCmdShow);
+		setFullScreenMode();
+		::SetCursor(::LoadCursor(NULL, IDC_ARROW));
     }
 
     void processMessages(std::atomic<bool>& isRunning, COMPortAdapter& port, std::atomic<bool>& isReceiving) {
@@ -656,16 +659,42 @@ public:
 
 private:
     void registerWindowClass(HINSTANCE hInstance) {
-        WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_OWNDC, wndProc, 0, 0, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, "OpenGL", NULL};
+        WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_OWNDC, wndProc, 0, 0, ::GetModuleHandle(NULL), NULL, NULL, NULL, NULL, "OpenGL", NULL};
         ::RegisterClassEx(&wc);
     }
 
     HWND createWindowInstance(HINSTANCE hInstance, int nCmdShow) {
-        HWND hwnd = CreateWindowEx(0, "OpenGL", "Foxie Window", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, NULL, NULL, hInstance, NULL);
-        ::ShowWindow(hwnd, nCmdShow);
+        HWND hwnd = ::CreateWindowEx(
+			0, 
+			"OpenGL", 
+			"Foxie Window", 
+			WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 
+			0, 
+			0, 
+			1024,
+			768, 
+			NULL, 
+			NULL, 
+			hInstance, 
+			NULL
+		);
+		
+		::ShowWindow(hwnd, nCmdShow);
         return hwnd;
     }
 
+	void setFullScreenMode() {
+		DEVMODE dmSettings;
+		memset(&dmSettings, 0, sizeof(dmSettings));
+		::EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dmSettings);
+		
+		dmSettings.dmPelsWidth = 1024;
+		dmSettings.dmPelsHeight	= 768;
+		dmSettings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+		
+		::ChangeDisplaySettings(&dmSettings, CDS_FULLSCREEN);	
+	}
+	
     static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         if (msg == WM_CLOSE)
             PostQuitMessage(0);

@@ -1,4 +1,3 @@
-// TODO: Implement the fullscreen mode.
 // TODO: Use the Subwindow functionality for rendering.
 // TODO: Implement the spectrum analyzer functionality.
 
