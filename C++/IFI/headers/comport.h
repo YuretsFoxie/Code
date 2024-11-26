@@ -3,38 +3,25 @@
 
 #include <windows.h>
 #include <string>
-#include <thread>
-#include <bitset>
-#include <atomic>
+#include <iostream>
 
 class COMPort
 {
 public:
-    static COMPort& shared()
-	{
-		static COMPort instance;
-		return instance;
-	}
-	
-	void toggle();
-	
-private:	
-	COMPort();
+	COMPort(): handle(INVALID_HANDLE_VALUE) {}
    ~COMPort();
 	
-	void start();
-	void stop();
-	bool open();
-	void close();
-	void send(const std::string& data);
-	void setup();
-	void receice();
-	int  convertTwosComplementToInt(const std::bitset<8> byte);
+	void setup(const std::string& portName, int baudRate);
+	void toggleDataTransmission(bool enable);
+	HANDLE getHandle() const;
 	
-	HANDLE hComm = INVALID_HANDLE_VALUE;
-	std::string portName = "COM3";
-	std::thread workerThread;
-	std::atomic<bool> isReceiving;
+private:
+	void openPort(const std::string& portName);
+	void configurePort(int baudRate);
+	void setPortTimeouts();
+	void closePort();
+
+    HANDLE handle;
 };
 
 #endif // COMPORT_H_INCLUDED

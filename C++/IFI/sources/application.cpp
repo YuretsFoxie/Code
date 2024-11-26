@@ -1,133 +1,62 @@
+#include <thread>
 #include "application.h"
-#include "comport.h"
-#include "graphics.h"
-#include "generator.h"
-#include "sound.h"
-#include <iostream>
 
-// Public Functions
+// Public Functins
 
-WPARAM Application::run(HINSTANCE instance)
+Application::Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings):
+	isRunning(true),
+	isReceiving(false),
+	hwnd(NULL), 
+	settings(settings),
+	window(hInstance, nCmdShow), 
+	graphics(),
+	buffer(settings.getMaxPoints(),
+	settings.getScaleFactor()), 
+	renderer(graphics, buffer, settings.getBatchSize())
 {
-	hInstance = instance;
-	
-	registerWindowClass();
-	createWindow();
-	setupConsole();
-	printHint();
-	Graphics::shared().setup(hWnd);
-	
-	runMainLoop();
-    return msg.wParam;
+	hwnd = window.getHwnd();
+	graphics.initialize(hwnd, settings);
 }
 
-void Application::onReceived(const int value)
+void Application::run()
 {
-	if (testCount % 2 == 0)
-	{
-		receivedValue = value;
-		shouldUpdateGraphics = true;
-	}
-	
-	testCount++;
-}
-
-void Application::onFFTCalculated(const std::vector<float>& data)
-{
-	// fftResult = data;
-	// shouldUpdateGraphics = true;
-}
-
-void Application::showText(const std::string& str)
-{
-	std::cout << str << "\n";
-}
-
-// Message Handler
-
-LRESULT CALLBACK Application::wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	if (message == WM_KEYDOWN)
-	{
-		if (wParam == VK_ESCAPE)	::PostQuitMessage(0);
-		if (wParam == VK_F1)		COMPort::shared().toggle();
-		if (wParam == VK_F2)		Generator::shared().toggle();
-		if (wParam == VK_F3)		Sound::shared().playTest();
-	}
-	
-	return ::DefWindowProc(hWnd, message, wParam, lParam);
+	portAdapter.setup(settings.getSerialPort(), settings.getBaudRate());
+	runCOMPortThread();
+	runLoop();
 }
 
 // Private Functions
 
-Application::Application() {}
-
-Application::~Application()
+void Application::runCOMPortThread() 
 {
-	::DestroyWindow(hWnd);
+	std::thread portThread(&Application::runCOMPort, this);
+	portThread.detach();
 }
 
-void Application::registerWindowClass()
+void Application::runCOMPort() 
 {
-    WNDCLASS wc = {0};
-	wc.lpfnWndProc = wndProc;
-	wc.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
-	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wc.hCursor = ::LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = reinterpret_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
-	wc.lpszMenuName = NULL;
-	wc.lpszClassName = "ClassName";
-	::RegisterClass(&wc);
-}
-
-void Application::createWindow()
-{	
-	hWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
-							"ClassName",
-							"Foxie Window",
-							WS_MINIMIZEBOX | WS_VISIBLE,
-							-4, 0, ::GetSystemMetrics(SM_CXSCREEN) + 8, ::GetSystemMetrics(SM_CYSCREEN) * 0.8,
-							NULL, NULL, hInstance, NULL);
-}
-
-void Application::setupConsole()
-{
-	::MoveWindow(::GetConsoleWindow(), 
-				 -8, 
-				 ::GetSystemMetrics(SM_CYSCREEN) * 0.8 - 34, 
-				 ::GetSystemMetrics(SM_CXSCREEN) + 16, 
-				 ::GetSystemMetrics(SM_CYSCREEN) * 0.2 + 4,
-				 TRUE);
-}
-
-void Application::runMainLoop()
-{
-	while(true)
+	char array[1];
+	DWORD bytesRead;
+	
+	while (isRunning)
+	if (isReceiving)
 	{
-		if (shouldUpdateGraphics)
-		{
-			Graphics::shared().push(receivedValue);
-			// Graphics::shared().updateFFT(fftResult);
-			shouldUpdateGraphics = false;
-		}
-		
-		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			if (msg.message == WM_QUIT)
-				break;
-			
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
-		}
-		
-		::Sleep(1);
+		::ReadFile(portAdapter.getHandle(), array, 1, &bytesRead, NULL);
+		if (bytesRead > 0)
+			buffer.push(static_cast<float>(array[0]));
 	}
 }
 
-void Application::printHint()
+void Application::runLoop()
 {
-	showText("F1  - start/stop data receiving\nF2  - start/stop test signal generator\nF3  - play test sound\nEsc - quit");
+	HDC hdc = ::GetDC(hwnd);
+	int updateCounter = 0;
+	
+	while (isRunning)
+	{
+		window.processMessages(isRunning, portAdapter, isReceiving);
+		renderer.renderFrame(hdc, updateCounter, isRunning);
+	}
+	
+	::ReleaseDC(hwnd, hdc);
 }

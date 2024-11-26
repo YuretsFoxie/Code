@@ -1,6 +1,7 @@
 #include "application.h"
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    return Application::shared().run(hInstance);
+	Application(hInstance, nCmdShow, Settings("settings.ini")).run();
+	return EXIT_SUCCESS;
 }

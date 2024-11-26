@@ -1,36 +1,28 @@
 #ifndef SETTINGS_H_INCLUDED
 #define SETTINGS_H_INCLUDED
 
-#include <vector>
 #include <string>
 
-struct SettingsData
-{
-	int spectrumN = 0;
-	int samplingFrequency = 0;
-};
-
-	
-	
 class Settings
 {
 public:
-	static Settings& shared()
-	{
-		static Settings instance;
-		return instance;
-	}
+	Settings(const std::string& filePath);
 	
-	SettingsData getData() const;
+	std::string getSerialPort() const;
+	int getBaudRate() const;
+	int getBatchSize() const;
+	int getScaleFactor() const;
+	int getMaxPoints() const;
 	
-private:	
-	Settings();
-    ~Settings() {}
+private:
+	void readConfigFile(const std::string& filePath);
+	void parseConfigLine(const std::string& line);
 	
-	std::vector<std::string> split(const std::string& line);
-	
-	const std::string fileName = "settings.ini";
-	SettingsData data;
+	std::string serialPort;
+	int baudRate;
+	int batchSize;
+	int scaleFactor;
+	int maxPoints;
 };
 
 #endif // SETTINGS_H_INCLUDED

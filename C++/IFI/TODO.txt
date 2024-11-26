@@ -1,8 +1,16 @@
-FIX reading the ADC data. Implement one channel data displaying first.
-	Make the single file test MVP, which combines UART and Graphics functionality.
-	The measured FPS is about 64. It means, that renderer can't update each 1/128 of second. Possible solution: redraw for each N values (N > 1) instaed of redrawing for each new value.
+// TODO: Use the Subwindow functionality for rendering.
+// TODO: Implement the spectrum analyzer functionality.
 
-COM-port: add the settings, consider adding the stop data sending check (send some code from the MCU after the stop command is accepted, instead of sending a fixed amount of zeros to it).
+https://github.com/YuretsFoxie/Code
 
 frequency resolution = sampling_frequency / spectrum_n
 df=fs/N
+
+
+
+Preserve the original code formatting, do not replace the tabs with the spaces and keep 3 lines between the classes. 
+
+Please, do not use the placeholder comments, implement the actual functionality. 
+Please, provide two halves of the updated code in two different messages. The havles' size should be close enough, so they both can fit to the messages.
+
+Please, provide the second half of the updated code, which matches the first one.

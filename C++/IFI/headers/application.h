@@ -1,50 +1,36 @@
 #ifndef APPLICATION_H_INCLUDED
 #define APPLICATION_H_INCLUDED
 
-#include <windows.h>
-#include <vector>
-#include <string>
+#include "settings.h"
+#include "comportadapter.h"
+#include "graphics.h"
+#include "databuffer.h"
+#include "window.h"
+#include "renderer.h"
 
-class Application
+// #include "textsubwindow.h"
+// #include "graphsubwindow.h"
+
+class Application 
 {
 public:
-    static Application& shared()
-    {
-        static Application instance;
-        return instance;
-    }
-	
-	WPARAM run(HINSTANCE instance);
-	void onReceived(const int value);
-	void onFFTCalculated(const std::vector<float>& data);
-	void showText(const std::string& str);
+	Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings);
+	void run();
 	
 private:
-	Application();
-   ~Application();
+	void runCOMPortThread();
+	void runCOMPort();
+	void runLoop();
 	
-    static LRESULT CALLBACK wndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	
-	void registerWindowClass();
-	void createWindow();
-	void setupConsole();
-	void runMainLoop();
-	void printHint();
-	
-	void onPressESC();
-	void onPressF1();
-	void onPressF2();
-	void onPressF3();
-	
-	HINSTANCE hInstance;
-	HWND hWnd;
-	MSG msg;
-	
-	float receivedValue = 0;
-	std::vector<float> fftResult = {0};	
-	bool shouldUpdateGraphics = false;
-	
-	int testCount = 0;
+	const Settings& settings;
+	std::atomic<bool> isRunning;
+	std::atomic<bool> isReceiving;
+	HWND hwnd;
+	COMPortAdapter portAdapter;
+	Graphics graphics;
+	DataBuffer buffer;
+	Window window;
+	Renderer renderer;
 };
 
 #endif // APPLICATION_H_INCLUDED
