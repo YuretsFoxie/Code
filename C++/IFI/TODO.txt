@@ -1,4 +1,6 @@
 // TODO: Use the Subwindow functionality for rendering.
+	// !!!!!1111 TODO: Try the new refactoring approach: handle all the shaders in one class.
+
 // TODO: Implement the spectrum analyzer functionality.
 
 https://github.com/YuretsFoxie/Code
@@ -8,9 +10,50 @@ df=fs/N
 
 
 
-Preserve the original code formatting, do not replace the tabs with the spaces and keep 3 lines between the classes. 
+Please, move all the text rendering functionality to the TextSubwindow class, remove this functionality from the previous location. 
+And move all the UART data rendering functionality to the GraphSubwindow class, remove this functionality from the previous location. 
+Use the TextSubwindow and GraphSubwindow classes for rendering. Please, implement the complete and consistent functionality, 
+provide the final version of the complete code of all the updated files, preserving the original formatting. 
+Do not replace the tabs with the spaces. Please, do not use the placeholder comments, implement the actual functionality.
+Please, provide the complete code of all the updated files.
 
-Please, do not use the placeholder comments, implement the actual functionality. 
-Please, provide two halves of the updated code in two different messages. The havles' size should be close enough, so they both can fit to the messages.
+Have you provided the complete updated code of all modified files?
 
-Please, provide the second half of the updated code, which matches the first one.
+
+
+Here are the files, we are working with:
+C++/IFI/headers/application.h
+C++/IFI/sources/application.cpp
+C++/IFI/headers/comport.h
+C++/IFI/sources/comport.cpp
+C++/IFI/headers/comportadapter.h
+C++/IFI/sources/comportadapter.cpp
+C++/IFI/headers/databuffer.h
+C++/IFI/sources/databuffer.cpp
+C++/IFI/headers/graphics.h
+C++/IFI/sources/graphics.cpp
+C++/IFI/headers/graphsubwindow.h
+C++/IFI/sources/graphsubwindow.cpp
+C++/IFI/headers/openglbuffer.h
+C++/IFI/sources/openglbuffer.cpp
+C++/IFI/headers/openglcontext.h
+C++/IFI/sources/openglcontext.cpp
+C++/IFI/headers/renderer.h
+C++/IFI/sources/renderer.cpp
+C++/IFI/headers/settings.h
+C++/IFI/sources/settings.cpp
+C++/IFI/headers/shaders.h
+C++/IFI/sources/shaders.cpp
+C++/IFI/headers/subwindow.h
+C++/IFI/sources/subwindow.cpp
+C++/IFI/headers/textsubwindow.h
+C++/IFI/sources/textsubwindow.cpp
+C++/IFI/headers/window.h
+C++/IFI/sources/window.cpp
+C++/IFI/sources/main.cpp
+
+
+
+
+
+
