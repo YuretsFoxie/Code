@@ -14,7 +14,7 @@ public:
 	void drawText(const std::string& text, float x, float y, float scale, float color[3]);
 	
 private:
-	Shaders shaders;
+	Shaders shaders = Shaders();
 	OpenGLBuffer buffer;
 	OpenGLContext context;
 };

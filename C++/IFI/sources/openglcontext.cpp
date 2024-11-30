@@ -7,7 +7,7 @@ void OpenGLContext::initialize(HWND hwnd)
 	setupPixelFormat(hwnd);
 	initializeGLEW();
 	initializeFreeType();
-	setupShaders();
+	// setupShaders();
 	setupTextRendering();
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
@@ -47,15 +47,6 @@ void OpenGLContext::initializeFreeType()
 	FT_Init_FreeType(&ft);
 	FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face);
 	FT_Set_Pixel_Sizes(face, 0, 24);
-}
-
-void OpenGLContext::setupShaders()
-{
-	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
-	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-	textShader = createShaderProgram(vertexShader, fragmentShader);
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
 }
 
 void OpenGLContext::setupTextRendering()
@@ -186,21 +177,4 @@ void OpenGLContext::setupPixelFormat(HWND hwnd)
 	
 	HGLRC hglrc = wglCreateContext(hdc);
 	wglMakeCurrent(hdc, hglrc);
-}
-
-GLuint OpenGLContext::compileShader(GLenum type, const char* source)
-{
-	GLuint shader = glCreateShader(type);
-	glShaderSource(shader, 1, &source, NULL);
-	glCompileShader(shader);
-	return shader;
-}
-
-GLuint OpenGLContext::createShaderProgram(GLuint vertexShader, GLuint fragmentShader)
-{
-	GLuint program = glCreateProgram();
-	glAttachShader(program, vertexShader);
-	glAttachShader(program, fragmentShader);
-	glLinkProgram(program);
-	return program;
 }

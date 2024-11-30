@@ -15,6 +15,7 @@ And move all the UART data rendering functionality to the GraphSubwindow class, 
 Use the TextSubwindow and GraphSubwindow classes for rendering. Please, implement the complete and consistent functionality, 
 provide the final version of the complete code of all the updated files, preserving the original formatting. 
 Do not replace the tabs with the spaces. Please, do not use the placeholder comments, implement the actual functionality.
+
 Please, provide the complete code of all the updated files.
 
 Have you provided the complete updated code of all modified files?
@@ -51,6 +52,25 @@ C++/IFI/sources/textsubwindow.cpp
 C++/IFI/headers/window.h
 C++/IFI/sources/window.cpp
 C++/IFI/sources/main.cpp
+
+Please, ignore the "temp" folder content.
+
+
+
+To work effectively with me on your refactoring tasks, follow these best practices:
+
+1. Provide Specific Context: Share specific parts of the code or files you are working on. This helps me understand the context and provide precise assistance.
+2. Clear Objectives: Define clear objectives for what you want to achieve with the refactoring. For example, improving performance, readability, or fixing bugs.
+3. Step-by-Step Requests: Break down your requests into smaller, actionable steps. For example, start with one class or function at a time.
+4. Use My Capabilities: Utilize my functions for:
+    1)Fetching Files: Retrieve file contents to review and analyze.
+    2) Finding Changes: Identify recent commits or changes in specific files.
+    3) Semantic and Lexical Search: Search for specific code patterns or concepts.
+    4) GitHub Actions: Check logs and debug workflows if needed.
+5. Iterate and Test: Apply changes incrementally and test them frequently to ensure each step is correct before moving on to the next.
+
+
+
 
 
 
