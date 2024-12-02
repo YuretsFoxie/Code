@@ -7,7 +7,7 @@ void OpenGLContext::initialize(HWND hwnd)
 	setupPixelFormat(hwnd);
 	initializeGLEW();
 	initializeFreeType();
-	setupShaders();
+	shaders.initialize();
 	setupTextRendering();
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
@@ -18,7 +18,7 @@ void OpenGLContext::initialize(HWND hwnd)
 
 void OpenGLContext::renderText(const std::string& text, float x, float y, float scale, float color[3])
 {
-	glUseProgram(textShader);
+	glUseProgram(shaders.getTextProgram());
 	setOrthographicProjection();
 	setTextColor(color);
 	glActiveTexture(GL_TEXTURE0);
@@ -47,15 +47,6 @@ void OpenGLContext::initializeFreeType()
 	FT_Init_FreeType(&ft);
 	FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face);
 	FT_Set_Pixel_Sizes(face, 0, 24);
-}
-
-void OpenGLContext::setupShaders()
-{
-	GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
-	GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-	textShader = createShaderProgram(vertexShader, fragmentShader);
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
 }
 
 void OpenGLContext::setupTextRendering()
@@ -139,12 +130,12 @@ void OpenGLContext::setOrthographicProjection()
 		0, 0, -1.0f, 0,
 		-1.0f, -1.0f, 0, 1.0f
 	};
-	glUniformMatrix4fv(glGetUniformLocation(textShader, "projection"), 1, GL_FALSE, ortho);
+	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, ortho);
 }
 
 void OpenGLContext::setTextColor(float color[3])
 {
-	glUniform3f(glGetUniformLocation(textShader, "textColor"), color[0], color[1], color[2]);
+	glUniform3f(glGetUniformLocation(shaders.getTextProgram(), "textColor"), color[0], color[1], color[2]);
 }
 
 void OpenGLContext::renderCharacter(const Character& ch, float x, float y, float scale)
@@ -186,21 +177,4 @@ void OpenGLContext::setupPixelFormat(HWND hwnd)
 	
 	HGLRC hglrc = wglCreateContext(hdc);
 	wglMakeCurrent(hdc, hglrc);
-}
-
-GLuint OpenGLContext::compileShader(GLenum type, const char* source)
-{
-	GLuint shader = glCreateShader(type);
-	glShaderSource(shader, 1, &source, NULL);
-	glCompileShader(shader);
-	return shader;
-}
-
-GLuint OpenGLContext::createShaderProgram(GLuint vertexShader, GLuint fragmentShader)
-{
-	GLuint program = glCreateProgram();
-	glAttachShader(program, vertexShader);
-	glAttachShader(program, fragmentShader);
-	glLinkProgram(program);
-	return program;
 }

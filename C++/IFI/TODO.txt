@@ -1,5 +1,5 @@
 // TODO: Use the Subwindow functionality for rendering.
-	// !!!!!1111 TODO: Try the new refactoring approach: handle all the shaders in one class.
+	// TODO: Try the new refactoring approach: handle all the shaders in one class. Move the shaders form the OpenGLContext first.
 
 // TODO: Implement the spectrum analyzer functionality.
 

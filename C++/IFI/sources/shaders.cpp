@@ -14,11 +14,31 @@ void Shaders::initialize()
 	createProgram(vertexShader, fragmentShader);
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+	
+	//=====
+	
+	GLuint textVertexShader = compileShader(GL_VERTEX_SHADER, textVertexShaderSource);
+	GLuint textFragmentShader = compileShader(GL_FRAGMENT_SHADER, textFragmentShaderSource);
+	
+	textProgram = glCreateProgram();
+	glAttachShader(textProgram, textVertexShader);
+	glAttachShader(textProgram, textFragmentShader);
+	glLinkProgram(textProgram);
+	
+	glDeleteShader(textVertexShader);
+	glDeleteShader(textFragmentShader);	
+	
+	//=====
 }
 
 GLuint Shaders::getProgram() const
 {
 	return program;
+}
+
+GLuint Shaders::getTextProgram() const
+{
+	return textProgram;
 }
 
 // Private Functions
