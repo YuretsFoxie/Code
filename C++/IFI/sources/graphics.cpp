@@ -5,12 +5,13 @@
 void Graphics::initialize(HWND hwnd, const Settings& settings)
 {
 	context.initialize(hwnd);
+	shaders.initialize();
 	buffer.prepare(settings.getMaxPoints());
 }
 
 void Graphics::drawVertices(const std::vector<float>& vertices)
 {
-	glUseProgram(shaders.getGraphProgram());
+	glUseProgram(shaders.getProgram());
 	buffer.draw(vertices);
 }
 
