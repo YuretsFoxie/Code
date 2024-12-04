@@ -14,6 +14,14 @@ public:
 	void drawText(const std::string& text, float x, float y);
 	
 private:
+	const float ortho[16] = 
+	{
+		2.0f / 1024, 0, 0, 0,
+		0, 2.0f / 768, 0, 0,
+		0, 0, -1.0f, 0,
+		-1.0f, -1.0f, 0, 1.0f
+	};
+	
 	Shaders shaders;
 	OpenGLBuffer buffer;
 	OpenGLContext context;

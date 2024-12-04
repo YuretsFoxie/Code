@@ -7,7 +7,6 @@ void OpenGLContext::initialize(HWND hwnd)
 	setupPixelFormat(hwnd);
 	initializeGLEW();
 	initializeFreeType();
-	shaders.initialize();
 	setupTextRendering();
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
@@ -18,8 +17,6 @@ void OpenGLContext::initialize(HWND hwnd)
 
 void OpenGLContext::renderText(const std::string& text, float x, float y)
 {
-	glUseProgram(shaders.getTextProgram());
-	setOrthographicProjection();
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(textVAO);
 	
@@ -118,18 +115,6 @@ Character OpenGLContext::createCharacter(GLuint texture, FT_GlyphSlot glyph)
 		glyph->bitmap_top,
 		glyph->advance.x
 	};
-}
-
-void OpenGLContext::setOrthographicProjection()
-{
-	float ortho[16] = 
-	{
-		2.0f / 1024, 0, 0, 0,
-		0, 2.0f / 768, 0, 0,
-		0, 0, -1.0f, 0,
-		-1.0f, -1.0f, 0, 1.0f
-	};
-	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, ortho);
 }
 
 void OpenGLContext::renderCharacter(const Character& ch, float x, float y, float scale)

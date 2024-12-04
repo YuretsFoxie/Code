@@ -7,7 +7,6 @@
 #include <GL/glew.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "shaders.h"
 
 struct Character
 {
@@ -36,11 +35,9 @@ private:
 	GLuint createTexture(const FT_Bitmap& bitmap);
 	void setTextureParameters();
 	Character createCharacter(GLuint texture, FT_GlyphSlot glyph);
-	void setOrthographicProjection();
 	void renderCharacter(const Character& ch, float x, float y, float scale);
 	void setupPixelFormat(HWND hwnd);
 	
-	Shaders shaders = Shaders();
 	FT_Library ft;
 	FT_Face face;
 	GLuint textVAO, textVBO;

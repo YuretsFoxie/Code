@@ -17,5 +17,7 @@ void Graphics::drawVertices(const std::vector<float>& vertices)
 
 void Graphics::drawText(const std::string& text, float x, float y)
 {
+	glUseProgram(shaders.getTextProgram());
+	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, ortho);
 	context.renderText(text, x, y);
 }
