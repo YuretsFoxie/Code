@@ -11,11 +11,11 @@ void Graphics::initialize(HWND hwnd, const Settings& settings)
 
 void Graphics::drawVertices(const std::vector<float>& vertices)
 {
-	glUseProgram(shaders.getProgram());
+	glUseProgram(shaders.getGraphProgram());
 	buffer.draw(vertices);
 }
 
-void Graphics::drawText(const std::string& text, float x, float y, float scale, float color[3])
+void Graphics::drawText(const std::string& text, float x, float y)
 {
-	context.renderText(text, x, y, scale, color);
+	context.renderText(text, x, y);
 }

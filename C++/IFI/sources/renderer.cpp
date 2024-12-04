@@ -28,6 +28,5 @@ void Renderer::drawVertices()
 
 void Renderer::drawText()
 {
-	float color[3] = {0.0f, 1.0f, 0.0f};
-	graphics.drawText("UART Data Visualization", 25.0f, 25.0f, 1.0f, color);
+	graphics.drawText("UART Data Visualization", 25.0f, 25.0f);
 }

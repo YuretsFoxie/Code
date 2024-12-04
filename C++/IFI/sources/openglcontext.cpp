@@ -16,19 +16,18 @@ void OpenGLContext::initialize(HWND hwnd)
 	((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(1); // enable vsync
 }
 
-void OpenGLContext::renderText(const std::string& text, float x, float y, float scale, float color[3])
+void OpenGLContext::renderText(const std::string& text, float x, float y)
 {
 	glUseProgram(shaders.getTextProgram());
 	setOrthographicProjection();
-	setTextColor(color);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(textVAO);
 	
 	for (const char& c: text) 
 	{
 		Character ch = Characters[c];
-		renderCharacter(ch, x, y, scale);
-		x += (ch.Advance >> 6) * scale;
+		renderCharacter(ch, x, y, 1.0f);
+		x += (ch.Advance >> 6) * 1.0f;
 	}
 	
 	glBindVertexArray(0);
@@ -131,11 +130,6 @@ void OpenGLContext::setOrthographicProjection()
 		-1.0f, -1.0f, 0, 1.0f
 	};
 	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, ortho);
-}
-
-void OpenGLContext::setTextColor(float color[3])
-{
-	glUniform3f(glGetUniformLocation(shaders.getTextProgram(), "textColor"), color[0], color[1], color[2]);
 }
 
 void OpenGLContext::renderCharacter(const Character& ch, float x, float y, float scale)

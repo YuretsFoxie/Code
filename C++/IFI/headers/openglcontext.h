@@ -7,14 +7,25 @@
 #include <GL/glew.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "textsubwindow.h" // temp, for the Character struct
 #include "shaders.h"
+
+struct Character
+{
+	GLuint TextureID;
+	int Width;
+	int Height;
+	int BearingX;
+	int BearingY;
+	long Advance;
+};
+
+
 
 class OpenGLContext
 {
 public:
 	void initialize(HWND hwnd);
-	void renderText(const std::string& text, float x, float y, float scale, float color[3]);
+	void renderText(const std::string& text, float x, float y);
 	
 private:
 	void initializeGLEW();
@@ -26,7 +37,6 @@ private:
 	void setTextureParameters();
 	Character createCharacter(GLuint texture, FT_GlyphSlot glyph);
 	void setOrthographicProjection();
-	void setTextColor(float color[3]);
 	void renderCharacter(const Character& ch, float x, float y, float scale);
 	void setupPixelFormat(HWND hwnd);
 	

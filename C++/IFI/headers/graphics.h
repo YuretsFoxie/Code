@@ -11,7 +11,7 @@ class Graphics
 public:
 	void initialize(HWND hwnd, const Settings& settings);
 	void drawVertices(const std::vector<float>& vertices);
-	void drawText(const std::string& text, float x, float y, float scale, float color[3]);
+	void drawText(const std::string& text, float x, float y);
 	
 private:
 	Shaders shaders;
