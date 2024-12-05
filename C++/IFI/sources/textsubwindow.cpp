@@ -2,10 +2,139 @@
 
 // Public Functions
 
-void TextSubwindow::render()
+TextSubwindow::~TextSubwindow()
 {
+	if (VAO) glDeleteVertexArrays(1, &VAO);
+	if (VBO) glDeleteBuffers(1, &VBO);
+}
+
+void TextSubwindow::initialize(HWND hwnd)
+{
+	initializeFreeType();
+	setupTextRendering();
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	loadCharacters();
+}
+
+void TextSubwindow::draw(const std::string& text, float x, float y)
+{
+	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(VAO);
 	
+	for (const char& c: text) 
+	{
+		Character ch = Characters[c];
+		renderCharacter(ch, x, y, 1.0f);
+		x += (ch.Advance >> 6) * 1.0f;
+	}
+	
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 // Private Functions
 
+void TextSubwindow::initializeFreeType()
+{
+	FT_Init_FreeType(&ft);
+	FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face);
+	FT_Set_Pixel_Sizes(face, 0, 24);
+}
+
+void TextSubwindow::setupTextRendering()
+{
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void TextSubwindow::loadCharacters()
+{
+	for (unsigned char c = 0; c < 128; c++)
+		loadCharacter(c);
+	
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void TextSubwindow::loadCharacter(unsigned char c) 
+{
+	FT_Load_Char(face, c, FT_LOAD_RENDER);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	GLuint texture = createTexture(face->glyph->bitmap);
+	Character character = createCharacter(texture, face->glyph);
+	Characters.insert(std::pair<char, Character>(c, character));
+}
+
+GLuint TextSubwindow::createTexture(const FT_Bitmap& bitmap)
+{
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0,
+		GL_RED,
+		bitmap.width,
+		bitmap.rows,
+		0,
+		GL_RED,
+		GL_UNSIGNED_BYTE,
+		bitmap.buffer
+	);
+	
+	setTextureParameters();
+	return texture;
+}
+
+void TextSubwindow::setTextureParameters()
+{
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+Character TextSubwindow::createCharacter(GLuint texture, FT_GlyphSlot glyph)
+{
+	return {
+		texture,
+		static_cast<int>(glyph->bitmap.width),
+		static_cast<int>(glyph->bitmap.rows),
+		glyph->bitmap_left,
+		glyph->bitmap_top,
+		glyph->advance.x
+	};
+}
+
+void TextSubwindow::renderCharacter(const Character& ch, float x, float y, float scale)
+{
+	float xpos = x + ch.BearingX * scale;
+	float ypos = y - (ch.Height - ch.BearingY) * scale;
+	float w = ch.Width * scale;
+	float h = ch.Height * scale;
+	
+	float vertices[6][4] = 
+	{
+		{xpos, ypos + h, 0.0f, 0.0f},
+		{xpos, ypos, 0.0f, 1.0f},
+		{xpos + w, ypos, 1.0f, 1.0f},
+		{xpos, ypos + h, 0.0f, 0.0f},
+		{xpos + w, ypos, 1.0f, 1.0f},
+		{xpos + w, ypos + h, 1.0f, 0.0f}
+	};
+	
+	glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}

@@ -20,7 +20,7 @@ class Subwindow
 public:
 	Subwindow(const Origin& origin, const Size& size): origin(origin), size(size) {}
 	virtual ~Subwindow() = default;
-	virtual void render() = 0;
+	// virtual void draw() = 0;
 	
 protected:
 	Origin origin;

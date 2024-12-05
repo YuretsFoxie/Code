@@ -7,6 +7,7 @@ void Renderer::renderFrame(HDC hdc, int& updateCounter, std::atomic<bool>& isRun
 	updateCounter++;
 	if (updateCounter >= BATCH_SIZE)
 	{
+		glClear(GL_COLOR_BUFFER_BIT);
 		drawVertices();
 		drawText();
 		::SwapBuffers(hdc);
@@ -18,7 +19,6 @@ void Renderer::renderFrame(HDC hdc, int& updateCounter, std::atomic<bool>& isRun
 
 void Renderer::drawVertices()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
 	std::vector<float> vertices;
 	buffer.prepare(vertices);
 	

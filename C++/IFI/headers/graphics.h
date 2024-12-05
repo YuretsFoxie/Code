@@ -3,17 +3,19 @@
 
 #include "settings.h"
 #include "shaders.h"
-#include "openglbuffer.h"
-#include "openglcontext.h"
+#include "graphsubwindow.h"
+#include "textsubwindow.h"
 
 class Graphics
 {
 public:
 	void initialize(HWND hwnd, const Settings& settings);
 	void drawVertices(const std::vector<float>& vertices);
-	void drawText(const std::string& text, float x, float y);
+	void drawText(const std::string& message, float x, float y);
 	
 private:
+	void setupPixelFormat(HWND hwnd);
+	
 	const float ortho[16] = 
 	{
 		2.0f / 1024, 0, 0, 0,
@@ -23,8 +25,8 @@ private:
 	};
 	
 	Shaders shaders;
-	OpenGLBuffer buffer;
-	OpenGLContext context;
+	GraphSubwindow graph;
+	TextSubwindow text;
 };
 
 #endif // GRAPHICS_H_INCLUDED
