@@ -1,4 +1,5 @@
 #include <thread>
+#include <chrono>
 #include "application.h"
 
 // Public Functins
@@ -56,6 +57,7 @@ void Application::runLoop()
 	{
 		window.processMessages(isRunning, portAdapter, isReceiving);
 		renderer.renderFrame(hdc, updateCounter, isRunning);
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 	
 	::ReleaseDC(hwnd, hdc);
