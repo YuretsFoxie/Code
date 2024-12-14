@@ -21,13 +21,11 @@ struct Character
 
 
 
-class TextSubwindow: public Subwindow
+class TextSubwindow
 {
 public:
-	// void draw() override;
-	
-	TextSubwindow(const Origin& origin = {0}, const Size& size = {0}): Subwindow(origin, size) {}
-   ~TextSubwindow() override;
+	TextSubwindow(const Origin& origin = {0}, const Size& size = {0}): origin(origin), size(size) {}
+   ~TextSubwindow();
    
 	void initialize(HWND hwnd);
 	void draw(const std::string& text, float x, float y);
@@ -46,6 +44,8 @@ private:
 	FT_Face face;
 	GLuint VAO, VBO;
 	std::map<char, Character> Characters;
+	Origin origin;
+	Size size;
 };
 
 #endif // TEXTSUBWINDOW_H_INCLUDED

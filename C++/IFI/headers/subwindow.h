@@ -13,18 +13,4 @@ struct Size
 	float height;
 };
 
-
-
-class Subwindow
-{
-public:
-	Subwindow(const Origin& origin, const Size& size): origin(origin), size(size) {}
-	virtual ~Subwindow() = default;
-	// virtual void draw() = 0;
-	
-protected:
-	Origin origin;
-	Size size;
-};
-
 #endif // SUBWINDOW_H_INCLUDED

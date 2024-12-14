@@ -1,20 +1,25 @@
 #ifndef GRAPHICS_H_INCLUDED
 #define GRAPHICS_H_INCLUDED
 
+#include <atomic>
 #include "settings.h"
 #include "shaders.h"
+#include "databuffer.h"
 #include "graphsubwindow.h"
 #include "textsubwindow.h"
 
 class Graphics
 {
 public:
-	void initialize(HWND hwnd, const Settings& settings);
-	void drawVertices(const std::vector<float>& vertices);
-	void drawText(const std::string& message, float x, float y);
+	Graphics(DataBuffer& buffer): buffer(buffer) {}
+	
+	void initialize(const HWND& hwnd, const Settings& settings);
+	void render(HDC hdc, int& updateCounter, std::atomic<bool>& isRunning);
 	
 private:
 	void setupPixelFormat(HWND hwnd);
+	void drawVertices();
+	void drawText();
 	
 	const float ortho[16] = 
 	{
@@ -24,9 +29,12 @@ private:
 		-1.0f, -1.0f, 0, 1.0f
 	};
 	
+	DataBuffer& buffer;
+	
 	Shaders shaders;
 	GraphSubwindow graph;
 	TextSubwindow text;
+	int batchSize;
 };
 
 #endif // GRAPHICS_H_INCLUDED

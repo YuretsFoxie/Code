@@ -2,14 +2,10 @@
 #define APPLICATION_H_INCLUDED
 
 #include "settings.h"
-#include "comportadapter.h"
+#include "comport.h"
 #include "graphics.h"
 #include "databuffer.h"
 #include "window.h"
-#include "renderer.h"
-
-// #include "textsubwindow.h"
-// #include "graphsubwindow.h"
 
 class Application 
 {
@@ -26,11 +22,10 @@ private:
 	std::atomic<bool> isRunning;
 	std::atomic<bool> isReceiving;
 	HWND hwnd;
-	COMPortAdapter portAdapter;
+	COMPort port;
 	Graphics graphics;
 	DataBuffer buffer;
 	Window window;
-	Renderer renderer;
 };
 
 #endif // APPLICATION_H_INCLUDED

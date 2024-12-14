@@ -10,7 +10,7 @@ Window::Window(HINSTANCE hInstance, int nCmdShow)
 	::SetCursor(::LoadCursor(NULL, IDC_ARROW));
 }
 
-void Window::processMessages(std::atomic<bool>& isRunning, COMPortAdapter& port, std::atomic<bool>& isReceiving)
+void Window::processMessages(std::atomic<bool>& isRunning, COMPort& port, std::atomic<bool>& isReceiving)
 {
 	MSG msg;
 	while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))

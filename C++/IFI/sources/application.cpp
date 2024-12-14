@@ -10,10 +10,9 @@ Application::Application(HINSTANCE hInstance, int nCmdShow, const Settings& sett
 	hwnd(NULL), 
 	settings(settings),
 	window(hInstance, nCmdShow), 
-	graphics(),
 	buffer(settings.getMaxPoints(),
-	settings.getScaleFactor()), 
-	renderer(graphics, buffer, settings.getBatchSize())
+	settings.getScaleFactor()),
+	graphics(buffer)
 {
 	hwnd = window.getHwnd();
 	graphics.initialize(hwnd, settings);
@@ -21,7 +20,7 @@ Application::Application(HINSTANCE hInstance, int nCmdShow, const Settings& sett
 
 void Application::run()
 {
-	portAdapter.setup(settings.getSerialPort(), settings.getBaudRate());
+	port.setup(settings.getSerialPort(), settings.getBaudRate());
 	runCOMPortThread();
 	runLoop();
 }
@@ -42,7 +41,7 @@ void Application::runCOMPort()
 	while (isRunning)
 	if (isReceiving)
 	{
-		::ReadFile(portAdapter.getHandle(), array, 1, &bytesRead, NULL);
+		::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
 		if (bytesRead > 0)
 			buffer.push(static_cast<float>(array[0]));
 	}
@@ -55,8 +54,8 @@ void Application::runLoop()
 	
 	while (isRunning)
 	{
-		window.processMessages(isRunning, portAdapter, isReceiving);
-		renderer.renderFrame(hdc, updateCounter, isRunning);
+		window.processMessages(isRunning, port, isReceiving);
+		graphics.render(hdc, updateCounter, isRunning);
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 	

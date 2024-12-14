@@ -1,3 +1,4 @@
+// TODO: Move the DataBuffer drawing functionality to the GraphSubwindow class.
 // TODO: Use the Subwindow functionality for rendering.
 // TODO: Implement the spectrum analyzer functionality.
 
@@ -75,5 +76,5 @@ To work effectively with me on your refactoring tasks, follow these best practic
 
 
 
-   
+
 

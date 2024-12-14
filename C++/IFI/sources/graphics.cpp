@@ -2,7 +2,7 @@
 
 // Public Functins
 
-void Graphics::initialize(HWND hwnd, const Settings& settings)
+void Graphics::initialize(const HWND& hwnd, const Settings& settings)
 {
 	setupPixelFormat(hwnd);
 	glewInit();
@@ -11,19 +11,21 @@ void Graphics::initialize(HWND hwnd, const Settings& settings)
 	shaders.initialize();
 	text.initialize(hwnd);
 	graph.initialize(settings.getMaxPoints());
+	
+	batchSize = settings.getBatchSize();
 }
 
-void Graphics::drawVertices(const std::vector<float>& vertices)
+void Graphics::render(HDC hdc, int& updateCounter, std::atomic<bool>& isRunning)
 {
-	glUseProgram(shaders.getGraphProgram());
-	graph.draw(vertices);
-}
-
-void Graphics::drawText(const std::string& message, float x, float y)
-{
-	glUseProgram(shaders.getTextProgram());
-	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, ortho);
-	text.draw(message, x, y);
+	updateCounter++;
+	if (updateCounter >= batchSize)
+	{
+		glClear(GL_COLOR_BUFFER_BIT);
+		drawVertices();
+		drawText();
+		::SwapBuffers(hdc);
+		updateCounter = 0;
+	}
 }
 
 // Private Functins
@@ -43,4 +45,23 @@ void Graphics::setupPixelFormat(HWND hwnd)
 	
 	HGLRC hglrc = wglCreateContext(hdc);
 	wglMakeCurrent(hdc, hglrc);
+}
+
+void Graphics::drawVertices()
+{
+	std::vector<float> vertices;
+	buffer.prepare(vertices);
+	
+	if (!vertices.empty())
+	{
+		glUseProgram(shaders.getGraphProgram());
+		graph.draw(vertices);
+	}
+}
+
+void Graphics::drawText()
+{
+	glUseProgram(shaders.getTextProgram());
+	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, ortho);
+	text.draw("UART Data Visualization", 25.0f, 25.0f);
 }

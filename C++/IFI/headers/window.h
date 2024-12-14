@@ -3,14 +3,14 @@
 
 #include <windows.h>
 #include <atomic>
-#include "comportadapter.h"
+#include "comport.h"
 
 class Window
 {
 public:
 	Window(HINSTANCE hInstance, int nCmdShow);
 	
-	void processMessages(std::atomic<bool>& isRunning, COMPortAdapter& port, std::atomic<bool>& isReceiving);
+	void processMessages(std::atomic<bool>& isRunning, COMPort& port, std::atomic<bool>& isReceiving);
 	HWND getHwnd() const;
 	
 private:
