@@ -10,7 +10,7 @@ void Graphics::initialize(const HWND& hwnd, const Settings& settings)
 	
 	shaders.initialize();
 	text.initialize(hwnd);
-	graph.initialize(settings.getMaxPoints());
+	graph.initialize(settings.getMaxPoints(), settings.getScaleFactor());
 	
 	batchSize = settings.getBatchSize();
 }
@@ -48,14 +48,13 @@ void Graphics::setupPixelFormat(HWND hwnd)
 }
 
 void Graphics::drawVertices()
-{
-	std::vector<float> vertices;
-	buffer.prepare(vertices);
+{	
+	std::vector<float> data = buffer.getData();
 	
-	if (!vertices.empty())
+	if (!data.empty())
 	{
 		glUseProgram(shaders.getGraphProgram());
-		graph.draw(vertices);
+		graph.draw(data);
 	}
 }
 

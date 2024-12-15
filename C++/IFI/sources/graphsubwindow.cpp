@@ -8,16 +8,22 @@ GraphSubwindow::~GraphSubwindow()
 	if (VBO) glDeleteBuffers(1, &VBO);
 }
 
-void GraphSubwindow::initialize(int maxPoints)
+void GraphSubwindow::initialize(int maxPoints, int scaleFactor)
 {
+	this->maxPoints = maxPoints;
+	this->scaleFactor = scaleFactor;
+	
 	generateBuffers();
 	bindBuffers(maxPoints);
 	configureVertexAttribPointer();
 	unbindBuffers();	
 }
 
-void GraphSubwindow::draw(const std::vector<float>& vertices)
+void GraphSubwindow::draw(const std::vector<float>& buffer)
 {
+	std::vector<float> vertices;
+	prepare(vertices, buffer);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
 	glBindVertexArray(VAO);
@@ -25,6 +31,20 @@ void GraphSubwindow::draw(const std::vector<float>& vertices)
 }
 
 // Private Functions
+
+void GraphSubwindow::prepare(std::vector<float>& vertices, const std::vector<float>& buffer)
+{
+	vertices.reserve(buffer.size() * 2);
+	
+	const float scale = 2.0f / maxPoints;
+	for (size_t i = 0; i < buffer.size(); ++i)
+	{
+		float x = (scale * i) - 1.0f;
+		float y = buffer[i] / static_cast<float>(scaleFactor);
+		vertices.push_back(x);
+		vertices.push_back(y);
+	}
+}
 
 void GraphSubwindow::generateBuffers()
 {

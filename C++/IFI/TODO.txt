@@ -1,4 +1,5 @@
-// TODO: Move the DataBuffer drawing functionality to the GraphSubwindow class.
+// TODO: Fix the application freezing.
+// TODO: Refactor the updated rendering functionality.
 // TODO: Use the Subwindow functionality for rendering.
 // TODO: Implement the spectrum analyzer functionality.
 
