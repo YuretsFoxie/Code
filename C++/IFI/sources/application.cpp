@@ -39,11 +39,15 @@ void Application::runCOMPort()
 	DWORD bytesRead;
 	
 	while (isRunning)
-	if (isReceiving)
 	{
-		::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
-		if (bytesRead > 0)
-			buffer.push(static_cast<float>(array[0]));
+		if (isReceiving)
+		{
+			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
+			if (bytesRead > 0)
+				buffer.push(static_cast<float>(array[0]));
+		}
+		
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 }
 
