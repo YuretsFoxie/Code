@@ -6,16 +6,16 @@ void Graphics::set(const HWND& hwnd)
 {
 	setupPixelFormat(hwnd);
 	glewInit();
-	((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(1); // enable vsync
 	
 	shaders.initialize();
 	text.initialize(hwnd);
 	graph.initialize(settings.getMaxPoints(), settings.getScaleFactor());
 	
 	batchSize = settings.getBatchSize();
+	((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(1); // enable vsync
 }
 
-void Graphics::render(HDC hdc, std::atomic<bool>& isRunning)
+void Graphics::render()
 {
 	updateCounter++;
 	if (updateCounter >= batchSize)
@@ -30,9 +30,9 @@ void Graphics::render(HDC hdc, std::atomic<bool>& isRunning)
 
 // Private Functins
 
-void Graphics::setupPixelFormat(HWND hwnd)
+void Graphics::setupPixelFormat(const HWND& hwnd)
 {
-	HDC hdc = ::GetDC(hwnd);
+	hdc = ::GetDC(hwnd);
 	PIXELFORMATDESCRIPTOR pfd = 
 	{
 		sizeof(PIXELFORMATDESCRIPTOR), 1,

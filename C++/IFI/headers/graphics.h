@@ -1,7 +1,6 @@
 #ifndef GRAPHICS_H_INCLUDED
 #define GRAPHICS_H_INCLUDED
 
-#include <atomic>
 #include "settings.h"
 #include "shaders.h"
 #include "databuffer.h"
@@ -14,10 +13,10 @@ public:
 	Graphics(DataBuffer& buffer, Settings& settings): buffer(buffer), settings(settings) {}
 	
 	void set(const HWND& hwnd);
-	void render(HDC hdc, std::atomic<bool>& isRunning);
+	void render();
 	
 private:
-	void setupPixelFormat(HWND hwnd);
+	void setupPixelFormat(const HWND& hwnd);
 	void drawVertices();
 	void drawText();
 	
@@ -36,7 +35,8 @@ private:
 	GraphSubwindow graph;
 	TextSubwindow text;
 	
-	int batchSize;
+	HDC hdc;
+	int batchSize = 0;
 	int updateCounter = 0;
 };
 

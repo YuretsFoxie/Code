@@ -57,7 +57,7 @@ void Application::runLoop()
 	while (isRunning)
 	{
 		window.processMessages(isRunning, isReceiving, port);
-		graphics.render(hdc, isRunning);
+		graphics.render();
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 	
