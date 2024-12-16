@@ -1,4 +1,3 @@
-// TODO: Restore the graph correct displaying. Optimize the DataBuffer functionality, Replace vector with list in the Buffer class.
 // TODO: Refactor the rest of the updated rendering functionality.
 // TODO: Use the Subwindow functionality for rendering at the specified window part.
 // TODO: Implement the spectrum analyzer functionality.

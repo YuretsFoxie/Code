@@ -20,7 +20,6 @@ private:
 	void bindBuffers(int maxPoints);
 	void configureVertexAttribPointer();
 	void unbindBuffers();
-	void cleanup();
 	
 	GLuint VBO, VAO;
 	Origin origin;
