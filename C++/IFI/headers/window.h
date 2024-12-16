@@ -10,12 +10,12 @@ class Window
 public:
 	Window(HINSTANCE hInstance, int nCmdShow);
 	
-	void processMessages(std::atomic<bool>& isRunning, COMPort& port, std::atomic<bool>& isReceiving);
+	void processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& isReceiving, COMPort& port);
 	HWND getHwnd() const;
 	
 private:
 	void registerWindowClass(HINSTANCE hInstance);
-	HWND createWindowInstance(HINSTANCE hInstance, int nCmdShow);
+	void createWindowInstance(HINSTANCE hInstance, int nCmdShow);
 	void setFullScreenMode();
 	static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	

@@ -1,16 +1,16 @@
 #ifndef APPLICATION_H_INCLUDED
 #define APPLICATION_H_INCLUDED
 
+#include "window.h"
 #include "settings.h"
+#include "databuffer.h"
 #include "comport.h"
 #include "graphics.h"
-#include "databuffer.h"
-#include "window.h"
 
 class Application 
 {
 public:
-	Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings);
+	Application(HINSTANCE hInstance, int nCmdShow);
 	void run();
 	
 private:
@@ -18,14 +18,15 @@ private:
 	void runCOMPort();
 	void runLoop();
 	
-	const Settings& settings;
+	Window window;
+	Settings settings;
+	DataBuffer buffer;
+	COMPort port;
+	Graphics graphics;
+	
 	std::atomic<bool> isRunning;
 	std::atomic<bool> isReceiving;
 	HWND hwnd;
-	COMPort port;
-	Graphics graphics;
-	DataBuffer buffer;
-	Window window;
 };
 
 #endif // APPLICATION_H_INCLUDED

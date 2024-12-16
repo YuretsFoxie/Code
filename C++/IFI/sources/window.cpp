@@ -5,12 +5,12 @@
 Window::Window(HINSTANCE hInstance, int nCmdShow)
 {
 	registerWindowClass(hInstance);
-	hwnd = createWindowInstance(hInstance, nCmdShow);
+	createWindowInstance(hInstance, nCmdShow);
 	setFullScreenMode();
 	::SetCursor(::LoadCursor(NULL, IDC_ARROW));
 }
 
-void Window::processMessages(std::atomic<bool>& isRunning, COMPort& port, std::atomic<bool>& isReceiving)
+void Window::processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& isReceiving, COMPort& port)
 {
 	MSG msg;
 	while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -44,15 +44,15 @@ HWND Window::getHwnd() const
 
 void Window::registerWindowClass(HINSTANCE hInstance)
 {
-	WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_OWNDC, wndProc, 0, 0, ::GetModuleHandle(NULL), NULL, NULL, NULL, NULL, "OpenGL", NULL};
+	WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_OWNDC, wndProc, 0, 0, ::GetModuleHandle(NULL), NULL, NULL, NULL, NULL, "Main", NULL};
 	::RegisterClassEx(&wc);
 }
 
-HWND Window::createWindowInstance(HINSTANCE hInstance, int nCmdShow)
+void Window::createWindowInstance(HINSTANCE hInstance, int nCmdShow)
 {
-	HWND hwnd = ::CreateWindowEx(
+	hwnd = ::CreateWindowEx(
 		0, 
-		"OpenGL", 
+		"Main", 
 		"", 
 		WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 
 		0, 
@@ -66,7 +66,6 @@ HWND Window::createWindowInstance(HINSTANCE hInstance, int nCmdShow)
 	);
 	
 	::ShowWindow(hwnd, nCmdShow);
-	return hwnd;
 }
 
 void Window::setFullScreenMode()
