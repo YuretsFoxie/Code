@@ -11,10 +11,10 @@
 class Graphics
 {
 public:
-	Graphics(DataBuffer& buffer): buffer(buffer) {}
+	Graphics(DataBuffer& buffer, Settings& settings): buffer(buffer), settings(settings) {}
 	
-	void initialize(const HWND& hwnd, const Settings& settings);
-	void render(HDC hdc, int& updateCounter, std::atomic<bool>& isRunning);
+	void set(const HWND& hwnd);
+	void render(HDC hdc, std::atomic<bool>& isRunning);
 	
 private:
 	void setupPixelFormat(HWND hwnd);
@@ -30,11 +30,14 @@ private:
 	};
 	
 	DataBuffer& buffer;
+	Settings& settings;
 	
 	Shaders shaders;
 	GraphSubwindow graph;
 	TextSubwindow text;
+	
 	int batchSize;
+	int updateCounter = 0;
 };
 
 #endif // GRAPHICS_H_INCLUDED

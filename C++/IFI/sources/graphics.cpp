@@ -2,7 +2,7 @@
 
 // Public Functins
 
-void Graphics::initialize(const HWND& hwnd, const Settings& settings)
+void Graphics::set(const HWND& hwnd)
 {
 	setupPixelFormat(hwnd);
 	glewInit();
@@ -15,7 +15,7 @@ void Graphics::initialize(const HWND& hwnd, const Settings& settings)
 	batchSize = settings.getBatchSize();
 }
 
-void Graphics::render(HDC hdc, int& updateCounter, std::atomic<bool>& isRunning)
+void Graphics::render(HDC hdc, std::atomic<bool>& isRunning)
 {
 	updateCounter++;
 	if (updateCounter >= batchSize)

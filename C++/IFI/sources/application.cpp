@@ -8,13 +8,13 @@ Application::Application(HINSTANCE hInstance, int nCmdShow):
 	window(hInstance, nCmdShow),
 	settings(Settings("settings.ini")),
 	buffer(settings.getMaxPoints()),
-	graphics(buffer),
+	graphics(buffer, settings),
 	isRunning(true),
 	isReceiving(false),
 	hwnd(NULL)
 {
 	hwnd = window.getHwnd();
-	graphics.initialize(hwnd, settings);
+	graphics.set(hwnd);
 }
 
 void Application::run()
@@ -53,12 +53,11 @@ void Application::runCOMPort()
 void Application::runLoop()
 {
 	HDC hdc = ::GetDC(hwnd);
-	int updateCounter = 0;
 	
 	while (isRunning)
 	{
 		window.processMessages(isRunning, isReceiving, port);
-		graphics.render(hdc, updateCounter, isRunning);
+		graphics.render(hdc, isRunning);
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 	

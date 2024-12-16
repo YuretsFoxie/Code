@@ -1,5 +1,7 @@
-// TODO: Refactor the rest of the updated rendering functionality.
+// TODO: Refactor the rest of the updated rendering functionality (Graphics, GraphSubwindow, TextSubwindow).
 // TODO: Use the Subwindow functionality for rendering at the specified window part.
+
+// TODO: Stabilize toggling the COM Port.
 // TODO: Implement the spectrum analyzer functionality.
 
 https://github.com/YuretsFoxie/Code
