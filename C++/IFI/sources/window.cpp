@@ -1,3 +1,4 @@
+#include <iostream>
 #include "window.h"
 
 // Public Functins
@@ -20,11 +21,18 @@ void Window::processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& is
 			
 		if (msg.message == WM_KEYDOWN)
 		{
+			
+			//=====
+			
+			std::cout << "test" << std::endl;
+			
+			//=====
+			
 			if (msg.wParam == VK_ESCAPE)
 				isRunning = false;
 				
 			if (msg.wParam == VK_F1)
-			{
+			{	
 				isReceiving = !isReceiving;
 				port.toggleDataTransmission(isReceiving);
 			}
