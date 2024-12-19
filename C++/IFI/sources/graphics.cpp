@@ -8,7 +8,7 @@ void Graphics::set(const HWND& hwnd)
 	glewInit();
 	
 	shaders.initialize();
-	text.initialize(hwnd);
+	text.initialize();
 	graph.initialize(settings.getMaxPoints(), settings.getScaleFactor());
 	
 	batchSize = settings.getBatchSize();

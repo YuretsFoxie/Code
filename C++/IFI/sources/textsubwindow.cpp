@@ -8,7 +8,7 @@ TextSubwindow::~TextSubwindow()
 	if (VBO) glDeleteBuffers(1, &VBO);
 }
 
-void TextSubwindow::initialize(HWND hwnd)
+void TextSubwindow::initialize()
 {
 	initializeFreeType();
 	setupTextRendering();

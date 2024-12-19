@@ -6,7 +6,7 @@
 class Shaders
 {
 public:
-	Shaders(): graphProgram(0), textProgram(0) {}
+	Shaders() {}
    ~Shaders();
 	
 	void initialize();
@@ -20,22 +20,31 @@ private:
 	const char* graphVertexShaderSource = R"(
 		#version 330 core
 		layout (location = 0) in vec2 aPos;
-		void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+		
+		void main()
+		{
+			gl_Position = vec4(aPos, 0.0, 1.0);
+		}
 	)";
 
 	const char* graphFragmentShaderSource = R"(
 		#version 330 core
 		out vec4 FragColor;
-		void main() { FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f); }
+		
+		void main()
+		{
+			FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+		}
 	)";
 	
 	const char* textVertexShaderSource = R"(
 		#version 330 core
 		layout (location = 0) in vec4 vertex;
-		uniform mat4 projection;
 		out vec2 TexCoords;
+		uniform mat4 projection;
 		
-		void main() {
+		void main()
+		{
 			gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
 			TexCoords = vertex.zw;
 		}
@@ -44,10 +53,13 @@ private:
 	const char* textFragmentShaderSource = R"(
 		#version 330 core
 		in vec2 TexCoords;
-		out vec4 color;
+		out vec4 color;		
+		uniform sampler2D text;
 		
-		uniform sampler2D text;	
-		void main() { color = vec4(0.0f, 1.0f, 0.0f, texture(text, TexCoords).r); }
+		void main()
+		{
+			color = vec4(0.0f, 1.0f, 0.0f, texture(text, TexCoords).r);
+		}
 	)";
 	
 	GLuint graphProgram;

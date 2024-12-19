@@ -1,6 +1,7 @@
 #ifndef GRAPHICS_H_INCLUDED
 #define GRAPHICS_H_INCLUDED
 
+#include <windows.h>
 #include "settings.h"
 #include "shaders.h"
 #include "databuffer.h"

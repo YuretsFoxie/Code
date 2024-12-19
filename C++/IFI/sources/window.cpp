@@ -20,19 +20,15 @@ void Window::processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& is
 			isRunning = false;
 			
 		if (msg.message == WM_KEYDOWN)
-		{
-			
-			//=====
-			
-			std::cout << "test" << std::endl;
-			
-			//=====
-			
+		{			
 			if (msg.wParam == VK_ESCAPE)
 				isRunning = false;
 				
 			if (msg.wParam == VK_F1)
-			{	
+			{
+				// TODO: Perform the correct fix (this print works as a temporary fix).
+				std::cout << "F1 is pressed" << std::endl;
+				
 				isReceiving = !isReceiving;
 				port.toggleDataTransmission(isReceiving);
 			}

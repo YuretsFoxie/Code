@@ -1,8 +1,8 @@
 // TODO: Refactor the rest of the updated rendering functionality (Graphics, GraphSubwindow, TextSubwindow).
 // TODO: Use the Subwindow functionality for rendering at the specified window part.
+// TODO: Implement the spectrum analyzer functionality.
 
 // TODO: Stabilize toggling the COM Port.
-// TODO: Implement the spectrum analyzer functionality.
 
 https://github.com/YuretsFoxie/Code
 
@@ -54,7 +54,7 @@ C++/IFI/headers/window.h
 C++/IFI/sources/window.cpp
 C++/IFI/sources/main.cpp
 
-Please, ignore the "temp" folder content.
+Please, ignore the "temp" folder content. Stay at the rendering_refactoring branch.
 
 
 
@@ -69,9 +69,6 @@ To work effectively with me on your refactoring tasks, follow these best practic
     3) Semantic and Lexical Search: Search for specific code patterns or concepts.
     4) GitHub Actions: Check logs and debug workflows if needed.
 5. Iterate and Test: Apply changes incrementally and test them frequently to ensure each step is correct before moving on to the next.
-
-
-
 
 
 

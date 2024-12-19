@@ -1,7 +1,6 @@
 #ifndef TEXTSUBWINDOW_H_INCLUDED
 #define TEXTSUBWINDOW_H_INCLUDED
 
-#include <windows.h>
 #include <map>
 #include <string>
 #include <GL/glew.h>
@@ -26,8 +25,8 @@ class TextSubwindow
 public:
 	TextSubwindow(const Origin& origin = {0}, const Size& size = {0}): origin(origin), size(size) {}
    ~TextSubwindow();
-   
-	void initialize(HWND hwnd);
+	
+	void initialize();
 	void draw(const std::string& text, float x, float y);
 	
 private:
