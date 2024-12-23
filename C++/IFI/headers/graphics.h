@@ -5,8 +5,8 @@
 #include "settings.h"
 #include "shaders.h"
 #include "databuffer.h"
-#include "graphsubwindow.h"
-#include "textsubwindow.h"
+#include "plot.h"
+#include "text.h"
 
 class Graphics
 {
@@ -18,23 +18,27 @@ public:
 	
 private:
 	void setupPixelFormat(const HWND& hwnd);
-	void drawVertices();
+	void setupProjections();
+	void drawPlots();
 	void drawText();
-	
-	const float ortho[16] = 
-	{
-		2.0f / 1024, 0, 0, 0,
-		0, 2.0f / 768, 0, 0,
-		0, 0, -1.0f, 0,
-		-1.0f, -1.0f, 0, 1.0f
-	};
 	
 	DataBuffer& buffer;
 	Settings& settings;
-	
 	Shaders shaders;
-	GraphSubwindow graph;
-	TextSubwindow text;
+	
+	ViewPortParameters plotParameters = {0, 0, settings.getWindowWidth(), settings.getWindowHeight()};
+	ViewPortParameters textParameters = {0, 0, settings.getWindowWidth(), settings.getWindowHeight()};
+	
+	Plot plot = Plot(plotParameters);
+	Text text = Text(textParameters);
+	
+	float textOrtho[16] = 
+	{
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, -1.0f, 0,
+		-1.0f, -1.0f, 0, 1.0f
+	};
 	
 	HDC hdc;
 	int batchSize = 0;

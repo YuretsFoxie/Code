@@ -4,10 +4,10 @@
 
 // Public Functins
 
-Application::Application(HINSTANCE hInstance, int nCmdShow):
-	window(hInstance, nCmdShow),
-	settings(Settings("settings.ini")),
-	buffer(settings.getMaxPoints()),
+Application::Application(HINSTANCE hInstance, int nCmdShow, Settings settings):
+	settings(settings),
+	window(hInstance, nCmdShow, settings),
+	buffer(settings),
 	graphics(buffer, settings),
 	isRunning(true),
 	isReceiving(false),

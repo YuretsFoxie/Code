@@ -10,7 +10,7 @@
 class Application 
 {
 public:
-	Application(HINSTANCE hInstance, int nCmdShow);
+	Application(HINSTANCE hInstance, int nCmdShow, Settings settings);
 	void run();
 	
 private:

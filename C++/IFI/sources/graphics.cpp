@@ -5,11 +5,12 @@
 void Graphics::set(const HWND& hwnd)
 {
 	setupPixelFormat(hwnd);
+	setupProjections();
 	glewInit();
 	
 	shaders.initialize();
 	text.initialize();
-	graph.initialize(settings.getMaxPoints(), settings.getScaleFactor());
+	plot.initialize(settings.getMaxPoints(), settings.getMaxADCValue());
 	
 	batchSize = settings.getBatchSize();
 	((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(1); // enable vsync
@@ -21,7 +22,7 @@ void Graphics::render()
 	if (updateCounter >= batchSize)
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
-		drawVertices();
+		drawPlots();
 		drawText();
 		::SwapBuffers(hdc);
 		updateCounter = 0;
@@ -47,20 +48,28 @@ void Graphics::setupPixelFormat(const HWND& hwnd)
 	wglMakeCurrent(hdc, hglrc);
 }
 
-void Graphics::drawVertices()
-{	
+void Graphics::setupProjections()
+{
+	textOrtho[0] = 2.0f / textParameters.width;
+	textOrtho[5] = 2.0f / textParameters.height;
+}
+
+void Graphics::drawPlots()
+{
 	std::vector<float> data = buffer.getData();
 	
 	if (!data.empty())
 	{
+		glViewport(plotParameters.x, plotParameters.y, plotParameters.width, plotParameters.height);
 		glUseProgram(shaders.getGraphProgram());
-		graph.draw(data);
+		plot.draw(data);
 	}
 }
 
 void Graphics::drawText()
 {
+	glViewport(textParameters.x, textParameters.y, textParameters.width, textParameters.height);
 	glUseProgram(shaders.getTextProgram());
-	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, ortho);
+	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, textOrtho);
 	text.draw("UART Data Visualization", 25.0f, 25.0f);
 }

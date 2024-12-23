@@ -2,6 +2,6 @@
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	Application(hInstance, nCmdShow).run();
+	Application(hInstance, nCmdShow, Settings("settings.ini")).run();
 	return EXIT_SUCCESS;
 }

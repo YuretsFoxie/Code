@@ -3,15 +3,15 @@
 
 #include <vector>
 #include <GL/glew.h>
-#include "subwindow.h"
+#include "viewportparameters.h"
 
-class GraphSubwindow
+class Plot
 {
 public:
-	GraphSubwindow(const Origin& origin = {0}, const Size& size = {0}): origin(origin), size(size) {}
-   ~GraphSubwindow();
+	Plot(const ViewPortParameters& parameters): parameters(parameters) {}
+   ~Plot();
 	
-	void initialize(int maxPoints, int scaleFactor);
+	void initialize(int maxPoints, int maxADCValue);
 	void draw(const std::vector<float>& buffer);
 	
 private:
@@ -21,12 +21,10 @@ private:
 	void configureVertexAttribPointer();
 	void unbindBuffers();
 	
+	ViewPortParameters parameters;
 	GLuint VBO, VAO;
-	Origin origin;
-	Size size;
-	
-	int maxPoints = 0;
-	int scaleFactor = 0;
+	int maxPoints;
+	int maxADCValue;
 };
 
 #endif // GRAPHSUBWINDOW_H_INCLUDED

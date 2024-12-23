@@ -1,14 +1,14 @@
-#include "textsubwindow.h"
+#include "text.h"
 
 // Public Functions
 
-TextSubwindow::~TextSubwindow()
+Text::~Text()
 {
 	if (VAO) glDeleteVertexArrays(1, &VAO);
 	if (VBO) glDeleteBuffers(1, &VBO);
 }
 
-void TextSubwindow::initialize()
+void Text::initialize()
 {
 	initializeFreeType();
 	setupTextRendering();
@@ -18,16 +18,16 @@ void TextSubwindow::initialize()
 	loadCharacters();
 }
 
-void TextSubwindow::draw(const std::string& text, float x, float y)
+void Text::draw(const std::string& text, float x, float y)
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(VAO);
 	
 	for (const char& c: text) 
 	{
-		Character ch = Characters[c];
-		renderCharacter(ch, x, y, 1.0f);
-		x += (ch.Advance >> 6) * 1.0f;
+		Character ch = characters[c];
+		renderCharacter(ch, x, y);
+		x += (ch.Advance >> 6);
 	}
 	
 	glBindVertexArray(0);
@@ -36,14 +36,14 @@ void TextSubwindow::draw(const std::string& text, float x, float y)
 
 // Private Functions
 
-void TextSubwindow::initializeFreeType()
+void Text::initializeFreeType()
 {
 	FT_Init_FreeType(&ft);
 	FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face);
 	FT_Set_Pixel_Sizes(face, 0, 24);
 }
 
-void TextSubwindow::setupTextRendering()
+void Text::setupTextRendering()
 {
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -56,7 +56,7 @@ void TextSubwindow::setupTextRendering()
 	glBindVertexArray(0);
 }
 
-void TextSubwindow::loadCharacters()
+void Text::loadCharacters()
 {
 	for (unsigned char c = 0; c < 128; c++)
 		loadCharacter(c);
@@ -64,16 +64,16 @@ void TextSubwindow::loadCharacters()
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void TextSubwindow::loadCharacter(unsigned char c) 
+void Text::loadCharacter(unsigned char c) 
 {
 	FT_Load_Char(face, c, FT_LOAD_RENDER);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	GLuint texture = createTexture(face->glyph->bitmap);
 	Character character = createCharacter(texture, face->glyph);
-	Characters.insert(std::pair<char, Character>(c, character));
+	characters.insert(std::pair<char, Character>(c, character));
 }
 
-GLuint TextSubwindow::createTexture(const FT_Bitmap& bitmap)
+GLuint Text::createTexture(const FT_Bitmap& bitmap)
 {
 	GLuint texture;
 	glGenTextures(1, &texture);
@@ -95,7 +95,7 @@ GLuint TextSubwindow::createTexture(const FT_Bitmap& bitmap)
 	return texture;
 }
 
-void TextSubwindow::setTextureParameters()
+void Text::setTextureParameters()
 {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -103,7 +103,7 @@ void TextSubwindow::setTextureParameters()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-Character TextSubwindow::createCharacter(GLuint texture, FT_GlyphSlot glyph)
+Text::Character Text::createCharacter(GLuint texture, FT_GlyphSlot glyph)
 {
 	return {
 		texture,
@@ -115,12 +115,12 @@ Character TextSubwindow::createCharacter(GLuint texture, FT_GlyphSlot glyph)
 	};
 }
 
-void TextSubwindow::renderCharacter(const Character& ch, float x, float y, float scale)
+void Text::renderCharacter(const Character& ch, float x, float y)
 {
-	float xpos = x + ch.BearingX * scale;
-	float ypos = y - (ch.Height - ch.BearingY) * scale;
-	float w = ch.Width * scale;
-	float h = ch.Height * scale;
+	float xpos = x + ch.BearingX;
+	float ypos = y - (ch.Height - ch.BearingY);
+	float w = ch.Width;
+	float h = ch.Height;
 	
 	float vertices[6][4] = 
 	{

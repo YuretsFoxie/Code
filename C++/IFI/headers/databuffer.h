@@ -2,11 +2,12 @@
 #define DATABUFFER_H_INCLUDED
 
 #include <vector>
+#include "settings.h"
 
 class DataBuffer
 {
 public:
-	DataBuffer(int maxPoints);
+	DataBuffer(const Settings& settings);
 	
 	void push(char newData);
 	std::vector<float>& getData();

@@ -3,12 +3,13 @@
 
 #include <windows.h>
 #include <atomic>
+#include "settings.h"
 #include "comport.h"
 
 class Window
 {
 public:
-	Window(HINSTANCE hInstance, int nCmdShow);
+	Window(HINSTANCE hInstance, int nCmdShow, Settings& settings);
 	
 	void processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& isReceiving, COMPort& port);
 	HWND getHwnd() const;
@@ -19,6 +20,7 @@ private:
 	void setFullScreenMode();
 	static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	
+	Settings& settings;
 	HWND hwnd;
 };
 

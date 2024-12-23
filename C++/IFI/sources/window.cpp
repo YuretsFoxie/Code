@@ -3,7 +3,7 @@
 
 // Public Functins
 
-Window::Window(HINSTANCE hInstance, int nCmdShow)
+Window::Window(HINSTANCE hInstance, int nCmdShow, Settings& settings): settings(settings)
 {
 	registerWindowClass(hInstance);
 	createWindowInstance(hInstance, nCmdShow);
@@ -26,7 +26,7 @@ void Window::processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& is
 				
 			if (msg.wParam == VK_F1)
 			{
-				// TODO: Perform the correct fix (this print works as a temporary fix).
+				// TODO: Perform the correct fix (this print works as a temporary fix). Try playing the sound instead.
 				std::cout << "F1 is pressed" << std::endl;
 				
 				isReceiving = !isReceiving;
@@ -61,8 +61,8 @@ void Window::createWindowInstance(HINSTANCE hInstance, int nCmdShow)
 		WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 
 		0, 
 		0, 
-		1024,
-		768, 
+		settings.getWindowWidth(), 
+		settings.getWindowHeight(), 
 		NULL, 
 		NULL, 
 		hInstance, 
@@ -78,8 +78,8 @@ void Window::setFullScreenMode()
 	memset(&dmSettings, 0, sizeof(dmSettings));
 	::EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dmSettings);
 	
-	dmSettings.dmPelsWidth = 1024;
-	dmSettings.dmPelsHeight	= 768;
+	dmSettings.dmPelsWidth = settings.getWindowWidth();
+	dmSettings.dmPelsHeight	= settings.getWindowHeight();
 	dmSettings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
 	
 	::ChangeDisplaySettings(&dmSettings, CDS_FULLSCREEN);	

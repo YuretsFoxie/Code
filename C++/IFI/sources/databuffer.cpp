@@ -3,7 +3,7 @@
 
 // Public Functins
 
-DataBuffer::DataBuffer(int maxPoints): maxPoints(maxPoints)
+DataBuffer::DataBuffer(const Settings& settings): maxPoints(settings.getMaxPoints())
 {
 	buffer.reserve(maxPoints);
 }

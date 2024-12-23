@@ -6,30 +6,28 @@
 #include <GL/glew.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "subwindow.h"
+#include "viewportparameters.h"
 
-struct Character
-{
-	GLuint TextureID;
-	int Width;
-	int Height;
-	int BearingX;
-	int BearingY;
-	long Advance;
-};
-
-
-
-class TextSubwindow
+class Text
 {
 public:
-	TextSubwindow(const Origin& origin = {0}, const Size& size = {0}): origin(origin), size(size) {}
-   ~TextSubwindow();
+	Text(const ViewPortParameters& parameters): parameters(parameters) {}
+   ~Text();
 	
 	void initialize();
 	void draw(const std::string& text, float x, float y);
 	
 private:
+	struct Character
+	{
+		GLuint TextureID;
+		int Width;
+		int Height;
+		int BearingX;
+		int BearingY;
+		long Advance;
+	};
+	
 	void initializeFreeType();
 	void setupTextRendering();
 	void loadCharacters();
@@ -37,14 +35,13 @@ private:
 	GLuint createTexture(const FT_Bitmap& bitmap);
 	void setTextureParameters();
 	Character createCharacter(GLuint texture, FT_GlyphSlot glyph);
-	void renderCharacter(const Character& ch, float x, float y, float scale);
+	void renderCharacter(const Character& ch, float x, float y);
 	
+	ViewPortParameters parameters;
 	FT_Library ft;
 	FT_Face face;
 	GLuint VAO, VBO;
-	std::map<char, Character> Characters;
-	Origin origin;
-	Size size;
+	std::map<char, Character> characters;
 };
 
 #endif // TEXTSUBWINDOW_H_INCLUDED

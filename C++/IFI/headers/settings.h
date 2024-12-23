@@ -11,8 +11,10 @@ public:
 	std::string getSerialPort() const;
 	int getBaudRate() const;
 	int getBatchSize() const;
-	int getScaleFactor() const;
+	int getMaxADCValue() const;
 	int getMaxPoints() const;
+	float getWindowWidth() const;
+	float getWindowHeight() const;
 	
 private:
 	void readConfigFile(const std::string& filePath);
@@ -21,8 +23,10 @@ private:
 	std::string serialPort;
 	int baudRate;
 	int batchSize;
-	int scaleFactor;
+	int maxADCValue;
 	int maxPoints;
+	float windowWidth;
+	float windowHeight;	
 };
 
 #endif // SETTINGS_H_INCLUDED
