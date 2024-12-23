@@ -18,8 +18,8 @@ private:
 	void runCOMPort();
 	void runLoop();
 	
-	Window window;
 	Settings settings;
+	Window window;
 	DataBuffer buffer;
 	COMPort port;
 	Graphics graphics;

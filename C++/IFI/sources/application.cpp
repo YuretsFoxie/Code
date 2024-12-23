@@ -15,11 +15,11 @@ Application::Application(HINSTANCE hInstance, int nCmdShow, Settings settings):
 {
 	hwnd = window.getHwnd();
 	graphics.set(hwnd);
+	port.setup(settings.getSerialPort(), settings.getBaudRate());	
 }
 
 void Application::run()
 {
-	port.setup(settings.getSerialPort(), settings.getBaudRate());
 	runCOMPortThread();
 	runLoop();
 }
