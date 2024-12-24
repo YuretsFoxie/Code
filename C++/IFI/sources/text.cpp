@@ -20,11 +20,11 @@ void Text::initialize()
 
 void Text::draw()
 {
-	// drawBuffer("1. Aa", 20.0f, 100.0f);
-	// drawBuffer("2. Bb", 20.0f, 70.0f);
+	int size = buffer.size();
+	float height = parameters.height;
 	
-	for (std::string s: buffer)
-		drawBuffer(s, 20.0f, 100.0f);
+	for (int i = 0; i < size; i++)
+		drawBuffer(buffer[i], leftEdge, height - (i + 1) * rowHeight);
 }
 
 void Text::print(const std::string& message)
@@ -54,7 +54,7 @@ void Text::initializeFreeType()
 {
 	FT_Init_FreeType(&ft);
 	FT_New_Face(ft, "fonts/ARIAL.ttf", 0, &face);
-	FT_Set_Pixel_Sizes(face, 0, 24);
+	FT_Set_Pixel_Sizes(face, 0, fontSize);
 }
 
 void Text::setupTextRendering()

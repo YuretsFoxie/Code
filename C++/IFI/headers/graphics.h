@@ -18,6 +18,7 @@ public:
 	
 private:
 	void setupPixelFormat(const HWND& hwnd);
+	void enableVerticalSyncronization();
 	void setupProjections();
 	void drawPlots();
 	void drawText();

@@ -20,6 +20,10 @@ private:
 	void setFullScreenMode();
 	static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	
+	void onPressESC(std::atomic<bool>& isRunning);
+	void onPressF1(std::atomic<bool>& isReceiving, COMPort& port);
+	void onPressF2();
+	
 	Settings& settings;
 	HWND hwnd;
 };

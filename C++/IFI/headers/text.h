@@ -40,6 +40,10 @@ private:
 	Character createCharacter(GLuint texture, FT_GlyphSlot glyph);
 	void renderCharacter(const Character& ch, float x, float y);
 	
+	const float leftEdge = 16;
+	const float rowHeight = 24;
+	const float fontSize = 20;
+	
 	ViewPortParameters parameters;
 	FT_Library ft;
 	FT_Face face;

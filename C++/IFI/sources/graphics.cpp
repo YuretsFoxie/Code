@@ -5,16 +5,15 @@
 
 void Graphics::set(const HWND& hwnd)
 {
+	batchSize = settings.getBatchSize();
 	setupPixelFormat(hwnd);
+	enableVerticalSyncronization();
 	setupProjections();
 	glewInit();
-	
 	shaders.initialize();
-	text.initialize();
-	plot.initialize(settings.getMaxPoints(), settings.getMaxADCValue());
 	
-	batchSize = settings.getBatchSize();
-	((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(1); // enable vsync
+	text.initialize();
+	plot.initialize(settings.getMaxPoints(), settings.getMaxADCValue());	
 	
 	Console::shared().addWindow(text);
 }
@@ -49,6 +48,11 @@ void Graphics::setupPixelFormat(const HWND& hwnd)
 	
 	HGLRC hglrc = wglCreateContext(hdc);
 	wglMakeCurrent(hdc, hglrc);
+}
+
+void Graphics::enableVerticalSyncronization()
+{
+	((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(1);
 }
 
 void Graphics::setupProjections()
