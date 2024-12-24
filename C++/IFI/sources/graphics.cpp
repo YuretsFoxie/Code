@@ -1,4 +1,5 @@
 #include "graphics.h"
+#include "console.h"
 
 // Public Functins
 
@@ -14,6 +15,8 @@ void Graphics::set(const HWND& hwnd)
 	
 	batchSize = settings.getBatchSize();
 	((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(1); // enable vsync
+	
+	Console::shared().addWindow(text);
 }
 
 void Graphics::render()
@@ -71,5 +74,5 @@ void Graphics::drawText()
 	glViewport(textParameters.x, textParameters.y, textParameters.width, textParameters.height);
 	glUseProgram(shaders.getTextProgram());
 	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, textOrtho);
-	text.draw("UART Data Visualization", 25.0f, 25.0f);
+	text.draw();
 }

@@ -18,7 +18,23 @@ void Text::initialize()
 	loadCharacters();
 }
 
-void Text::draw(const std::string& text, float x, float y)
+void Text::draw()
+{
+	// drawBuffer("1. Aa", 20.0f, 100.0f);
+	// drawBuffer("2. Bb", 20.0f, 70.0f);
+	
+	for (std::string s: buffer)
+		drawBuffer(s, 20.0f, 100.0f);
+}
+
+void Text::print(const std::string& message)
+{
+	buffer.push_back(message);
+}
+
+// Private Functions
+
+void Text::drawBuffer(const std::string& text, float x, float y)
 {
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(VAO);
@@ -33,8 +49,6 @@ void Text::draw(const std::string& text, float x, float y)
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
-
-// Private Functions
 
 void Text::initializeFreeType()
 {

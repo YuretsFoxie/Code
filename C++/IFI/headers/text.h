@@ -2,6 +2,7 @@
 #define TEXTSUBWINDOW_H_INCLUDED
 
 #include <map>
+#include <vector>
 #include <string>
 #include <GL/glew.h>
 #include <ft2build.h>
@@ -15,7 +16,8 @@ public:
    ~Text();
 	
 	void initialize();
-	void draw(const std::string& text, float x, float y);
+	void draw();
+	void print(const std::string& message);
 	
 private:
 	struct Character
@@ -28,6 +30,7 @@ private:
 		long Advance;
 	};
 	
+	void drawBuffer(const std::string& text, float x, float y);
 	void initializeFreeType();
 	void setupTextRendering();
 	void loadCharacters();
@@ -42,6 +45,7 @@ private:
 	FT_Face face;
 	GLuint VAO, VBO;
 	std::map<char, Character> characters;
+	std::vector<std::string> buffer;
 };
 
 #endif // TEXTSUBWINDOW_H_INCLUDED

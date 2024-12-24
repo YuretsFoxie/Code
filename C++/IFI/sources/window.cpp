@@ -1,5 +1,6 @@
 #include <iostream>
 #include "window.h"
+#include "console.h"
 
 // Public Functins
 
@@ -24,7 +25,7 @@ void Window::processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& is
 			if (msg.wParam == VK_ESCAPE)
 				isRunning = false;
 				
-			if (msg.wParam == VK_F1)
+			else if (msg.wParam == VK_F1)
 			{
 				// TODO: Perform the correct fix (this print works as a temporary fix). Try playing the sound instead.
 				std::cout << "F1 is pressed" << std::endl;
@@ -32,6 +33,8 @@ void Window::processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& is
 				isReceiving = !isReceiving;
 				port.toggleDataTransmission(isReceiving);
 			}
+			else if (msg.wParam == VK_F2)
+				Console::shared().print("test");
 		}
 		
 		::TranslateMessage(&msg);
