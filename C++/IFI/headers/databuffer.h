@@ -13,7 +13,7 @@ public:
 	std::vector<float>& getData();
 	
 private:
-	const int maxPoints;
+	const int bufferSize;
 	std::vector<float> buffer;
 };
 

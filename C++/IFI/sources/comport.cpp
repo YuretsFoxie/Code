@@ -1,4 +1,6 @@
 #include "comport.h"
+#include "console.h"
+#include "sound.h"
 
 // Public Functins
 
@@ -32,7 +34,10 @@ void COMPort::openPort(const std::string& portName)
 {
 	handle = ::CreateFile(portName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle == INVALID_HANDLE_VALUE)
-		std::cerr << "Error opening COM port." << std::endl;
+	{
+		Console::shared().print("Error opening COM port.");
+		Sound::shared().playError();
+	}
 }
 
 void COMPort::configurePort(int baudRate)

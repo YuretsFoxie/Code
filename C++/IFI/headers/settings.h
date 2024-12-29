@@ -12,7 +12,7 @@ public:
 	int getBaudRate() const;
 	int getBatchSize() const;
 	int getMaxADCValue() const;
-	int getMaxPoints() const;
+	int getBufferSize() const;
 	float getWindowWidth() const;
 	float getWindowHeight() const;
 	
@@ -24,7 +24,7 @@ private:
 	int baudRate;
 	int batchSize;
 	int maxADCValue;
-	int maxPoints;
+	int bufferSize;
 	float windowWidth;
 	float windowHeight;	
 };

@@ -50,6 +50,7 @@ private:
 	GLuint VAO, VBO;
 	std::map<char, Character> characters;
 	std::vector<std::string> buffer;
+	int bufferSize = 0;
 };
 
 #endif // TEXTSUBWINDOW_H_INCLUDED

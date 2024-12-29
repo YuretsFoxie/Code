@@ -28,9 +28,9 @@ int Settings::getMaxADCValue() const
 	return maxADCValue;
 }
 
-int Settings::getMaxPoints() const
+int Settings::getBufferSize() const
 {
-	return maxPoints;
+	return bufferSize;
 }
 
 float Settings::getWindowWidth() const
@@ -64,7 +64,7 @@ void Settings::parseConfigLine(const std::string& line)
 	if (name == "baudRate")		baudRate = std::stoi(value);
 	if (name == "batchSize")	batchSize = std::stoi(value);
 	if (name == "maxADCValue")	maxADCValue = std::stoi(value);
-	if (name == "maxPoints")	maxPoints = std::stoi(value);
+	if (name == "bufferSize")	bufferSize = std::stoi(value);
 	if (name == "windowWidth")	windowWidth = std::stof(value);
 	if (name == "windowHeight")	windowHeight = std::stof(value);	
 }

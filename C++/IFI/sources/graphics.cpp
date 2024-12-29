@@ -13,7 +13,7 @@ void Graphics::set(const HWND& hwnd)
 	shaders.initialize();
 	
 	text.initialize();
-	plot.initialize(settings.getMaxPoints(), settings.getMaxADCValue());	
+	plot.initialize(settings);
 	
 	Console::shared().addWindow(text);
 }

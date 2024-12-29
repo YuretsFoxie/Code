@@ -8,13 +8,13 @@ Plot::~Plot()
 	if (VBO) glDeleteBuffers(1, &VBO);
 }
 
-void Plot::initialize(int maxPoints, int maxADCValue)
+void Plot::initialize(const Settings& settings)
 {
-	this->maxPoints = maxPoints;
-	this->maxADCValue = maxADCValue;
+	bufferSize = settings.getBufferSize();
+	maxADCValue =settings.getMaxADCValue();
 	
 	generateBuffers();
-	bindBuffers(maxPoints);
+	bindBuffers(bufferSize);
 	configureVertexAttribPointer();
 	unbindBuffers();	
 }
@@ -36,7 +36,7 @@ void Plot::prepare(std::vector<float>& vertices, const std::vector<float>& buffe
 {
 	vertices.reserve(buffer.size() * 2);
 	
-	const float scale = 2.0f / maxPoints;
+	const float scale = 2.0f / bufferSize;
 	for (size_t i = 0; i < buffer.size(); ++i)
 	{
 		float x = (scale * i) - 1.0f;
@@ -52,11 +52,11 @@ void Plot::generateBuffers()
 	glGenBuffers(1, &VBO);
 }
 
-void Plot::bindBuffers(int maxPoints)
+void Plot::bindBuffers(int bufferSize)
 {
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, maxPoints * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
 }
 
 void Plot::configureVertexAttribPointer()

@@ -22,7 +22,6 @@ private:
 	
 	void onPressESC(std::atomic<bool>& isRunning);
 	void onPressF1(std::atomic<bool>& isReceiving, COMPort& port);
-	void onPressF2();
 	
 	Settings& settings;
 	HWND hwnd;

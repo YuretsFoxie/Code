@@ -16,6 +16,7 @@ void Text::initialize()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	loadCharacters();
+	bufferSize = parameters.height / rowHeight;
 }
 
 void Text::draw()
@@ -30,6 +31,9 @@ void Text::draw()
 void Text::print(const std::string& message)
 {
 	buffer.push_back(message);
+	
+	if (buffer.size() == bufferSize)
+		buffer.erase(buffer.begin());
 }
 
 // Private Functions

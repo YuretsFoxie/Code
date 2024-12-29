@@ -1,6 +1,7 @@
 #include <iostream>
 #include "window.h"
 #include "console.h"
+#include "sound.h"
 
 // Public Functins
 
@@ -24,7 +25,6 @@ void Window::processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& is
 		{
 			if (msg.wParam == VK_ESCAPE)	onPressESC(isRunning);
 			if (msg.wParam == VK_F1)		onPressF1(isReceiving, port);
-			if (msg.wParam == VK_F2)		onPressF2();
 		}
 		
 		::TranslateMessage(&msg);
@@ -96,11 +96,8 @@ void Window::onPressF1(std::atomic<bool>& isReceiving, COMPort& port)
 	// TODO: Perform the correct fix (this print works as a temporary fix). Try playing the sound instead.
 	std::cout << "F1 is pressed" << std::endl;
 	
+	Sound::shared().playButton();
+	
 	isReceiving = !isReceiving;
 	port.toggleDataTransmission(isReceiving);
-}
-
-void Window::onPressF2()
-{
-	Console::shared().print("test");
 }

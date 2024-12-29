@@ -4,6 +4,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include "viewportparameters.h"
+#include "settings.h"
 
 class Plot
 {
@@ -11,7 +12,7 @@ public:
 	Plot(const ViewPortParameters& parameters): parameters(parameters) {}
    ~Plot();
 	
-	void initialize(int maxPoints, int maxADCValue);
+	void initialize(const Settings& settings);
 	void draw(const std::vector<float>& buffer);
 	
 private:
@@ -23,7 +24,7 @@ private:
 	
 	ViewPortParameters parameters;
 	GLuint VBO, VAO;
-	int maxPoints;
+	int bufferSize;
 	int maxADCValue;
 };
 
