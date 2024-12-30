@@ -1,8 +1,8 @@
 #ifndef APPLICATION_H_INCLUDED
 #define APPLICATION_H_INCLUDED
 
-#include "window.h"
 #include "settings.h"
+#include "window.h"
 #include "databuffer.h"
 #include "comport.h"
 #include "graphics.h"
@@ -18,7 +18,6 @@ private:
 	void runCOMPort();
 	void runLoop();
 	
-	Settings settings;
 	Window window;
 	DataBuffer buffer;
 	COMPort port;

@@ -5,7 +5,6 @@
 // Public Functins
 
 Application::Application(HINSTANCE hInstance, int nCmdShow, Settings settings):
-	settings(settings),
 	window(hInstance, nCmdShow, settings),
 	buffer(settings),
 	graphics(buffer, settings),
@@ -43,7 +42,9 @@ void Application::runCOMPort()
 		{
 			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
 			if (bytesRead > 0)
+			{
 				buffer.push(array[0]);
+			}
 		}
 		
 		std::this_thread::sleep_for(std::chrono::microseconds(10));
