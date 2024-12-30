@@ -8,7 +8,7 @@ Plot::~Plot()
 	if (VBO) glDeleteBuffers(1, &VBO);
 }
 
-void Plot::initialize(const Settings& settings)
+void Plot::setup(const Settings& settings)
 {
 	bufferSize = settings.getBufferSize();
 	maxADCValue =settings.getMaxADCValue();

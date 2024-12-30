@@ -15,7 +15,7 @@ Application::Application(HINSTANCE hInstance, int nCmdShow, Settings settings):
 {
 	hwnd = window.getHwnd();
 	graphics.set(hwnd);
-	port.setup(settings.getSerialPort(), settings.getBaudRate());	
+	port.setup(settings);
 }
 
 void Application::run()

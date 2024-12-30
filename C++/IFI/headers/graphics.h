@@ -27,21 +27,8 @@ private:
 	Settings& settings;
 	Shaders shaders;
 	
-	ViewPortParameters plotParameters =
-	{
-		0.0f * settings.getWindowWidth(), 
-		0.0f * settings.getWindowHeight(),
-		1.0f * settings.getWindowWidth(),
-		1.0f * settings.getWindowHeight()
-	};
-	
-	ViewPortParameters textParameters = 
-	{
-		0.0f * settings.getWindowWidth(),
-		0.0f * settings.getWindowHeight(),
-		1.0f * settings.getWindowWidth(),
-		1.0F * settings.getWindowHeight()
-	};
+	ViewPortParameters plotParameters = ViewPortParameters(settings);
+	ViewPortParameters textParameters = ViewPortParameters(settings);
 	
 	Plot plot = Plot(plotParameters);
 	Text text = Text(textParameters);

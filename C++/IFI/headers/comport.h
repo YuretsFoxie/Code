@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <string>
+#include "settings.h"
 
 class COMPort
 {
@@ -10,7 +11,7 @@ public:
 	COMPort(): handle(INVALID_HANDLE_VALUE) {}
    ~COMPort();
 	
-	void setup(const std::string& portName, int baudRate);
+	void setup(const Settings& settings);
 	void toggleDataTransmission(bool enable);
 	HANDLE getHandle() const;
 	

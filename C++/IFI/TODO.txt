@@ -1,6 +1,4 @@
-// TODO: Continue refactoring.
 // TODO: Stabilize toggling the COM Port. Try getting rid of the console printing.
-
 // TODO: Implement the spectrum analyzer functionality.
 
 https://github.com/YuretsFoxie/Code
@@ -10,69 +8,29 @@ df=fs/N
 
 
 
-Please, move all the text rendering functionality to the TextSubwindow class, remove this functionality from the previous location. 
-And move all the UART data rendering functionality to the GraphSubwindow class, remove this functionality from the previous location. 
-Use the TextSubwindow and GraphSubwindow classes for rendering. Please, implement the complete and consistent functionality, 
-provide the final version of the complete code of all the updated files, preserving the original formatting. 
-Do not replace the tabs with the spaces. Please, do not use the placeholder comments, implement the actual functionality.
-
-Please, provide the complete code of all the updated files.
-
-Have you provided the complete updated code of all modified files?
-
-
-
 Here are the files, we are working with:
 C++/IFI/headers/application.h
 C++/IFI/sources/application.cpp
 C++/IFI/headers/comport.h
 C++/IFI/sources/comport.cpp
-C++/IFI/headers/comportadapter.h
-C++/IFI/sources/comportadapter.cpp
+C++/IFI/headers/console.h
+C++/IFI/sources/console.cpp
 C++/IFI/headers/databuffer.h
 C++/IFI/sources/databuffer.cpp
 C++/IFI/headers/graphics.h
 C++/IFI/sources/graphics.cpp
-C++/IFI/headers/graphsubwindow.h
-C++/IFI/sources/graphsubwindow.cpp
-C++/IFI/headers/openglbuffer.h
-C++/IFI/sources/openglbuffer.cpp
-C++/IFI/headers/openglcontext.h
-C++/IFI/sources/openglcontext.cpp
-C++/IFI/headers/renderer.h
-C++/IFI/sources/renderer.cpp
+C++/IFI/headers/plot.h
+C++/IFI/sources/plot.cpp
 C++/IFI/headers/settings.h
 C++/IFI/sources/settings.cpp
 C++/IFI/headers/shaders.h
 C++/IFI/sources/shaders.cpp
-C++/IFI/headers/subwindow.h
-C++/IFI/sources/subwindow.cpp
-C++/IFI/headers/textsubwindow.h
-C++/IFI/sources/textsubwindow.cpp
+C++/IFI/headers/sound.h
+C++/IFI/sources/sound.cpp
+C++/IFI/headers/text.h
+C++/IFI/sources/text.cpp
+C++/IFI/headers/viewportparameters.h
+C++/IFI/sources/viewportparameters.cpp
 C++/IFI/headers/window.h
 C++/IFI/sources/window.cpp
 C++/IFI/sources/main.cpp
-
-Please, ignore the "temp" folder content. Stay at the rendering_refactoring branch.
-
-
-
-To work effectively with me on your refactoring tasks, follow these best practices:
-
-1. Provide Specific Context: Share specific parts of the code or files you are working on. This helps me understand the context and provide precise assistance.
-2. Clear Objectives: Define clear objectives for what you want to achieve with the refactoring. For example, improving performance, readability, or fixing bugs.
-3. Step-by-Step Requests: Break down your requests into smaller, actionable steps. For example, start with one class or function at a time.
-4. Use My Capabilities: Utilize my functions for:
-    1)Fetching Files: Retrieve file contents to review and analyze.
-    2) Finding Changes: Identify recent commits or changes in specific files.
-    3) Semantic and Lexical Search: Search for specific code patterns or concepts.
-    4) GitHub Actions: Check logs and debug workflows if needed.
-5. Iterate and Test: Apply changes incrementally and test them frequently to ensure each step is correct before moving on to the next.
-
-
-
-
-
-
-
-

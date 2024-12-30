@@ -9,10 +9,10 @@ COMPort::~COMPort()
 	closePort();
 }
 
-void COMPort::setup(const std::string& portName, int baudRate)
+void COMPort::setup(const Settings& settings)
 {
-	openPort(portName);
-	configurePort(baudRate);
+	openPort(settings.getSerialPort());
+	configurePort(settings.getBaudRate());
 	setPortTimeouts();
 }
 

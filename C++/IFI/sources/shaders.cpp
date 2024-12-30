@@ -11,7 +11,7 @@ Shaders::~Shaders()
 		glDeleteProgram(textProgram);
 }
 
-void Shaders::initialize()
+void Shaders::setup()
 {
 	GLuint graphVertexShader = compileShader(GL_VERTEX_SHADER, graphVertexShaderSource);
 	GLuint graphFragmentShader = compileShader(GL_FRAGMENT_SHADER, graphFragmentShaderSource);	

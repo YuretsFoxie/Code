@@ -15,7 +15,7 @@ public:
 	Text(const ViewPortParameters& parameters): parameters(parameters) {}
    ~Text();
 	
-	void initialize();
+	void setup();
 	void draw();
 	void print(const std::string& message);
 	

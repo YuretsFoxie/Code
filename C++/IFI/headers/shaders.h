@@ -9,7 +9,7 @@ public:
 	Shaders() {}
    ~Shaders();
 	
-	void initialize();
+	void setup();
 	GLuint getGraphProgram() const;
 	GLuint getTextProgram() const;
 	

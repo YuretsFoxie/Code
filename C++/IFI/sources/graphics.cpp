@@ -10,10 +10,10 @@ void Graphics::set(const HWND& hwnd)
 	enableVerticalSyncronization();
 	setupProjections();
 	glewInit();
-	shaders.initialize();
+	shaders.setup();
 	
-	text.initialize();
-	plot.initialize(settings);
+	text.setup();
+	plot.setup(settings);
 	
 	Console::shared().addWindow(text);
 }

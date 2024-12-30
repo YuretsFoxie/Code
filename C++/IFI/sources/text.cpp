@@ -8,7 +8,7 @@ Text::~Text()
 	if (VBO) glDeleteBuffers(1, &VBO);
 }
 
-void Text::initialize()
+void Text::setup()
 {
 	initializeFreeType();
 	setupTextRendering();

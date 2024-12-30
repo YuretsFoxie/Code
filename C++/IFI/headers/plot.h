@@ -12,7 +12,7 @@ public:
 	Plot(const ViewPortParameters& parameters): parameters(parameters) {}
    ~Plot();
 	
-	void initialize(const Settings& settings);
+	void setup(const Settings& settings);
 	void draw(const std::vector<float>& buffer);
 	
 private:
