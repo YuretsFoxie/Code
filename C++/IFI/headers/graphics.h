@@ -1,22 +1,62 @@
 #ifndef GRAPHICS_H_INCLUDED
 #define GRAPHICS_H_INCLUDED
 
+#include <windows.h>
 #include "settings.h"
 #include "shaders.h"
-#include "openglbuffer.h"
-#include "openglcontext.h"
+#include "databuffer.h"
+#include "plot.h"
+#include "text.h"
 
 class Graphics
 {
 public:
-	void initialize(HWND hwnd, const Settings& settings);
-	void drawVertices(const std::vector<float>& vertices);
-	void drawText(const std::string& text, float x, float y, float scale, float color[3]);
+	Graphics(DataBuffer& buffer, Settings& settings): buffer(buffer), settings(settings) {}
+	
+	void set(const HWND& hwnd);
+	void render();
 	
 private:
+	void setupPixelFormat(const HWND& hwnd);
+	void enableVerticalSyncronization();
+	void setupProjections();
+	void drawPlots();
+	void drawText();
+	
+	DataBuffer& buffer;
+	Settings& settings;
 	Shaders shaders;
-	OpenGLBuffer buffer;
-	OpenGLContext context;
+	
+	ViewPortParameters plotParameters =
+	{
+		0.0f * settings.getWindowWidth(), 
+		0.0f * settings.getWindowHeight(),
+		1.0f * settings.getWindowWidth(),
+		1.0f * settings.getWindowHeight()
+	};
+	
+	ViewPortParameters textParameters = 
+	{
+		0.0f * settings.getWindowWidth(),
+		0.0f * settings.getWindowHeight(),
+		1.0f * settings.getWindowWidth(),
+		1.0F * settings.getWindowHeight()
+	};
+	
+	Plot plot = Plot(plotParameters);
+	Text text = Text(textParameters);
+	
+	float textOrtho[16] = 
+	{
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, -1.0f, 0,
+		-1.0f, -1.0f, 0, 1.0f
+	};
+	
+	HDC hdc;
+	int batchSize = 0;
+	int updateCounter = 0;
 };
 
 #endif // GRAPHICS_H_INCLUDED

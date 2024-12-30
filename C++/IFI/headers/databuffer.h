@@ -2,25 +2,19 @@
 #define DATABUFFER_H_INCLUDED
 
 #include <vector>
-#include <mutex>
-#include <bitset>
+#include "settings.h"
 
 class DataBuffer
 {
 public:
-	DataBuffer(int maxPoints, int scaleFactor);
+	DataBuffer(const Settings& settings);
 	
-	void push(float newData);
-	void prepare(std::vector<float>& vertices);
+	void push(char newData);
+	std::vector<float>& getData();
 	
 private:
-	void preComputeVertices(std::vector<float>& vertices);
-	int convertTwosComplementToInt(const std::bitset<8>& byte);
-	
-	const int MAX_POINTS;
-	const int SCALE_FACTOR;
-	std::vector<float> dataBuffer;
-	std::mutex bufferMutex;
+	const int bufferSize;
+	std::vector<float> buffer;
 };
 
 #endif // DATABUFFER_H_INCLUDED

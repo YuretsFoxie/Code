@@ -13,7 +13,8 @@ public:
         return instance;
     }
 	
-	void playTest();
+	void playButton();
+	void playError();
 	void playTestLoop();
 	void stop();
 	

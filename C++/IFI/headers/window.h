@@ -3,22 +3,27 @@
 
 #include <windows.h>
 #include <atomic>
-#include "comportadapter.h"
+#include "settings.h"
+#include "comport.h"
 
 class Window
 {
 public:
-	Window(HINSTANCE hInstance, int nCmdShow);
+	Window(HINSTANCE hInstance, int nCmdShow, Settings& settings);
 	
-	void processMessages(std::atomic<bool>& isRunning, COMPortAdapter& port, std::atomic<bool>& isReceiving);
+	void processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& isReceiving, COMPort& port);
 	HWND getHwnd() const;
 	
 private:
 	void registerWindowClass(HINSTANCE hInstance);
-	HWND createWindowInstance(HINSTANCE hInstance, int nCmdShow);
+	void createWindowInstance(HINSTANCE hInstance, int nCmdShow);
 	void setFullScreenMode();
 	static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	
+	void onPressESC(std::atomic<bool>& isRunning);
+	void onPressF1(std::atomic<bool>& isReceiving, COMPort& port);
+	
+	Settings& settings;
 	HWND hwnd;
 };
 

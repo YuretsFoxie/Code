@@ -1,16 +1,19 @@
+#include <iostream>
 #include "window.h"
+#include "console.h"
+#include "sound.h"
 
 // Public Functins
 
-Window::Window(HINSTANCE hInstance, int nCmdShow)
+Window::Window(HINSTANCE hInstance, int nCmdShow, Settings& settings): settings(settings)
 {
 	registerWindowClass(hInstance);
-	hwnd = createWindowInstance(hInstance, nCmdShow);
+	createWindowInstance(hInstance, nCmdShow);
 	setFullScreenMode();
 	::SetCursor(::LoadCursor(NULL, IDC_ARROW));
 }
 
-void Window::processMessages(std::atomic<bool>& isRunning, COMPortAdapter& port, std::atomic<bool>& isReceiving)
+void Window::processMessages(std::atomic<bool>& isRunning, std::atomic<bool>& isReceiving, COMPort& port)
 {
 	MSG msg;
 	while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -20,14 +23,8 @@ void Window::processMessages(std::atomic<bool>& isRunning, COMPortAdapter& port,
 			
 		if (msg.message == WM_KEYDOWN)
 		{
-			if (msg.wParam == VK_ESCAPE)
-				isRunning = false;
-				
-			if (msg.wParam == VK_F1)
-			{
-				isReceiving = !isReceiving;
-				port.toggleDataTransmission(isReceiving);
-			}
+			if (msg.wParam == VK_ESCAPE)	onPressESC(isRunning);
+			if (msg.wParam == VK_F1)		onPressF1(isReceiving, port);
 		}
 		
 		::TranslateMessage(&msg);
@@ -44,21 +41,21 @@ HWND Window::getHwnd() const
 
 void Window::registerWindowClass(HINSTANCE hInstance)
 {
-	WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_OWNDC, wndProc, 0, 0, ::GetModuleHandle(NULL), NULL, NULL, NULL, NULL, "OpenGL", NULL};
+	WNDCLASSEX wc = {sizeof(WNDCLASSEX), CS_OWNDC, wndProc, 0, 0, ::GetModuleHandle(NULL), NULL, NULL, NULL, NULL, "Main", NULL};
 	::RegisterClassEx(&wc);
 }
 
-HWND Window::createWindowInstance(HINSTANCE hInstance, int nCmdShow)
+void Window::createWindowInstance(HINSTANCE hInstance, int nCmdShow)
 {
-	HWND hwnd = ::CreateWindowEx(
+	hwnd = ::CreateWindowEx(
 		0, 
-		"OpenGL", 
+		"Main", 
 		"", 
 		WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 
 		0, 
 		0, 
-		1024,
-		768, 
+		settings.getWindowWidth(), 
+		settings.getWindowHeight(), 
 		NULL, 
 		NULL, 
 		hInstance, 
@@ -66,7 +63,6 @@ HWND Window::createWindowInstance(HINSTANCE hInstance, int nCmdShow)
 	);
 	
 	::ShowWindow(hwnd, nCmdShow);
-	return hwnd;
 }
 
 void Window::setFullScreenMode()
@@ -75,8 +71,8 @@ void Window::setFullScreenMode()
 	memset(&dmSettings, 0, sizeof(dmSettings));
 	::EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dmSettings);
 	
-	dmSettings.dmPelsWidth = 1024;
-	dmSettings.dmPelsHeight	= 768;
+	dmSettings.dmPelsWidth = settings.getWindowWidth();
+	dmSettings.dmPelsHeight	= settings.getWindowHeight();
 	dmSettings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
 	
 	::ChangeDisplaySettings(&dmSettings, CDS_FULLSCREEN);	
@@ -88,4 +84,20 @@ LRESULT CALLBACK Window::wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 		::PostQuitMessage(0);
 		
 	return DefWindowProc(hwnd, msg, wParam, lParam);
+}
+
+void Window::onPressESC(std::atomic<bool>& isRunning)
+{
+	isRunning = false;
+}
+
+void Window::onPressF1(std::atomic<bool>& isReceiving, COMPort& port)
+{
+	// TODO: Perform the correct fix (this print works as a temporary fix). Try playing the sound instead.
+	std::cout << "F1 is pressed" << std::endl;
+	
+	Sound::shared().playButton();
+	
+	isReceiving = !isReceiving;
+	port.toggleDataTransmission(isReceiving);
 }

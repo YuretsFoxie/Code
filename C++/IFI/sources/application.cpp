@@ -1,26 +1,25 @@
 #include <thread>
+#include <chrono>
 #include "application.h"
 
 // Public Functins
 
-Application::Application(HINSTANCE hInstance, int nCmdShow, const Settings& settings):
+Application::Application(HINSTANCE hInstance, int nCmdShow, Settings settings):
+	settings(settings),
+	window(hInstance, nCmdShow, settings),
+	buffer(settings),
+	graphics(buffer, settings),
 	isRunning(true),
 	isReceiving(false),
-	hwnd(NULL), 
-	settings(settings),
-	window(hInstance, nCmdShow), 
-	graphics(),
-	buffer(settings.getMaxPoints(),
-	settings.getScaleFactor()), 
-	renderer(graphics, buffer, settings.getBatchSize())
+	hwnd(NULL)
 {
 	hwnd = window.getHwnd();
-	graphics.initialize(hwnd, settings);
+	graphics.set(hwnd);
+	port.setup(settings.getSerialPort(), settings.getBaudRate());	
 }
 
 void Application::run()
 {
-	portAdapter.setup(settings.getSerialPort(), settings.getBaudRate());
 	runCOMPortThread();
 	runLoop();
 }
@@ -39,23 +38,27 @@ void Application::runCOMPort()
 	DWORD bytesRead;
 	
 	while (isRunning)
-	if (isReceiving)
 	{
-		::ReadFile(portAdapter.getHandle(), array, 1, &bytesRead, NULL);
-		if (bytesRead > 0)
-			buffer.push(static_cast<float>(array[0]));
+		if (isReceiving)
+		{
+			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
+			if (bytesRead > 0)
+				buffer.push(array[0]);
+		}
+		
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 }
 
 void Application::runLoop()
 {
 	HDC hdc = ::GetDC(hwnd);
-	int updateCounter = 0;
 	
 	while (isRunning)
 	{
-		window.processMessages(isRunning, portAdapter, isReceiving);
-		renderer.renderFrame(hdc, updateCounter, isRunning);
+		window.processMessages(isRunning, isReceiving, port);
+		graphics.render();
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 	
 	::ReleaseDC(hwnd, hdc);
