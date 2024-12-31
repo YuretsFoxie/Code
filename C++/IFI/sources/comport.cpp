@@ -38,6 +38,10 @@ void COMPort::openPort(const std::string& portName)
 		Console::shared().print("Error opening COM port.");
 		Sound::shared().playError();
 	}
+	else
+	{
+		Console::shared().print("COM port is opened.");
+	}
 }
 
 void COMPort::configurePort(int baudRate)

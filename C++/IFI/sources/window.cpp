@@ -1,11 +1,10 @@
 #include "window.h"
-#include "console.h"
 #include "sound.h"
 
 // Public Functins
 
 Window::Window(HINSTANCE hInstance, int nCmdShow, Settings& settings): settings(settings)
-{
+{	
 	registerWindowClass(hInstance);
 	createWindowInstance(hInstance, nCmdShow);
 	setFullScreenMode();

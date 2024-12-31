@@ -1,5 +1,12 @@
 // TODO: Implement the spectrum analyzer functionality.
+	// The spectrumanalyzer should use the databuffer instead of its internal buffer, don't use the deques.
+	// Improve the spectrumanalyzer performance.
+	// Consider implementing the dynamic algorithm with caching.
+	// Implement the Spectrum window class.
+	// Implement displaying the Spectrumanalyzer data at the Spectrum window.
+
 // TODO: Optimize performance, adjust the animation to make it smooth.
+// TODO: Fix the floating deadlock bug (when the COM Port is toggled).
 
 https://github.com/YuretsFoxie/Code
 
@@ -27,6 +34,10 @@ C++/IFI/headers/shaders.h
 C++/IFI/sources/shaders.cpp
 C++/IFI/headers/sound.h
 C++/IFI/sources/sound.cpp
+C++/IFI/headers/spectrum.h
+C++/IFI/sources/spectrum.cpp
+C++/IFI/headers/spectrumanalyzer.h
+C++/IFI/sources/spectrumanalyzer.cpp
 C++/IFI/headers/text.h
 C++/IFI/sources/text.cpp
 C++/IFI/headers/viewportparameters.h
