@@ -38,6 +38,8 @@ void Application::runCOMPort()
 	
 	while (isRunning)
 	{
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
+		
 		if (isReceiving)
 		{
 			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
@@ -46,8 +48,6 @@ void Application::runCOMPort()
 				buffer.push(array[0]);
 			}
 		}
-		
-		std::this_thread::sleep_for(std::chrono::microseconds(10));
 	}
 }
 

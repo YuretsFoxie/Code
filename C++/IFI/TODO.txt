@@ -1,5 +1,5 @@
-// TODO: Stabilize toggling the COM Port. Try getting rid of the console printing.
 // TODO: Implement the spectrum analyzer functionality.
+// TODO: Optimize performance, adjust the animation to make it smooth.
 
 https://github.com/YuretsFoxie/Code
 

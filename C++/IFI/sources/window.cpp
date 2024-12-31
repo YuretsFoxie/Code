@@ -1,4 +1,3 @@
-#include <iostream>
 #include "window.h"
 #include "console.h"
 #include "sound.h"
@@ -93,9 +92,6 @@ void Window::onPressESC(std::atomic<bool>& isRunning)
 
 void Window::onPressF1(std::atomic<bool>& isReceiving, COMPort& port)
 {
-	// TODO: Perform the correct fix (this print works as a temporary fix). Try playing the sound instead.
-	std::cout << "F1 is pressed" << std::endl;
-	
 	Sound::shared().playButton();
 	
 	isReceiving = !isReceiving;
