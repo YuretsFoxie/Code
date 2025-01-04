@@ -18,7 +18,7 @@ public:
 private:
 	void prepare(std::vector<float>& vertices, const std::vector<float>& buffer);
 	void generateBuffers();
-	void bindBuffers(int maxPoints);
+	void bindBuffers();
 	void configureVertexAttribPointer();
 	void unbindBuffers();
 	

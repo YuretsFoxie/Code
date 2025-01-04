@@ -7,6 +7,7 @@
 #include "databuffer.h"
 #include "plot.h"
 #include "text.h"
+#include "spectrum.h"
 
 class Graphics
 {
@@ -29,9 +30,11 @@ private:
 	
 	ViewPortParameters plotParameters = ViewPortParameters(settings);
 	ViewPortParameters textParameters = ViewPortParameters(settings);
+	ViewPortParameters spectrumParameters = ViewPortParameters(settings);
 	
 	Plot plot = Plot(plotParameters);
 	Text text = Text(textParameters);
+	Spectrum spectrum = Spectrum(spectrumParameters);
 	
 	float textOrtho[16] = 
 	{

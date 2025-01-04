@@ -15,7 +15,9 @@ void DataBuffer::push(char newData)
 	buffer.push_back(convertedData);
 	
 	if (buffer.size() > bufferSize)
+	{
 		buffer.erase(buffer.begin());
+	}
 }
 
 std::vector<float>& DataBuffer::getData()

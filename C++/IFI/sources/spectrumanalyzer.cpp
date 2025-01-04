@@ -1,5 +1,4 @@
 #include "spectrumanalyzer.h"
-#include "application.h"
 
 // Public Functions
 
@@ -19,7 +18,7 @@ void SpectrumAnalyzer::push(const int value)
 	for(int i = 0; i < n / 2; i++)
 		magnitudes[i] = abs(fft[i]);
 	
-	Application::shared().onFFTCalculated(magnitudes);	// The first magnitude is a DC offset
+	// Application::shared().onFFTCalculated(magnitudes);	// The first magnitude is a DC offset
 }
 
 // Private Functions

@@ -1,10 +1,5 @@
+// TODO: Perform the MVC refactoring.
 // TODO: Implement the spectrum analyzer functionality.
-	// The spectrumanalyzer should use the databuffer instead of its internal buffer, don't use the deques.
-	// Improve the spectrumanalyzer performance.
-	// Consider implementing the dynamic algorithm with caching.
-	// Implement the Spectrum window class.
-	// Implement displaying the Spectrumanalyzer data at the Spectrum window.
-
 // TODO: Optimize performance, adjust the animation to make it smooth.
 // TODO: Fix the floating deadlock bug (when the COM Port is toggled).
 

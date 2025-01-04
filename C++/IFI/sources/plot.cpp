@@ -4,8 +4,15 @@
 
 Plot::~Plot()
 {
-	if (VAO) glDeleteVertexArrays(1, &VAO);
-	if (VBO) glDeleteBuffers(1, &VBO);
+	if (VAO)
+	{	
+		glDeleteVertexArrays(1, &VAO);
+	}
+	
+	if (VBO)
+	{
+		glDeleteBuffers(1, &VBO);
+	}
 }
 
 void Plot::setup(const Settings& settings)
@@ -14,7 +21,7 @@ void Plot::setup(const Settings& settings)
 	maxADCValue =settings.getMaxADCValue();
 	
 	generateBuffers();
-	bindBuffers(bufferSize);
+	bindBuffers();
 	configureVertexAttribPointer();
 	unbindBuffers();	
 }
@@ -52,7 +59,7 @@ void Plot::generateBuffers()
 	glGenBuffers(1, &VBO);
 }
 
-void Plot::bindBuffers(int bufferSize)
+void Plot::bindBuffers()
 {
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
