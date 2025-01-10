@@ -8,9 +8,9 @@ Settings::Settings(const std::string& filePath)
 	readConfigFile(filePath);
 }
 
-std::string Settings::getSerialPort() const
+std::string Settings::portName() const
 { 
-	return serialPort;
+	return portName;
 }
 
 int Settings::getBaudRate() const
@@ -60,7 +60,7 @@ void Settings::parseConfigLine(const std::string& line)
 	auto name = line.substr(0, delimiterPos);
 	auto value = line.substr(delimiterPos + 2);
 		
-	if (name == "serialPort")	serialPort = value;
+	if (name == "portName")		portName = value;
 	if (name == "baudRate")		baudRate = std::stoi(value);
 	if (name == "batchSize")	batchSize = std::stoi(value);
 	if (name == "maxADCValue")	maxADCValue = std::stoi(value);

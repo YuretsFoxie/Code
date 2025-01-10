@@ -6,9 +6,9 @@
 class Settings
 {
 public:
-	Settings(const std::string& filePath);
+	Settings();
 	
-	std::string getSerialPort() const;
+	std::string portName() const;
 	int getBaudRate() const;
 	int getBatchSize() const;
 	int getMaxADCValue() const;
@@ -20,7 +20,9 @@ private:
 	void readConfigFile(const std::string& filePath);
 	void parseConfigLine(const std::string& line);
 	
-	std::string serialPort;
+	const std::string& filePath = "settings.ini";
+	
+	std::string portName;
 	int baudRate;
 	int batchSize;
 	int maxADCValue;

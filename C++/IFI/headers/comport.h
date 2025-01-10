@@ -4,24 +4,34 @@
 #include <windows.h>
 #include <string>
 #include "settings.h"
+#include "databuffer.h"
+#include "text.h"
+#include "sounds.h"
 
 class COMPort
 {
 public:
-	COMPort(): handle(INVALID_HANDLE_VALUE) {}
+	COMPort(Settings& settings, Databuffer& buffer1, Databuffer& buffer2, Text& text, Sounds& sounds);
    ~COMPort();
 	
-	void setup(const Settings& settings);
-	void toggleDataTransmission(bool enable);
-	HANDLE getHandle() const;
+	void toggleTransmission();
 	
 private:
-	void openPort(const std::string& portName);
-	void configurePort(int baudRate);
-	void setPortTimeouts();
-	void closePort();
-
-    HANDLE handle;
+	void open();
+	void close();
+	void setup();
+	void run();
+	void read();
+	
+	Settings& settings;
+	Databuffer& buffer1;
+	Databuffer& buffer2;
+	Text& text;
+	Sounds& sounds;
+	
+	std::atomic<bool> isReceiving;
+	bool isPushedToBuffer1;
+	HANDLE handle;
 };
 
 #endif // COMPORT_H_INCLUDED

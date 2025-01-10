@@ -1,73 +1,97 @@
+#include <thread>
+#include <chrono>
 #include "comport.h"
-#include "console.h"
-#include "sound.h"
 
 // Public Functins
 
+COMPort(Settings& settings, Databuffer& buffer1, Databuffer& buffer2, Text& text, Sounds& sounds):
+	settings(settings),
+	buffer1(buffer1),
+	buffer2(buffer2),
+	text(text),
+	sounds(sounds),
+	handle(INVALID_HANDLE_VALUE)
+{
+	open();
+	setup();
+}
+
 COMPort::~COMPort()
 {
-	closePort();
+	close();
 }
 
-void COMPort::setup(const Settings& settings)
+void COMPort::toggleTransmission()
 {
-	openPort(settings.getSerialPort());
-	configurePort(settings.getBaudRate());
-	setPortTimeouts();
-}
-
-void COMPort::toggleDataTransmission(bool enable)
-{
-	char cmd = enable ? '1' : '0';
+	char cmd = isReceiving ? '0' : '1';
 	DWORD bytesWritten;
 	::WriteFile(handle, &cmd, 1, &bytesWritten, NULL);
 }
-	
-HANDLE COMPort::getHandle() const
-{
-	return handle;
-}
-	
+
 // Private Functions
 
-void COMPort::openPort(const std::string& portName)
+void COMPort::open()
 {
-	handle = ::CreateFile(portName.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	std::string name = settings.getPortName();
+	handle = ::CreateFile(name.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (handle == INVALID_HANDLE_VALUE)
 	{
-		Console::shared().print("Error opening COM port.");
-		Sound::shared().playError();
+		text.print("Error opening COM port.");
+		sounds.playError();
 	}
 	else
 	{
-		Console::shared().print("COM port is opened.");
+		text.print("COM port is opened.");
 	}
 }
 
-void COMPort::configurePort(int baudRate)
-{
-	DCB dcbSerialParams = { 0 };
-	dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-	::GetCommState(handle, &dcbSerialParams);
-	dcbSerialParams.BaudRate = baudRate;
-	dcbSerialParams.ByteSize = 8;
-	dcbSerialParams.StopBits = ONESTOPBIT;
-	dcbSerialParams.Parity = NOPARITY;
-	::SetCommState(handle, &dcbSerialParams);
-}
-
-void COMPort::setPortTimeouts()
-{
-	COMMTIMEOUTS timeouts = { 0 };
-	timeouts.ReadIntervalTimeout = 50;
-	::SetCommTimeouts(handle, &timeouts);
-}
-
-void COMPort::closePort()
+void COMPort::close()
 {
 	if (handle != INVALID_HANDLE_VALUE)
 	{
 		::CloseHandle(handle);
 		handle = INVALID_HANDLE_VALUE;
+	}
+}
+
+void COMPort::setup()
+{
+	DCB dcbSerialParams = { 0 };
+	dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+	::GetCommState(handle, &dcbSerialParams);
+	dcbSerialParams.BaudRate = settings.getBaudRate();
+	dcbSerialParams.ByteSize = 8;
+	dcbSerialParams.StopBits = ONESTOPBIT;
+	dcbSerialParams.Parity = NOPARITY;
+	::SetCommState(handle, &dcbSerialParams);
+	
+	COMMTIMEOUTS timeouts = { 0 };
+	timeouts.ReadIntervalTimeout = 50;
+	::SetCommTimeouts(handle, &timeouts);
+}
+
+void COMPort::run() 
+{
+	std::thread portThread(&COMPort::runCOMPort, this);
+	portThread.detach();
+}
+
+void COMPort::read()
+{
+	char array[1];
+	DWORD bytesRead;
+	
+	while (true)
+	{
+		std::this_thread::sleep_for(std::chrono::microseconds(10));
+		
+		if (isReceiving)
+		{
+			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
+			if (bytesRead > 0)
+			{
+				// buffer.push(array[0]);
+			}
+		}
 	}
 }
