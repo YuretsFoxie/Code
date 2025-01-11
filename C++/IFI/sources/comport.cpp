@@ -10,6 +10,8 @@ COMPort(Settings& settings, Databuffer& buffer1, Databuffer& buffer2, Text& text
 	buffer2(buffer2),
 	text(text),
 	sounds(sounds),
+	isReceiving(false),
+	isPushedToBuffer1(false),
 	handle(INVALID_HANDLE_VALUE)
 {
 	open();
@@ -24,6 +26,7 @@ COMPort::~COMPort()
 void COMPort::toggleTransmission()
 {
 	char cmd = isReceiving ? '0' : '1';
+	isReceiving != isReceiving;
 	DWORD bytesWritten;
 	::WriteFile(handle, &cmd, 1, &bytesWritten, NULL);
 }
@@ -90,7 +93,8 @@ void COMPort::read()
 			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
 			if (bytesRead > 0)
 			{
-				// buffer.push(array[0]);
+				isPushedToBuffer1 ? buffer2.push(array[0]) : buffer1.push(array[0]);
+				isPushedToBuffer1 != isPushedToBuffer1;
 			}
 		}
 	}
