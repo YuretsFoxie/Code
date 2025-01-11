@@ -22,8 +22,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Shaders				shaders		= Shaders();
 	Plot				plot1		= Plot(buffer1);	// Plot calls buffer.getData(), when it is ready to be redrawn
 	Plot				plot2		= Plot(buffer2);	// 
-	Spectrum			spectrum1	= Spectrum(analyzer1);
-	Spectrum			spectrum2	= Spectrum(analyzer2);
+	Spectrum			spectrum1	= Spectrum(analyzer1);	// Spectrum calls analyzer.getData(), when it is ready to be redrawn
+	Spectrum			spectrum2	= Spectrum(analyzer2);	// 
 	Text				text		= Text();
 	Graphics			graphics	= Graphics(shaders, buffer1, buffer2, spectrum1, spectrum2, text);
 	Comport				comport		= Comport(settings, buffer1, buffer2, text, sounds);

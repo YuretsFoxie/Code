@@ -3,16 +3,19 @@
 
 #include <vector>
 #include "settings.h"
+#include "spectrumanalyzer.h"
 
 class DataBuffer
 {
 public:
-	DataBuffer(const Settings& settings);
+	DataBuffer(Settings& settings, SpectrumAnalyzer& analyzer);
 	
-	void push(char newData);
+	void push(const char newData);
 	std::vector<float>& getData();
 	
 private:
+	SpectrumAnalyzer& analyzer;
+	
 	const int bufferSize;
 	std::vector<float> buffer;
 };

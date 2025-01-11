@@ -2,41 +2,38 @@
 #define SPECTRUMANALYZER_H_INCLUDED
 
 #include <vector>
-#include <deque>
 #include <math.h>
 #include <complex>
+#include "settings.h"
 
 typedef std::complex<double> cd;
 
 class SpectrumAnalyzer
 {
 public:
-	static SpectrumAnalyzer& shared()
-	{
-		static SpectrumAnalyzer instance;
-		return instance;
-	}
+	SpectrumAnalyzer(Settings& settings);
 	
-	void push(const int value);
-	
+	void push(const std::vector<float>& data);
+	std::vector<float>& getData();
+
 private:
 	struct SplittedItems
 	{
-		std::deque<cd> evens;
-		std::deque<cd> odds;
+		std::vector<cd> evens;
+		std::vector<cd> odds;
 	};
 	
 	SpectrumAnalyzer() {};
    ~SpectrumAnalyzer() {};
 	
-	SplittedItems split(const std::deque<cd>& v);
-	std::deque<cd> calculateFFT(const std::deque<cd>& v);
+	SplittedItems split(const std::vector<cd>& v);
+	std::vector<cd> calculateFFT(const std::vector<cd>& v);
 	
-	const int n = 128; // n must be a power of two
 	const double pi = acos(-1);
 	const cd i = cd(0.0, 1.0);
 	
-	std::deque<cd> buffer;
+	std::vector<cd> timeDomainData;
+	std::vector<float> frequencyDomainData;
 };
 
 #endif // SPECTRUMANALYZER_H_INCLUDED
