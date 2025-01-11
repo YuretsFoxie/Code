@@ -1,24 +1,24 @@
-#include "sound.h"
+#include "sounds.h"
 
-void Sound::playButton()
+void Sounds::playButton()
 {
 	const char* path = "sounds\\blip1.wav";
 	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_ASYNC);
 }
 
-void Sound::playError()
+void Sounds::playError()
 {
 	const char* path = "sounds\\warn1.wav";
 	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_ASYNC);
 }
 
-void Sound::playTestLoop()
+void Sounds::playTestLoop()
 {
 	const char* path = "sounds\\warn1.wav";
 	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 }
 
-void Sound::stop()
+void Sounds::stop()
 {
 	::PlaySound(NULL, NULL, 0);
 }
