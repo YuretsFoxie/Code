@@ -4,7 +4,7 @@
 
 // Public Functins
 
-COMPort(Settings& settings, Databuffer& buffer1, Databuffer& buffer2, Text& text, Sounds& sounds):
+COMPort::COMPort(Settings& settings, DataBuffer& buffer1, DataBuffer& buffer2, Text& text, Sounds& sounds):
 	settings(settings),
 	buffer1(buffer1),
 	buffer2(buffer2),
@@ -75,7 +75,7 @@ void COMPort::setup()
 
 void COMPort::run() 
 {
-	std::thread portThread(&COMPort::runCOMPort, this);
+	std::thread portThread(&COMPort::read, this);
 	portThread.detach();
 }
 
@@ -90,7 +90,7 @@ void COMPort::read()
 		
 		if (isReceiving)
 		{
-			::ReadFile(port.getHandle(), array, 1, &bytesRead, NULL);
+			::ReadFile(handle, array, 1, &bytesRead, NULL);
 			if (bytesRead > 0)
 			{
 				isPushedToBuffer1 ? buffer2.push(array[0]) : buffer1.push(array[0]);

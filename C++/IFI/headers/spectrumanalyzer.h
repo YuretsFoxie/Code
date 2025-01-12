@@ -23,9 +23,6 @@ private:
 		std::vector<cd> odds;
 	};
 	
-	SpectrumAnalyzer() {};
-   ~SpectrumAnalyzer() {};
-	
 	SplittedItems split(const std::vector<cd>& v);
 	std::vector<cd> calculateFFT(const std::vector<cd>& v);
 	

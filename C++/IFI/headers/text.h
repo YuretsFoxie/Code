@@ -12,12 +12,13 @@
 class Text
 {
 public:
-	Text(const ViewPortParameters& parameters): parameters(parameters) {}
+	Text(const ViewPortParameters& parameters);
    ~Text();
 	
-	void setup();
 	void draw();
 	void print(const std::string& message);
+	
+	ViewPortParameters getParameters();
 	
 private:
 	struct Character

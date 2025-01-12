@@ -4,7 +4,7 @@
 
 // Public Functins
 
-Application::Application(HINSTANCE hInstance, int nCmdShow, Settings& settings, COMPort& port, Graphics& graphics):
+Application::Application(HINSTANCE hInstance, int nCmdShow, Settings& settings, COMPort* port, Graphics& graphics):
 	settings(settings),
 	port(port),
 	graphics(graphics),
@@ -67,7 +67,7 @@ void Application::setFullScreenMode()
 	::ChangeDisplaySettings(&dmSettings, CDS_FULLSCREEN);	
 }
 
-LRESULT CALLBACK Window::wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Application::wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_CLOSE)
 		::PostQuitMessage(0);
@@ -75,7 +75,7 @@ LRESULT CALLBACK Window::wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-void Window::processMessages()
+void Application::processMessages()
 {
 	MSG msg;
 	while (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -96,12 +96,12 @@ void Window::processMessages()
 	}
 }
 
-void Window::onPressESC()
+void Application::onPressESC()
 {
 	isRunning = false;
 }
 
-void Window::onPressF1()
+void Application::onPressF1()
 {
-	port.toggleTransmission();
+	port->toggleTransmission();
 }

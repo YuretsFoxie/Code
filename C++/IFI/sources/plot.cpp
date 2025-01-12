@@ -2,6 +2,18 @@
 
 // Public Functions
 
+Plot::Plot(Settings& settings, DataBuffer& buffer, const ViewPortParameters& parameters):
+	bufferSize(settings.getBufferSize()),
+	maxADCValue(settings.getMaxADCValue()),
+	buffer(buffer),
+	parameters(parameters)
+{
+	generateBuffers();
+	bindBuffers();
+	configureVertexAttribPointer();
+	unbindBuffers();
+}
+
 Plot::~Plot()
 {
 	if (VAO)
@@ -15,21 +27,12 @@ Plot::~Plot()
 	}
 }
 
-void Plot::setup(const Settings& settings)
+void Plot::draw()
 {
-	bufferSize = settings.getBufferSize();
-	maxADCValue =settings.getMaxADCValue();
+	glViewport(parameters.x, parameters.y, parameters.width, parameters.height);
 	
-	generateBuffers();
-	bindBuffers();
-	configureVertexAttribPointer();
-	unbindBuffers();	
-}
-
-void Plot::draw(const std::vector<float>& buffer)
-{
 	std::vector<float> vertices;
-	prepare(vertices, buffer);
+	prepare(vertices, buffer.getData());
 	
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());

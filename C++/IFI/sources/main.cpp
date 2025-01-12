@@ -4,31 +4,34 @@
 #include "databuffer.h"
 #include "spectrumanalyzer.h"
 #include "shaders.h"
-#include "viewportparameters.h"
 #include "graphics.h"
 #include "plot.h"
 #include "spectrum.h"
 #include "text.h"
 #include "sounds.h"
+#include "viewportparameters.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	Settings			settings	= Settings();
+	Shaders				shaders		= Shaders();
 	Sounds				sounds		= Sounds();
-	SpectrumAnalyzer	analyzer1	= SpectrumAnalyzer();
-	SpectrumAnalyzer	analyzer2	= SpectrumAnalyzer();
+	SpectrumAnalyzer	analyzer1	= SpectrumAnalyzer(settings);
+	SpectrumAnalyzer	analyzer2	= SpectrumAnalyzer(settings);
 	DataBuffer			buffer1		= DataBuffer(settings, analyzer1);
 	DataBuffer			buffer2		= DataBuffer(settings, analyzer2);
-	Shaders				shaders		= Shaders();
-	Plot				plot1		= Plot(buffer1);	// Plot calls buffer.getData(), when it is ready to be redrawn
-	Plot				plot2		= Plot(buffer2);	// 
-	Spectrum			spectrum1	= Spectrum(analyzer1);	// Spectrum calls analyzer.getData(), when it is ready to be redrawn
-	Spectrum			spectrum2	= Spectrum(analyzer2);	// 
-	Text				text		= Text();
-	Graphics			graphics	= Graphics(shaders, buffer1, buffer2, spectrum1, spectrum2, text);
-	Comport				comport		= Comport(settings, buffer1, buffer2, text, sounds);
-	Application			application	= Application(hInstance, nCmdShow, settings, comport, graphics);
+	Plot				plot1		= Plot(settings, buffer1, ViewPortParameters(settings));
+	Plot				plot2		= Plot(settings, buffer2, ViewPortParameters(settings));
+	Spectrum			spectrum1	= Spectrum(settings, analyzer1, ViewPortParameters(settings));
+	Spectrum			spectrum2	= Spectrum(settings, analyzer2, ViewPortParameters(settings));
+	Text				text		= Text(ViewPortParameters(settings));
+	Graphics			graphics	= Graphics(settings, shaders, plot1, plot2, spectrum1, spectrum2, text);
+	COMPort* 			port		= new COMPort(settings, buffer1, buffer2, text, sounds);
+	Application* 		application	= new Application(hInstance, nCmdShow, settings, port, graphics);
 	
-	application.run();
+	application->run();
+	
+	delete port;
+	delete application;
 	return EXIT_SUCCESS;
 }

@@ -4,37 +4,30 @@
 #include <windows.h>
 #include "settings.h"
 #include "shaders.h"
-#include "databuffer.h"
 #include "plot.h"
-#include "text.h"
 #include "spectrum.h"
+#include "text.h"
 
 class Graphics
 {
 public:
-	Graphics(DataBuffer& buffer, Settings& settings): buffer(buffer), settings(settings) {}
-	
-	void set(const HWND& hwnd);
+	Graphics(Settings& settings, Shaders& shaders, Plot& plot1, Plot& plot2, Spectrum& spectrum1, Spectrum& spectrum2, Text& text);
 	void render();
 	
 private:
-	void setupPixelFormat(const HWND& hwnd);
+	void setupPixelFormat();
 	void enableVerticalSyncronization();
 	void setupProjections();
 	void drawPlots();
+	void drawSpectrums();
 	void drawText();
 	
-	DataBuffer& buffer;
-	Settings& settings;
-	Shaders shaders;
-	
-	ViewPortParameters plotParameters = ViewPortParameters(settings);
-	ViewPortParameters textParameters = ViewPortParameters(settings);
-	ViewPortParameters spectrumParameters = ViewPortParameters(settings);
-	
-	Plot plot = Plot(plotParameters);
-	Text text = Text(textParameters);
-	Spectrum spectrum = Spectrum(spectrumParameters);
+	Shaders& shaders;
+	Plot& plot1;
+	Plot& plot2;
+	Spectrum& spectrum1;
+	Spectrum& spectrum2;
+	Text& text;
 	
 	float textOrtho[16] = 
 	{

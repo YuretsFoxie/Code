@@ -10,7 +10,7 @@
 class Application 
 {
 public:
-	Application(HINSTANCE hInstance, int nCmdShow, Settings& settings, COMPort& port, Graphics& graphics);
+	Application(HINSTANCE hInstance, int nCmdShow, Settings& settings, COMPort* port, Graphics& graphics);
 	void run();
 	
 private:
@@ -23,8 +23,8 @@ private:
 	void onPressESC();
 	void onPressF1();
 	
+	COMPort* port;
 	Settings& settings;
-	COMPort& port;
 	Graphics& graphics;
 	
 	std::atomic<bool> isRunning;

@@ -3,12 +3,12 @@
 
 // Public Functions
 
-Settings::Settings(const std::string& filePath)
+Settings::Settings()
 {
-	readConfigFile(filePath);
+	readConfigFile();
 }
 
-std::string Settings::portName() const
+std::string Settings::getPortName() const
 { 
 	return portName;
 }
@@ -45,7 +45,7 @@ float Settings::getWindowHeight() const
 
 // Private Functions
 
-void Settings::readConfigFile(const std::string& filePath)
+void Settings::readConfigFile()
 {
 	std::ifstream configFile(filePath);
 	std::string line;

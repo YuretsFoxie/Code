@@ -5,8 +5,8 @@
 
 SpectrumAnalyzer::SpectrumAnalyzer(Settings& settings)
 {
-	timeDomainData(settings.getBufferSize());
-	frequencyDomainData(settings.getBufferSize() / 2);
+	timeDomainData = std::vector<cd>(settings.getBufferSize());
+	frequencyDomainData = std::vector<float>(settings.getBufferSize() / 2);
 }
 
 void SpectrumAnalyzer::push(const std::vector<float>& data)

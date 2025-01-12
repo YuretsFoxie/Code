@@ -8,7 +8,7 @@ class Settings
 public:
 	Settings();
 	
-	std::string portName() const;
+	std::string getPortName() const;
 	int getBaudRate() const;
 	int getBatchSize() const;
 	int getMaxADCValue() const;
@@ -17,7 +17,7 @@ public:
 	float getWindowHeight() const;
 	
 private:
-	void readConfigFile(const std::string& filePath);
+	void readConfigFile();
 	void parseConfigLine(const std::string& line);
 	
 	const std::string& filePath = "settings.ini";

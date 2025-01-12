@@ -5,15 +5,15 @@
 #include <GL/glew.h>
 #include "viewportparameters.h"
 #include "settings.h"
+#include "databuffer.h"
 
 class Plot
 {
 public:
-	Plot(const ViewPortParameters& parameters): parameters(parameters) {}
+	Plot(Settings& settings, DataBuffer& buffer, const ViewPortParameters& parameters);
    ~Plot();
 	
-	void setup(const Settings& settings);
-	void draw(const std::vector<float>& buffer);
+	void draw();
 	
 private:
 	void prepare(std::vector<float>& vertices, const std::vector<float>& buffer);
@@ -22,7 +22,9 @@ private:
 	void configureVertexAttribPointer();
 	void unbindBuffers();
 	
-	ViewPortParameters parameters;
+	const ViewPortParameters& parameters;
+	DataBuffer& buffer;
+	
 	GLuint VBO, VAO;
 	int bufferSize;
 	int maxADCValue;

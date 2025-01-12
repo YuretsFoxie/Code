@@ -1,5 +1,4 @@
-// TODO: Perform the Object Composition refactoring. Follow KISS and Law of Demeter, see the Information Expert GRASP pattern.
-// TODO: Implement the spectrum analyzer functionality.
+// TODO: Implement the spectrum functionality.
 // TODO: Optimize performance, adjust the animation to make it smooth.
 // TODO: Fix the floating deadlock bug (when the COM Port is toggled).
 

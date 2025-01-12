@@ -2,7 +2,7 @@
 #define COMPORT_H_INCLUDED
 
 #include <windows.h>
-#include <string>
+#include <atomic>
 #include "settings.h"
 #include "databuffer.h"
 #include "text.h"
@@ -11,7 +11,8 @@
 class COMPort
 {
 public:
-	COMPort(Settings& settings, Databuffer& buffer1, Databuffer& buffer2, Text& text, Sounds& sounds);
+	COMPort();
+	COMPort(Settings& settings, DataBuffer& buffer1, DataBuffer& buffer2, Text& text, Sounds& sounds);
    ~COMPort();
 	
 	void toggleTransmission();
@@ -24,8 +25,8 @@ private:
 	void read();
 	
 	Settings& settings;
-	Databuffer& buffer1;
-	Databuffer& buffer2;
+	DataBuffer& buffer1;
+	DataBuffer& buffer2;
 	Text& text;
 	Sounds& sounds;
 	
