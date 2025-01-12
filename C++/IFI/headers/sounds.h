@@ -6,11 +6,12 @@
 
 class Sounds
 {
-public:	
+public:
+	void playHello();
+	void playError();
 	void playButton();
 	void playDisabled();
-	void playWarning();
-	void playTestLoop();
+	void playWarningLoop();
 	void stop();
 };
 

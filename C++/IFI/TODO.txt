@@ -14,8 +14,6 @@ C++/IFI/headers/application.h
 C++/IFI/sources/application.cpp
 C++/IFI/headers/comport.h
 C++/IFI/sources/comport.cpp
-C++/IFI/headers/console.h
-C++/IFI/sources/console.cpp
 C++/IFI/headers/databuffer.h
 C++/IFI/sources/databuffer.cpp
 C++/IFI/headers/graphics.h
@@ -26,8 +24,8 @@ C++/IFI/headers/settings.h
 C++/IFI/sources/settings.cpp
 C++/IFI/headers/shaders.h
 C++/IFI/sources/shaders.cpp
-C++/IFI/headers/sound.h
-C++/IFI/sources/sound.cpp
+C++/IFI/headers/sounds.h
+C++/IFI/sources/sounds.cpp
 C++/IFI/headers/spectrum.h
 C++/IFI/sources/spectrum.cpp
 C++/IFI/headers/spectrumanalyzer.h
@@ -36,6 +34,4 @@ C++/IFI/headers/text.h
 C++/IFI/sources/text.cpp
 C++/IFI/headers/viewportparameters.h
 C++/IFI/sources/viewportparameters.cpp
-C++/IFI/headers/window.h
-C++/IFI/sources/window.cpp
 C++/IFI/sources/main.cpp

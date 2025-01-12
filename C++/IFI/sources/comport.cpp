@@ -28,11 +28,7 @@ void COMPort::toggleTransmission()
 {
 	if (isOpened())
 	{
-		char cmd = isReceiving ? '0' : '1';
-		isReceiving = !isReceiving;
-		DWORD bytesWritten;
-		::WriteFile(handle, &cmd, 1, &bytesWritten, NULL);
-		
+		toggle();
 		sounds.playButton();
 	}
 	else
@@ -51,11 +47,12 @@ void COMPort::open()
 	if (isOpened())
 	{
 		text.print("COM port is opened.");
+		sounds.playHello();
 	}
 	else
 	{
 		text.print("Error opening COM port.");
-		sounds.playWarning();
+		sounds.playError();
 	}
 }
 
@@ -109,6 +106,14 @@ void COMPort::read()
 			}
 		}
 	}
+}
+
+void COMPort::toggle()
+{
+	char cmd = isReceiving ? '0' : '1';
+	isReceiving = !isReceiving;
+	DWORD bytesWritten;
+	::WriteFile(handle, &cmd, 1, &bytesWritten, NULL);
 }
 
 bool COMPort::isOpened()

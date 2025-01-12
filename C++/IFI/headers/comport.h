@@ -23,6 +23,7 @@ private:
 	void setup();
 	void run();
 	void read();
+	void toggle();
 	bool isOpened();
 	
 	Settings& settings;
