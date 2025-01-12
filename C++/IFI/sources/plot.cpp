@@ -2,18 +2,6 @@
 
 // Public Functions
 
-Plot::Plot(Settings& settings, DataBuffer& buffer, const ViewPortParameters& parameters):
-	bufferSize(settings.getBufferSize()),
-	maxADCValue(settings.getMaxADCValue()),
-	buffer(buffer),
-	parameters(parameters)
-{
-	generateBuffers();
-	bindBuffers();
-	configureVertexAttribPointer();
-	unbindBuffers();
-}
-
 Plot::~Plot()
 {
 	if (VAO)
@@ -25,6 +13,14 @@ Plot::~Plot()
 	{
 		glDeleteBuffers(1, &VBO);
 	}
+}
+
+void Plot::setup()
+{
+	generateBuffers();
+	bindBuffers();
+	configureVertexAttribPointer();
+	unbindBuffers();	
 }
 
 void Plot::draw()

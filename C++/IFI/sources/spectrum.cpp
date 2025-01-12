@@ -8,3 +8,16 @@ Spectrum::Spectrum(Settings& settings, SpectrumAnalyzer& analyzer, const ViewPor
 {
 	
 }
+
+void Spectrum::setup()
+{
+	
+}
+
+void Spectrum::draw()
+{
+	
+}
+
+// Private Functions
+

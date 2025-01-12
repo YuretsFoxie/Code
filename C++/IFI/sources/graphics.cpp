@@ -15,6 +15,13 @@ Graphics::Graphics(Settings& settings, Shaders& shaders, Plot& plot1, Plot& plot
 	enableVerticalSyncronization();
 	setupProjections();
 	glewInit();
+	
+	shaders.setup();
+	plot1.setup();
+	plot2.setup();
+	spectrum1.setup();
+	spectrum2.setup();
+	text.setup();
 }
 
 void Graphics::render()

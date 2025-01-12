@@ -1,15 +1,16 @@
-#include "application.h"
+#include <windows.h>
 #include "settings.h"
-#include "comport.h"
-#include "databuffer.h"
-#include "spectrumanalyzer.h"
 #include "shaders.h"
-#include "graphics.h"
+#include "sounds.h"
+#include "spectrumanalyzer.h"
+#include "databuffer.h"
+#include "viewportparameters.h"
 #include "plot.h"
 #include "spectrum.h"
 #include "text.h"
-#include "sounds.h"
-#include "viewportparameters.h"
+#include "graphics.h"
+#include "comport.h"
+#include "application.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {

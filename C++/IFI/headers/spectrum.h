@@ -13,7 +13,8 @@ public:
 	Spectrum(Settings& settings, SpectrumAnalyzer& analyzer, const ViewPortParameters& parameters);
    ~Spectrum() {}
 	
-	void draw() {}
+	void setup();
+	void draw();
 	
 private:
 	const ViewPortParameters& parameters;

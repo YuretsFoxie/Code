@@ -2,10 +2,19 @@
 
 // Public Functins
 
-Shaders::Shaders()
+Shaders::~Shaders()
+{
+	if (graphProgram)
+		glDeleteProgram(graphProgram);
+	
+	if (textProgram)
+		glDeleteProgram(textProgram);
+}
+
+void Shaders::setup()
 {
 	GLuint graphVertexShader = compileShader(GL_VERTEX_SHADER, graphVertexShaderSource);
-	GLuint graphFragmentShader = compileShader(GL_FRAGMENT_SHADER, graphFragmentShaderSource);	
+	GLuint graphFragmentShader = compileShader(GL_FRAGMENT_SHADER, graphFragmentShaderSource);
 	GLuint textVertexShader = compileShader(GL_VERTEX_SHADER, textVertexShaderSource);
 	GLuint textFragmentShader = compileShader(GL_FRAGMENT_SHADER, textFragmentShaderSource);
 	
@@ -15,16 +24,7 @@ Shaders::Shaders()
 	glDeleteShader(graphVertexShader);
 	glDeleteShader(graphFragmentShader);
 	glDeleteShader(textVertexShader);
-	glDeleteShader(textFragmentShader);	
-}
-
-Shaders::~Shaders()
-{
-	if (graphProgram)
-		glDeleteProgram(graphProgram);
-	
-	if (textProgram)
-		glDeleteProgram(textProgram);
+	glDeleteShader(textFragmentShader);
 }
 
 GLuint Shaders::getGraphProgram() const
