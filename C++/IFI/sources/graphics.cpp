@@ -1,21 +1,27 @@
 #include "graphics.h"
-#include "console.h"
 
 // Public Functins
 
-void Graphics::set(const HWND& hwnd)
+Graphics::Graphics(Settings& settings, Shaders& shaders, Plot& plot1, Plot& plot2, Spectrum& spectrum1, Spectrum& spectrum2, Text& text):
+	shaders(shaders),
+	plot1(plot1),
+	plot2(plot2),
+	spectrum1(spectrum1),
+	spectrum2(spectrum2),
+	text(text)
 {
 	batchSize = settings.getBatchSize();
-	setupPixelFormat(hwnd);
+	setupPixelFormat();
 	enableVerticalSyncronization();
 	setupProjections();
 	glewInit();
+	
 	shaders.setup();
-	
+	plot1.setup();
+	plot2.setup();
+	spectrum1.setup();
+	spectrum2.setup();
 	text.setup();
-	plot.setup(settings);
-	
-	Console::shared().addWindow(text);
 }
 
 void Graphics::render()
@@ -25,6 +31,7 @@ void Graphics::render()
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 		drawPlots();
+		drawSpectrums();
 		drawText();
 		::SwapBuffers(hdc);
 		updateCounter = 0;
@@ -33,9 +40,9 @@ void Graphics::render()
 
 // Private Functins
 
-void Graphics::setupPixelFormat(const HWND& hwnd)
+void Graphics::setupPixelFormat()
 {
-	hdc = ::GetDC(hwnd);
+	hdc = ::GetDC(::GetActiveWindow());
 	PIXELFORMATDESCRIPTOR pfd = 
 	{
 		sizeof(PIXELFORMATDESCRIPTOR), 1,
@@ -57,25 +64,27 @@ void Graphics::enableVerticalSyncronization()
 
 void Graphics::setupProjections()
 {
+	ViewPortParameters textParameters = text.getParameters();
 	textOrtho[0] = 2.0f / textParameters.width;
 	textOrtho[5] = 2.0f / textParameters.height;
 }
 
 void Graphics::drawPlots()
 {
-	std::vector<float> data = buffer.getData();
-	
-	if (!data.empty())
-	{
-		glViewport(plotParameters.x, plotParameters.y, plotParameters.width, plotParameters.height);
-		glUseProgram(shaders.getGraphProgram());
-		plot.draw(data);
-	}
+	glUseProgram(shaders.getGraphProgram());
+	plot1.draw();
+	plot2.draw();
+}
+
+void Graphics::drawSpectrums()
+{
+	glUseProgram(shaders.getGraphProgram());
+	spectrum1.draw();
+	spectrum2.draw();
 }
 
 void Graphics::drawText()
 {
-	glViewport(textParameters.x, textParameters.y, textParameters.width, textParameters.height);
 	glUseProgram(shaders.getTextProgram());
 	glUniformMatrix4fv(glGetUniformLocation(shaders.getTextProgram(), "projection"), 1, GL_FALSE, textOrtho);
 	text.draw();

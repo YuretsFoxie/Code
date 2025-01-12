@@ -19,6 +19,8 @@ public:
 	void draw();
 	void print(const std::string& message);
 	
+	ViewPortParameters getParameters();
+	
 private:
 	struct Character
 	{

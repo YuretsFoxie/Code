@@ -3,14 +3,14 @@
 
 // Public Functions
 
-Settings::Settings(const std::string& filePath)
+Settings::Settings()
 {
-	readConfigFile(filePath);
+	readConfigFile();
 }
 
-std::string Settings::getSerialPort() const
+std::string Settings::getPortName() const
 { 
-	return serialPort;
+	return portName;
 }
 
 int Settings::getBaudRate() const
@@ -45,7 +45,7 @@ float Settings::getWindowHeight() const
 
 // Private Functions
 
-void Settings::readConfigFile(const std::string& filePath)
+void Settings::readConfigFile()
 {
 	std::ifstream configFile(filePath);
 	std::string line;
@@ -60,7 +60,7 @@ void Settings::parseConfigLine(const std::string& line)
 	auto name = line.substr(0, delimiterPos);
 	auto value = line.substr(delimiterPos + 2);
 		
-	if (name == "serialPort")	serialPort = value;
+	if (name == "portName")		portName = value;
 	if (name == "baudRate")		baudRate = std::stoi(value);
 	if (name == "batchSize")	batchSize = std::stoi(value);
 	if (name == "maxADCValue")	maxADCValue = std::stoi(value);

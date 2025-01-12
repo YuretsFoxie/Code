@@ -15,21 +15,20 @@ Plot::~Plot()
 	}
 }
 
-void Plot::setup(const Settings& settings)
+void Plot::setup()
 {
-	bufferSize = settings.getBufferSize();
-	maxADCValue =settings.getMaxADCValue();
-	
 	generateBuffers();
 	bindBuffers();
 	configureVertexAttribPointer();
 	unbindBuffers();	
 }
 
-void Plot::draw(const std::vector<float>& buffer)
+void Plot::draw()
 {
+	glViewport(parameters.x, parameters.y, parameters.width, parameters.height);
+	
 	std::vector<float> vertices;
-	prepare(vertices, buffer);
+	prepare(vertices, buffer.getData());
 	
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());

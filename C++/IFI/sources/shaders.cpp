@@ -14,7 +14,7 @@ Shaders::~Shaders()
 void Shaders::setup()
 {
 	GLuint graphVertexShader = compileShader(GL_VERTEX_SHADER, graphVertexShaderSource);
-	GLuint graphFragmentShader = compileShader(GL_FRAGMENT_SHADER, graphFragmentShaderSource);	
+	GLuint graphFragmentShader = compileShader(GL_FRAGMENT_SHADER, graphFragmentShaderSource);
 	GLuint textVertexShader = compileShader(GL_VERTEX_SHADER, textVertexShaderSource);
 	GLuint textFragmentShader = compileShader(GL_FRAGMENT_SHADER, textFragmentShaderSource);
 	

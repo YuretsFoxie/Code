@@ -3,28 +3,22 @@
 
 #include <vector>
 #include <GL/glew.h>
-#include "viewportparameters.h"
 #include "settings.h"
+#include "spectrumanalyzer.h"
+#include "viewportparameters.h"
 
 struct Spectrum
 {
 public:
-	Spectrum(const ViewPortParameters& parameters): parameters(parameters) {}
+	Spectrum(Settings& settings, SpectrumAnalyzer& analyzer, const ViewPortParameters& parameters);
    ~Spectrum() {}
 	
-	void setup(const Settings& settings) {}
-	void draw(const std::vector<float>& buffer) {}
+	void setup();
+	void draw();
 	
 private:
-	// void prepare(std::vector<float>& vertices, const std::vector<float>& buffer);
-	void generateBuffers() {}
-	void bindBuffers(int maxPoints) {}
-	void configureVertexAttribPointer() {}
-	void unbindBuffers() {}
-	
-	ViewPortParameters parameters;
-	GLuint VBO, VAO;
-	int bufferSize;
+	const ViewPortParameters& parameters;
+	SpectrumAnalyzer& analyzer;
 };
 
 #endif // SPECTRUM_H_INCLUDED

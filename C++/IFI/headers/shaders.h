@@ -6,9 +6,9 @@
 class Shaders
 {
 public:
-	Shaders() {}
+	Shaders() {};
    ~Shaders();
-	
+   
 	void setup();
 	GLuint getGraphProgram() const;
 	GLuint getTextProgram() const;

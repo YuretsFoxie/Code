@@ -4,8 +4,14 @@
 
 Text::~Text()
 {
-	if (VAO) glDeleteVertexArrays(1, &VAO);
-	if (VBO) glDeleteBuffers(1, &VBO);
+	if (VAO) 
+	{	
+		glDeleteVertexArrays(1, &VAO);
+	}
+	if (VBO) 
+	{
+		glDeleteBuffers(1, &VBO);
+	}
 }
 
 void Text::setup()
@@ -21,6 +27,8 @@ void Text::setup()
 
 void Text::draw()
 {
+	glViewport(parameters.x, parameters.y, parameters.width, parameters.height);
+	
 	int size = buffer.size();
 	float height = parameters.height;
 	
@@ -34,6 +42,11 @@ void Text::print(const std::string& message)
 	
 	if (buffer.size() == bufferSize)
 		buffer.erase(buffer.begin());
+}
+
+ViewPortParameters Text::getParameters()
+{
+	return parameters;
 }
 
 // Private Functions

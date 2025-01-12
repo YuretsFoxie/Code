@@ -1,31 +1,33 @@
 #ifndef APPLICATION_H_INCLUDED
 #define APPLICATION_H_INCLUDED
 
+#include <windows.h>
+#include <atomic>
 #include "settings.h"
-#include "window.h"
-#include "databuffer.h"
 #include "comport.h"
 #include "graphics.h"
 
 class Application 
 {
 public:
-	Application(HINSTANCE hInstance, int nCmdShow, Settings settings);
+	Application(HINSTANCE hInstance, int nCmdShow, Settings& settings, COMPort* port, Graphics& graphics);
 	void run();
 	
 private:
-	void runCOMPortThread();
-	void runCOMPort();
-	void runLoop();
+	void registerWindowClass(HINSTANCE hInstance);
+	void createWindowInstance(HINSTANCE hInstance, int nCmdShow);
+	void setFullScreenMode();
 	
-	Window window;
-	DataBuffer buffer;
-	COMPort port;
-	Graphics graphics;
+	static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	void processMessages();
+	void onPressESC();
+	void onPressF1();
+	
+	COMPort* port;
+	Settings& settings;
+	Graphics& graphics;
 	
 	std::atomic<bool> isRunning;
-	std::atomic<bool> isReceiving;
-	HWND hwnd;
 };
 
 #endif // APPLICATION_H_INCLUDED

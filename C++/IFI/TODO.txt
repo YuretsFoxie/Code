@@ -1,5 +1,4 @@
-// TODO: Perform the MVC refactoring.
-// TODO: Implement the spectrum analyzer functionality.
+// TODO: Implement the spectrum functionality.
 // TODO: Optimize performance, adjust the animation to make it smooth.
 // TODO: Fix the floating deadlock bug (when the COM Port is toggled).
 
