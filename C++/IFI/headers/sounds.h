@@ -8,7 +8,8 @@ class Sounds
 {
 public:	
 	void playButton();
-	void playError();
+	void playDisabled();
+	void playWarning();
 	void playTestLoop();
 	void stop();
 };

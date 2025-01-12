@@ -6,7 +6,13 @@ void Sounds::playButton()
 	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_ASYNC);
 }
 
-void Sounds::playError()
+void Sounds::playDisabled()
+{
+	const char* path = "sounds\\button8.wav";
+	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_ASYNC);
+}
+
+void Sounds::playWarning()
 {
 	const char* path = "sounds\\warn1.wav";
 	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_ASYNC);

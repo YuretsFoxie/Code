@@ -23,6 +23,7 @@ private:
 	void setup();
 	void run();
 	void read();
+	bool isOpened();
 	
 	Settings& settings;
 	DataBuffer& buffer1;

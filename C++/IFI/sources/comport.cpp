@@ -16,6 +16,7 @@ COMPort::COMPort(Settings& settings, DataBuffer& buffer1, DataBuffer& buffer2, T
 {
 	open();
 	setup();
+	run();
 }
 
 COMPort::~COMPort()
@@ -25,10 +26,19 @@ COMPort::~COMPort()
 
 void COMPort::toggleTransmission()
 {
-	char cmd = isReceiving ? '0' : '1';
-	isReceiving != isReceiving;
-	DWORD bytesWritten;
-	::WriteFile(handle, &cmd, 1, &bytesWritten, NULL);
+	if (isOpened())
+	{
+		char cmd = isReceiving ? '0' : '1';
+		isReceiving = !isReceiving;
+		DWORD bytesWritten;
+		::WriteFile(handle, &cmd, 1, &bytesWritten, NULL);
+		
+		sounds.playButton();
+	}
+	else
+	{
+		sounds.playDisabled();
+	}
 }
 
 // Private Functions
@@ -37,20 +47,21 @@ void COMPort::open()
 {
 	std::string name = settings.getPortName();
 	handle = ::CreateFile(name.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (handle == INVALID_HANDLE_VALUE)
+	
+	if (isOpened())
 	{
-		text.print("Error opening COM port.");
-		sounds.playError();
+		text.print("COM port is opened.");
 	}
 	else
 	{
-		text.print("COM port is opened.");
+		text.print("Error opening COM port.");
+		sounds.playWarning();
 	}
 }
 
 void COMPort::close()
 {
-	if (handle != INVALID_HANDLE_VALUE)
+	if (isOpened())
 	{
 		::CloseHandle(handle);
 		handle = INVALID_HANDLE_VALUE;
@@ -94,8 +105,13 @@ void COMPort::read()
 			if (bytesRead > 0)
 			{
 				isPushedToBuffer1 ? buffer2.push(array[0]) : buffer1.push(array[0]);
-				isPushedToBuffer1 != isPushedToBuffer1;
+				isPushedToBuffer1 = !isPushedToBuffer1;
 			}
 		}
 	}
+}
+
+bool COMPort::isOpened()
+{
+	return handle != INVALID_HANDLE_VALUE;
 }
