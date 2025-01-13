@@ -47,7 +47,7 @@ void COMPort::open()
 	if (isOpened())
 	{
 		text.print("COM port is opened.");
-		sounds.playHello();
+		sounds.playSuccess();
 	}
 	else
 	{

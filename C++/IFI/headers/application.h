@@ -6,11 +6,12 @@
 #include "settings.h"
 #include "comport.h"
 #include "graphics.h"
+#include "sounds.h"
 
 class Application 
 {
 public:
-	Application(HINSTANCE hInstance, int nCmdShow, Settings& settings, COMPort* port, Graphics& graphics);
+	Application(HINSTANCE hInstance, int nCmdShow, Settings& settings, COMPort* port, Graphics& graphics, Sounds& sounds);
 	void run();
 	
 private:
@@ -26,6 +27,7 @@ private:
 	COMPort* port;
 	Settings& settings;
 	Graphics& graphics;
+	Sounds& sounds;
 	
 	std::atomic<bool> isRunning;
 };

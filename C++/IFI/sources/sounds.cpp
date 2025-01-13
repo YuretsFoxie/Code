@@ -1,14 +1,14 @@
 #include "sounds.h"
 
-void Sounds::playHello()
+void Sounds::playSuccess()
 {
-	const char* path = "sounds\\hello.wav";
+	const char* path = "sounds\\battery_pickup.wav";
 	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_ASYNC);
 }
 
 void Sounds::playError()
 {
-	const char* path = "sounds\\error.wav";
+	const char* path = "sounds\\warn1.wav";
 	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_ASYNC);
 }
 
@@ -22,6 +22,12 @@ void Sounds::playDisabled()
 {
 	const char* path = "sounds\\button10.wav";
 	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_ASYNC);
+}
+
+void Sounds::playQuit()
+{
+	const char* path = "sounds\\button3.wav";
+	::PlaySound(TEXT(path), NULL, SND_FILENAME | SND_SYNC);
 }
 
 void Sounds::playWarningLoop()

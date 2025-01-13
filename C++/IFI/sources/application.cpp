@@ -4,10 +4,11 @@
 
 // Public Functins
 
-Application::Application(HINSTANCE hInstance, int nCmdShow, Settings& settings, COMPort* port, Graphics& graphics):
+Application::Application(HINSTANCE hInstance, int nCmdShow, Settings& settings, COMPort* port, Graphics& graphics, Sounds& sounds):
 	settings(settings),
 	port(port),
 	graphics(graphics),
+	sounds(sounds),
 	isRunning(true)
 {
 	registerWindowClass(hInstance);
@@ -98,6 +99,7 @@ void Application::processMessages()
 
 void Application::onPressESC()
 {
+	sounds.playQuit();
 	isRunning = false;
 }
 

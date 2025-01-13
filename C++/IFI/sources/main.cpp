@@ -28,7 +28,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Text				text		= Text(ViewPortParameters(settings));
 	Graphics			graphics	= Graphics(settings, shaders, plot1, plot2, spectrum1, spectrum2, text);
 	COMPort* 			port		= new COMPort(settings, buffer1, buffer2, text, sounds);
-	Application* 		application	= new Application(hInstance, nCmdShow, settings, port, graphics);
+	Application* 		application	= new Application(hInstance, nCmdShow, settings, port, graphics, sounds);
 	
 	application->run();
 	

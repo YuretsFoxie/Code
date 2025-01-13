@@ -7,10 +7,11 @@
 class Sounds
 {
 public:
-	void playHello();
+	void playSuccess();
 	void playError();
 	void playButton();
 	void playDisabled();
+	void playQuit();
 	void playWarningLoop();
 	void stop();
 };
