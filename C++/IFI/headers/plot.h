@@ -10,12 +10,7 @@
 class Plot
 {
 public:
-	Plot(Settings& settings, DataBuffer& buffer, const ViewPortParameters& parameters):
-		bufferSize(settings.getBufferSize()),
-		maxADCValue(settings.getMaxADCValue()),
-		buffer(buffer),
-		parameters(parameters) {}
-	
+	Plot(Settings& settings, DataBuffer& buffer, const ViewPortParameters& parameters);
    ~Plot();
 	
 	void setup();

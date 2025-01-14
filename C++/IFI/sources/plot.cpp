@@ -2,6 +2,12 @@
 
 // Public Functions
 
+Plot::Plot(Settings& settings, DataBuffer& buffer, const ViewPortParameters& parameters):
+	bufferSize(settings.getBufferSize()),
+	maxADCValue(settings.getMaxADCValue()),
+	buffer(buffer),
+	parameters(parameters) {}
+
 Plot::~Plot()
 {
 	if (VAO)
