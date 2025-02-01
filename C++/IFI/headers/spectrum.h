@@ -21,7 +21,7 @@ private:
 	void bindBuffers();
 	void configureVertexAttribPointer();
 	void unbindBuffers();
-	void updateFFT();
+	void updateFFT(const std::vector<float>& data);
 	float convert(const float value, const float max);
 	void addItem(const int index, const float y);
 	

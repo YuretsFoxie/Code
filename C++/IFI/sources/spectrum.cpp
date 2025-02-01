@@ -1,106 +1,86 @@
-#include <algorithm>
-#include "spectrum.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
 
-// Public Functions
-
-Spectrum::Spectrum(Settings& settings, SpectrumAnalyzer& analyzer, const ViewPortParameters& parameters):
-	pointsCount(3 * settings.getBufferSize() / 2 + 2),
-	analyzer(analyzer),
-	parameters(parameters)
-{
-	array = new float[2 * pointsCount];
-	dx = 2.0 / settings.getBufferSize();
-}
-
-Spectrum::~Spectrum()
-{
-	if (VAO)
-	{	
-		glDeleteVertexArrays(1, &VAO);
-	}
-	
-	if (VBO)
-	{
-		glDeleteBuffers(1, &VBO);
-	}
-	
-	delete[] array;
-}
-
-void Spectrum::setup()
-{
-	generateBuffers();
-	bindBuffers();
-	configureVertexAttribPointer();
-	unbindBuffers();	
-}
-
-void Spectrum::draw()
-{
-	glViewport(parameters.x, parameters.y, parameters.width, parameters.height);
-	updateFFT();
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, 2 * pointsCount * sizeof(float), array);
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(pointsCount));
-}
-
-// Private Functions
-
-void Spectrum::generateBuffers()
-{
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-}
-
-void Spectrum::bindBuffers()
-{
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(float) * 2, nullptr, GL_DYNAMIC_DRAW);
-}
-
-void Spectrum::configureVertexAttribPointer()
-{
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-}
-
-void Spectrum::unbindBuffers()
-{
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void Spectrum::updateFFT()
-{
-	const std::vector<float> data = analyzer.getData();
-	float max = *std::max_element(data.begin(), data.end());
-	
-	array[0] = -1.0;
-	array[1] = -1.0;
-	array[2 * pointsCount - 2] = -1.0;
-	array[2 * pointsCount - 1] = -1.0;
-	
-	for (int i = 0; i < data.size(); i++)
-	{
-		addItem(i, convert(data[i], max));
-	}
+struct Vertex {
+    double x, y;
 };
 
-float Spectrum::convert(const float value, const float max)
-{
-	return ((value * 2) / max) - 1;
+struct Polyline {
+    std::vector<Vertex> vertices;
+};
+
+void writeGCodeHeader(std::ofstream& outFile) {
+    outFile << "%\n";
+    outFile << "G90\n";  // Absolute positioning
+    outFile << "M3 S30000\n";  // Spindle on, speed 30000 RPM
+    outFile << "G1 F50\n";  // Feed rate 50 mm/min
 }
 
-void Spectrum::addItem(const int index, const float y)
-{
-	array[6 * index + 0] = -1.0 + index * dx;
-	array[6 * index + 1] = y;
-	
-	array[6 * index + 2] = -1.0 + (index + 1) * dx;
-	array[6 * index + 3] = y;
-	
-	array[6 * index + 4] = -1.0 + (index + 1) * dx;
-	array[6 * index + 5] = -1.0;
+void writeGCodeFooter(std::ofstream& outFile) {
+    outFile << "M5\n";  // Spindle stop
+    outFile << "M30\n";  // Program end
+    outFile << "%\n";
+}
+
+void writePolylineGCode(std::ofstream& outFile, const Polyline& polyline) {
+    for (size_t i = 0; i < polyline.vertices.size(); ++i) {
+        if (i == 0) {
+            outFile << "G0 X" << polyline.vertices[i].x << " Y" << polyline.vertices[i].y << "\n";
+        } else {
+            outFile << "G1 X" << polyline.vertices[i].x << " Y" << polyline.vertices[i].y << "\n";
+        }
+    }
+}
+
+int main() {
+    std::ifstream inFile("FlashMX.txt");
+    std::ofstream outFile("Converted_GCode.nc");
+
+    if (!inFile.is_open() || !outFile.is_open()) {
+        std::cerr << "Error opening file" << std::endl;
+        return 1;
+    }
+
+    std::string line;
+    Polyline currentPolyline;
+    bool inPolyline = false;
+
+    // Write G-code header
+    writeGCodeHeader(outFile);
+
+    while (std::getline(inFile, line)) {
+        if (line == "0" && std::getline(inFile, line) && line == "POLYLINE") {
+            if (inPolyline) {
+                writePolylineGCode(outFile, currentPolyline);
+                currentPolyline.vertices.clear();
+            }
+            inPolyline = true;
+        } else if (line == "0" && std::getline(inFile, line) && line == "VERTEX") {
+            Vertex vertex;
+            std::getline(inFile, line);  // Skip "8" line
+            std::getline(inFile, line); vertex.x = std::stod(line);  // Read X (10)
+            std::getline(inFile, line);  // Skip "20" line
+            std::getline(inFile, line); vertex.y = std::stod(line);  // Read Y (20)
+            currentPolyline.vertices.push_back(vertex);
+        } else if (line == "0" && std::getline(inFile, line) && line == "SEQEND") {
+            writePolylineGCode(outFile, currentPolyline);
+            currentPolyline.vertices.clear();
+            inPolyline = false;
+        }
+    }
+
+    if (inPolyline) {
+        writePolylineGCode(outFile, currentPolyline);
+    }
+
+    // Write G-code footer
+    writeGCodeFooter(outFile);
+
+    inFile.close();
+    outFile.close();
+
+    std::cout << "Conversion complete" << std::endl;
+    return 0;
 }
