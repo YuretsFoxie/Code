@@ -1,3 +1,3 @@
 @echo off
-DXFConverter.exe sample.dxf sample.tap 50 2 -0.2 0.05
+DXFConverter.exe 1.dxf 1.tap 20 2 -0.1 2 10 10
 pause
