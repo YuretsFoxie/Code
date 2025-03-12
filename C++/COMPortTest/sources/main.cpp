@@ -15,6 +15,7 @@ public:
 	}
 	
 	void toggle();
+	void send(const std::string& data);
 	
 private:	
 	COMPort();
@@ -24,10 +25,8 @@ private:
 	void stop();
 	bool open();
 	void close();
-	void send(const std::string& data);
 	void setup();
 	void receice();
-	int  convertTwosComplementToInt(const std::bitset<8> byte);
 	
 	HANDLE hComm = INVALID_HANDLE_VALUE;
 	std::string portName = "COM3";
@@ -44,17 +43,24 @@ void COMPort::toggle()
 	isReceiving ? stop() : start();	
 }
 
+void COMPort::send(const std::string& data)
+{	
+	DWORD bytesWritten;	
+	::WriteFile(hComm, data.c_str(), data.size(), &bytesWritten, NULL);
+}
+
 // Private Functions
 
 void COMPort::start()
 {
+	std::cout << "start" << std::endl;
 	isReceiving = true;
 	workerThread = std::thread(&COMPort::receice, this);
-	send("1");
 }
 
 void COMPort::stop()
-{	
+{
+	std::cout << "stop" << std::endl;
 	isReceiving = false;
 	
 	if (workerThread.joinable())
@@ -80,7 +86,6 @@ bool COMPort::open()
 	
 	if (hComm == INVALID_HANDLE_VALUE)
 	{
-		// Application::shared().showText("error: port is not connected.");
 		std::cout << "error: port is not connected\n";
 		return false;
 	}
@@ -98,18 +103,12 @@ void COMPort::close()
 	}
 }
 
-void COMPort::send(const std::string& data)
-{
-	DWORD bytesWritten;
-	WriteFile(hComm, data.c_str(), data.size(), &bytesWritten, NULL);
-}
-
 void COMPort::setup()
 {
 	DCB dcb = {0};
 	dcb.DCBlength = sizeof(dcb);
 	GetCommState(hComm, &dcb);
-	dcb.BaudRate = CBR_57600;
+	dcb.BaudRate = CBR_4800;
 	dcb.ByteSize = 8;
 	dcb.StopBits = ONESTOPBIT;
 	dcb.Parity = NOPARITY;
@@ -118,30 +117,19 @@ void COMPort::setup()
 
 void COMPort::receice()
 {
-	char buffer[1];
-	
+	char buffer[1];	
 	DWORD bytesRead;
 	
 	while (isReceiving)
+	{
 		if (::ReadFile(hComm, buffer, sizeof(buffer), &bytesRead, NULL))
+		{
 			for (int i = 0; i < bytesRead; i++)
 			{
-				int value = convertTwosComplementToInt(std::bitset<8>(buffer[i]));
-				// Application::shared().onReceived(value);
-				std::cout << value << "\n";
+				std::cout << "received: " << buffer[i] << " " << std::bitset<8>(buffer[i]) << "\n";
 			}
-	
-	if (!isReceiving)
-		for (int i = 0; i < 50; i++)
-		{
-			::Sleep(1);
-			send("0");
 		}
-}
-
-int COMPort::convertTwosComplementToInt(const std::bitset<8> byte)
-{
-	return byte[7] ? -std::bitset<8>(byte.to_ulong() - 1).flip().to_ulong() : byte.to_ulong();
+	}
 }
 
 
@@ -149,6 +137,13 @@ int COMPort::convertTwosComplementToInt(const std::bitset<8> byte)
 int main()
 {
 	COMPort::shared().toggle();
+	
+	// COMPort::shared().send("012");
+	
+	COMPort::shared().send("0");
+	COMPort::shared().send("1");
+	COMPort::shared().send("2");
+	
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 	COMPort::shared().toggle();
 	
