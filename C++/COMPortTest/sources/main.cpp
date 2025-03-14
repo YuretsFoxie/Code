@@ -137,12 +137,7 @@ void COMPort::receice()
 int main()
 {
 	COMPort::shared().toggle();
-	
-	// COMPort::shared().send("012");
-	
-	COMPort::shared().send("0");
 	COMPort::shared().send("1");
-	COMPort::shared().send("2");
 	
 	std::this_thread::sleep_for(std::chrono::seconds(1));
 	COMPort::shared().toggle();

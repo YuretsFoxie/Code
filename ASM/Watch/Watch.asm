@@ -1,9 +1,13 @@
 .device ATmega8
 .include "m8def.inc"
 
-.equ frequency	  = 1000000
-.equ baudrate     = 4800
-.equ uartSetting  = frequency / (16 * baudrate) - 1
+.equ mcuFrequency	= 1000000
+.equ uartBaudrate	= 4800
+.equ uartSetting	= mcuFrequency / (16 * uartBaudrate) - 1
+
+.equ twiFrequency	= 50000
+.equ twiPrescaler	= 1
+.equ twiSetting		= (mcuFrequency / twiFrequency - 16) / (2 * twiPrescaler)
 
 .macro Load
 ldi R16, @1
@@ -15,6 +19,57 @@ ldi  R17, @1
 in   R16, @0
 eor  R16, R17
 out  @0, R16
+.endm
+
+.macro SetBit
+lds R16, @0
+sbr R16, 1<<@1
+sts @0, R16
+.endm
+
+.macro ClearBit
+lds R16, @0
+sbr R16, 0<<@1
+sts @0, R16
+.endm
+
+.macro CheckTWIState
+in   R16, TWSR
+andi R16, 0xF8  ; Mask the prescaler bits
+.endm
+
+.macro TWIStartTransmitted
+cpi  R16, 0x08
+breq OnTWIStartTransmitted
+.endm
+
+.macro TWIRepeatedStartTransmitted
+cpi  R16, 0x10
+breq OnTWIStartTransmitted
+.endm
+
+.macro TWISLAWTransmitted
+cpi  R16, 0x18
+breq OnTWISLAWTransmitted
+.endm
+
+.macro TWIDataTransmitted
+cpi  R16, 0x28
+breq OnTWIDataTransmitted
+.endm
+
+.macro TWISLARTransmitted
+cpi  R16, 0x40
+breq OnTWISLARTransmitted
+.endm
+
+.macro TWIDataReceivedACK
+cpi  R16, 0x50
+breq OnTWIDataReceivedACK
+.endm
+
+.macro TWIError
+rjmp OnTWIError
 .endm
 
 .macro InitStack
@@ -39,6 +94,13 @@ Load UCSRB, 1<<RXEN | 1<<TXEN | 1<<RXCIE | 0<<TXCIE | 0<<UDRIE
 Load UCSRC, 1<<URSEL | 1<<UCSZ0 | 1<<UCSZ1
 .endm
 
+.macro InitTWI
+Load TWBR, twiSetting
+Load TWSR, 0<<TWPS1 | 0<<TWPS0		; Set prescaler to 1 
+;Load TWCR, 1<<TWINT | 1<<TWEA | 1<<TWEN | 1<<TWIE
+Load TWCR, 1<<TWEN | 1<<TWIE
+.endm
+
 .macro InitTimer
 Load TCCR0, (1<<CS02) | (1<<CS00)	; Prescaler 1024
 Load TIMSK, (1<<TOIE0)				; Enable overflow interrupt
@@ -60,6 +122,7 @@ sei
 InitStack
 InitPorts
 InitUART
+InitTWI
 InitTimer
 DisableUnused
 EnableInterrupts
@@ -78,6 +141,7 @@ rjmp Main
 .org 0x0000 rjmp Reset
 .org 0x0009	rjmp OnTimer0Overflow
 .org 0x000b rjmp OnUARTReceived
+.org 0x0011 rjmp OnTWIEvent
 
 ;=====
 
@@ -91,9 +155,50 @@ Load TCNT0, 246					; 50 Hz for prescaler 1024
 reti
 
 OnUARTReceived:
-in   R16, UDR
-inc  R16
-out  UDR, R16
+in R16, UDR
+SetBit  TWCR, TWSTA
+SetBit  TWCR, TWINT
+reti
+
+OnTWIEvent:
+Load UDR, 'A'
+
+CheckTWIState
+TWIStartTransmitted
+TWIRepeatedStartTransmitted
+TWISLAWTransmitted
+TWIDataTransmitted
+TWISLARTransmitted
+TWIDataReceivedACK
+TWIError
+reti
+
+OnTWIStartTransmitted:
+Load UDR, 0b00000001
+reti
+
+OnTWIRepeatedStartTransmitted:
+Load UDR, 0b00000010
+reti
+
+OnTWISLAWTransmitted:
+Load UDR, 0b00000100
+reti
+
+OnTWIDataTransmitted:
+Load UDR, 0b00001000
+reti
+
+OnTWISLARTransmitted:
+Load UDR, 0b00010000
+reti
+
+OnTWIDataReceivedACK:
+Load UDR, 0b00100000
+reti
+
+OnTWIError:
+Load UDR, 0b01000000
 reti
 
 ;=====

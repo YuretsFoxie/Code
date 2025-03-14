@@ -98,7 +98,7 @@ Summary
 
 This algorithm outlines the steps needed to set the time on the DS1307 RTC and read the time whenever an external interrupt occurs, using TWI (I2C) communication and interrupt service routines.
 
-
+==========
 
 "Wait for the TWINT flag to be set, indicating that the start condition has been transmitted." Does it mean to wait for the interrupt?
 
@@ -259,7 +259,7 @@ Summary
 
 This approach ensures that TWI operations are handled efficiently using interrupts, allowing the main program to remain responsive and perform other tasks.
 
-
+==========
 
 Please, don't provide the code just yet, just answer. "Clear the TWSTA bit and set the TWINT bit in the TWCR register to start transmission." Do I understand correctly, that it is required to set the TWINT bit (interrupt flag) manually?
 
@@ -331,7 +331,7 @@ Example Workflow for Handling NACK
 
 This approach ensures that your program can handle cases where the DS1307 does not acknowledge the address, allowing for robust error handling in your TWI communication.
 
-
+==========
 
 "Send Repeated Start Condition" Is it nesessary to send the Repeated Start Condition, if DS1307 is acknowledged?
 
@@ -377,7 +377,7 @@ Summary
     A repeated start condition is not strictly necessary if the DS1307 is acknowledged and you are continuing communication without losing control of the bus.
     However, it is commonly used to switch from write to read mode without releasing the bus, ensuring continuous control of the bus during the entire communication process.
 
-
+==========
 
 Please, add more details to this part:
    " Send DS1307 Address + Read Bit:
@@ -453,7 +453,7 @@ Summary of the Detailed Steps
 
 This detailed description ensures that each step of sending the DS1307 address with the read bit is clearly understood, and the necessary actions are taken to handle the TWI communication correctly.
 
-
+==========
 
 How do I read all the data from DS1307, not just the time?
 
@@ -545,3 +545,22 @@ Summary
     Send Stop Condition: Terminate communication with the DS1307.
 
 This process ensures that all data, including time and RAM, is read from the DS1307 RTC chip.
+
+==========
+
+This sets up the SCL frequency to approximately 50 kHz for a 1 MHz CPU clock.
+
+TWBR = (1000000 / 50000 - 16) / (2 * 1)
+TWBR = (20 - 16) / 2
+TWBR = 4 / 2
+TWBR = 2
+
+Set the prescaler to 1 (TWPS1=0, TWPS0=0)
+TWSR = 0x00;
+
+Set TWBR (TWI Bit Rate Register) for 50 kHz SCL frequency
+TWBR = 2;
+
+Enable TWI
+TWCR = (1 << TWEN);
+
