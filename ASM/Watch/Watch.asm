@@ -21,16 +21,16 @@ eor  R16, R17
 out  @0, R16
 .endm
 
-.macro SetBit
-lds R16, @0
-sbr R16, 1<<@1
-sts @0, R16
+.macro SetBits
+in  R16, @0
+sbr R16, @1
+out @0, R16
 .endm
 
-.macro ClearBit
-lds R16, @0
-sbr R16, 0<<@1
-sts @0, R16
+.macro ClearBits
+in  R16, @0
+cbr R16, @1
+out @0, R16
 .endm
 
 .macro CheckTWIState
@@ -96,9 +96,8 @@ Load UCSRC, 1<<URSEL | 1<<UCSZ0 | 1<<UCSZ1
 
 .macro InitTWI
 Load TWBR, twiSetting
-Load TWSR, 0<<TWPS1 | 0<<TWPS0		; Set prescaler to 1 
-;Load TWCR, 1<<TWINT | 1<<TWEA | 1<<TWEN | 1<<TWIE
-Load TWCR, 1<<TWEN | 1<<TWIE
+Load TWSR, 0<<TWPS1 | 0<<TWPS0		; Set prescaler to 1
+Load TWCR, 1<<TWEA | 1<<TWEN | 1<<TWIE
 .endm
 
 .macro InitTimer
@@ -156,13 +155,10 @@ reti
 
 OnUARTReceived:
 in R16, UDR
-SetBit  TWCR, TWSTA
-SetBit  TWCR, TWINT
+SetBits TWCR, 1<<TWSTA
 reti
 
 OnTWIEvent:
-Load UDR, 'A'
-
 CheckTWIState
 TWIStartTransmitted
 TWIRepeatedStartTransmitted
@@ -175,6 +171,10 @@ reti
 
 OnTWIStartTransmitted:
 Load UDR, 0b00000001
+
+; Error state: 01001000
+
+SetBits TWCR, 1<<TWINT
 reti
 
 OnTWIRepeatedStartTransmitted:
@@ -199,6 +199,8 @@ reti
 
 OnTWIError:
 Load UDR, 0b01000000
+;in R16, TWSR
+;out UDR, R16
 reti
 
 ;=====
