@@ -9,6 +9,8 @@
 .equ twiPrescaler	= 1
 .equ twiSetting		= (mcuFrequency / twiFrequency - 16) / (2 * twiPrescaler)
 
+.def timeSettingFlags = R18
+
 .macro Load
 ldi R16, @1
 out @0, R16
@@ -171,9 +173,8 @@ reti
 
 OnTWIStartTransmitted:
 Load UDR, 0b00000001
-
-; Error state: 01001000
-
+Load TWDR, 0xD0			 ; DS1307 address
+ClearBits TWCR, 1<<TWSTA
 SetBits TWCR, 1<<TWINT
 reti
 
@@ -181,12 +182,33 @@ OnTWIRepeatedStartTransmitted:
 Load UDR, 0b00000010
 reti
 
+;=====
+
+    ;00h: Seconds
+    ;01h: Minutes
+    ;02h: Hours
+    ;03h: Day
+    ;04h: Date
+    ;05h: Month
+    ;06h: Year
+    ;07h: Control
+    ;08h - 3Fh: RAM (56 bytes of user RAM)
+
+;=====
+
 OnTWISLAWTransmitted:
 Load UDR, 0b00000100
+Load TWDR, 0x00			 ; Seconds register address
+SetBits TWCR, 1<<TWINT
 reti
 
 OnTWIDataTransmitted:
+
+; After setting the register, we return here
+
 Load UDR, 0b00001000
+Load TWDR, 0b00000000	; Loading data to the Seconds register
+SetBits TWCR, 1<<TWINT
 reti
 
 OnTWISLARTransmitted:
@@ -199,8 +221,8 @@ reti
 
 OnTWIError:
 Load UDR, 0b01000000
-;in R16, TWSR
-;out UDR, R16
+in R16, TWSR
+out UDR, R16
 reti
 
 ;=====

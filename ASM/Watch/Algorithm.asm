@@ -564,3 +564,26 @@ TWBR = 2;
 Enable TWI
 TWCR = (1 << TWEN);
 
+
+
+==========
+
+DS1307 RTC must have an external 3 V micro battery in addition to the main rechargable battery or engine.
+
+Table in SRAM contains all the RTC registers data: time, date and control.
+If the table values are changed, they are written to the RTC and displayed at the watch.
+The values on the watch, SRAM table and RTC must be syncronized.
+At least control register needs an initial value to generate the pulse each second. The other values may be set manually.
+In time setting mode the table values may be changed.
+
+The rotation knob may be used to scroll (in basic mode), switch modes (with the fast reverse gesture), change values (in setting mode) and charge the watch.
+The knob must rotate a micro generator.
+
+
+
+
+
+
+
+
+
